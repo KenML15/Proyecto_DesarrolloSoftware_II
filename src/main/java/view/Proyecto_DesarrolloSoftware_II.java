@@ -11,6 +11,6 @@ package view;
 public class Proyecto_DesarrolloSoftware_II {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        System.out.println("Hola mundo");
     }
 }
