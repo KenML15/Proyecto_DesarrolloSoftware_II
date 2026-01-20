@@ -80,6 +80,14 @@ public class Vehicle {
     public String toString() {
         return "Vehicle{" + "plate=" + plate + ", color=" + color + ", brand=" + brand + ", model=" + model + ", customer=" + customer + ", vehicleType=" + vehicleType + '}';
     }
+
+    public void setSpace(Space space) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public Iterable<Customer> getCustomers() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
     
     
