@@ -4,7 +4,7 @@
  */
 package model.data;
 
-import model.entity.Customer;
+import model.entities.Customer;
 import java.util.ArrayList;
 
 /**

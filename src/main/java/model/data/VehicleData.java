@@ -5,8 +5,8 @@
 package model.data;
 
 import java.util.ArrayList;
-import model.entity.Customer;
-import model.entity.Vehicle;
+import model.entities.Customer;
+import model.entities.Vehicle;
 
 /**
  *
@@ -14,7 +14,6 @@ import model.entity.Vehicle;
  */
 public class VehicleData {
     ArrayList <Vehicle> vehicles = new ArrayList<>();
-    ArrayList <Customer> customers = new ArrayList<>();
     
     public void insertVehicle(Vehicle vehicle){
         vehicles.add(vehicle);
@@ -24,14 +23,34 @@ public class VehicleData {
         return vehicles;
     } 
     
-    public Vehicle findVehicle(Customer customer){
+    public Vehicle findVehicle(Customer customer) {
         Vehicle vehicleToFind = null;
         for (Vehicle vehicle : vehicles) {
-            if(vehicle.getCustomer() == customer){
-                vehicleToFind = vehicle;
+            for (Customer customerToFind : vehicle.getCustomer()) {
+                if (customerToFind.getId().equals(customer.getId())) {
+                    vehicleToFind = vehicle;
+                }
             }
         }
-        
+
         return vehicleToFind;
-    } 
+    }
+    
+    public void removeVehicle(Vehicle vehicle){
+        vehicles.remove(vehicle);
+    }
+    
+    
+   //Este método encuentra el vehículo por medio de la placa
+    public Vehicle findVehicleByPlate(String plate) {
+        
+        Vehicle vehicleToReturn = null;
+        
+        for (Vehicle vehicle : vehicles) {
+            if (vehicle.getPlate().equals(plate)) {
+                vehicleToReturn = vehicle;
+            }
+        }
+        return vehicleToReturn;
+    }
 }

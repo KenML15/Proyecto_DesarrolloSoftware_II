@@ -2,7 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package model.entity;
+package model.entities;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 /**
  *
@@ -13,19 +16,24 @@ public class Vehicle {
     private String color;
     private String brand;
     private String model;
-    private Customer customer;
+    private ArrayList <Customer> customer;
     private VehicleType vehicleType;
+    private Space space;
+    private LocalDateTime entryTime;
 
     public Vehicle() {
     }
 
-    public Vehicle(String plate, String color, String brand, String model, Customer customer, VehicleType vehicleType) {
+    public Vehicle(String plate, String color, String brand, String model, ArrayList <Customer> customer, VehicleType vehicleType, Space space, LocalDateTime entryTime) {
+        this.entryTime = LocalDateTime.now();
         this.plate = plate;
         this.color = color;
         this.brand = brand;
         this.model = model;
         this.customer = customer;
         this.vehicleType = vehicleType;
+        this.space = space;
+        this.entryTime = entryTime;
     }
 
     public String getPlate() {
@@ -60,11 +68,11 @@ public class Vehicle {
         this.model = model;
     }
 
-    public Customer getCustomer() {
+    public ArrayList <Customer> getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
+    public void setCustomer(ArrayList <Customer> customer) {
         this.customer = customer;
     }
 
@@ -75,11 +83,21 @@ public class Vehicle {
     public void setVehicleType(VehicleType vehicleType) {
         this.vehicleType = vehicleType;
     }
+    
+    public LocalDateTime getEntryTime() {
+        return entryTime;
+    }
+
+    public void setEntryTime(LocalDateTime entryTime) {
+        this.entryTime = entryTime;
+    }
 
     @Override
     public String toString() {
-        return "Vehicle{" + "plate=" + plate + ", color=" + color + ", brand=" + brand + ", model=" + model + ", customer=" + customer + ", vehicleType=" + vehicleType + '}';
+        return "Vehicle{" + "plate=" + plate + ", color=" + color + ", brand=" + brand + ", model=" + model + ", customer=" + customer + ", vehicleType=" + vehicleType + ", entryTime=" + entryTime + '}';
     }
+    
+    
     
     
     

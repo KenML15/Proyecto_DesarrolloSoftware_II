@@ -5,8 +5,9 @@
 package controller;
 
 import model.data.CustomerData;
-import model.entity.Customer;
+import model.entities.Customer;
 import java.util.ArrayList;
+import model.entities.Vehicle;
 
 /**
  *
@@ -29,7 +30,13 @@ public class CustomerController {
         return result;
     }
     
-    public String removeCustomer(String id) {
+    public void removeCustomer(Customer customer) {
+        customerData.removeCustomer(customer);
+    }
+    
+    
+    //Metodo de Pablo
+    /*public String removeCustomer(String id) {
 
         String result;
 
@@ -42,10 +49,14 @@ public class CustomerController {
             result = "El cliente no existe en el sistema";
         }
         return result;
-    }
+    }*/
     
     public ArrayList<Customer> getAllCustomers() {
         return customerData.getAllCustomers();
+    }
+    
+    public Customer findCustomerById(String id) {
+        return customerData.findCustomerById(id);
     }
 
 }

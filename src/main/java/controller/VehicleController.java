@@ -6,8 +6,8 @@ package controller;
 
 import java.util.ArrayList;
 import model.data.VehicleData;
-import model.entity.Customer;
-import model.entity.Vehicle;
+import model.entities.Customer;
+import model.entities.Vehicle;
 
 /**
  *
@@ -27,6 +27,14 @@ public class VehicleController {
     
     public Vehicle findVehicle(Customer customer){
         return vehicleData.findVehicle(customer);
+    }
+    
+    public void removeVehicle(Vehicle vehicle){
+        vehicleData.removeVehicle(vehicle);
+    }
+    
+    public Vehicle findVehicleByPlate(String plate) {
+        return vehicleData.findVehicleByPlate(plate);
     }
 
 }
