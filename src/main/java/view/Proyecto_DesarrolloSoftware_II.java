@@ -1,7 +1,6 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
-
 package view;
 
 import controller.CustomerController;
@@ -21,6 +20,7 @@ import model.entities.Space;
  * @author user
  */
 public class Proyecto_DesarrolloSoftware_II {
+
     static CustomerController customerController = new CustomerController();
     static VehicleController vehicleController = new VehicleController();
     static ParkingLotController parkingLotController = new ParkingLotController();
@@ -30,10 +30,10 @@ public class Proyecto_DesarrolloSoftware_II {
     }
 
     public static void showMenu() {
-        
+
         int choice = 1;
-        while (choice != 0) {  
-            
+        while (choice != 0) {
+
             choice = Integer.parseInt(JOptionPane.showInputDialog(
                     "Ingrese 0 para cerrar el sistema."
                     + "\n Ingrese 1 para añadir a un cliente."
@@ -70,13 +70,12 @@ public class Proyecto_DesarrolloSoftware_II {
             }
         }
     }
-    
+
     // ====================Todo lo del cliente===========================  
-    
     public static void showAllCustomer() {
         JOptionPane.showMessageDialog(null, customerController.getAllCustomers().toString());
     }
-    
+
     private static Customer insertCustomer() {
         String id = JOptionPane.showInputDialog("Ingrese el número de cédula del cliente");
 
@@ -123,12 +122,11 @@ public class Proyecto_DesarrolloSoftware_II {
     }*/
     
     // ====================Todo lo del vehículo===========================
-    
-    public static void showAllVehicles(){
+    public static void showAllVehicles() {
         JOptionPane.showMessageDialog(null, vehicleController.getAllVehicles().toString());
     }
-    
-    private static void insertVehicle(){
+
+    private static void insertVehicle() {
         String plate = JOptionPane.showInputDialog("Ingrese la placa del vehículo");
         String color = JOptionPane.showInputDialog("Ingrese el color del vehículo");
         String brand = JOptionPane.showInputDialog("Ingrese la marca del vehículo");
@@ -165,7 +163,7 @@ public class Proyecto_DesarrolloSoftware_II {
         
         return responsibleList;
     }
-    
+
     private static VehicleType configureVehicleTypeOfSpaces(int position, boolean disabilityPresented) {
         String[] types = {"Tipos de vehículo", "1)moto", "2)liviano", "3)pesado", "4)bicicleta", "5)otro"};
         byte[] tires = {0, 2, 4, 8, 12, -1};
@@ -175,7 +173,7 @@ public class Proyecto_DesarrolloSoftware_II {
 
             allTypes += type + "\n";
         }
-        
+
         VehicleType vehicleType = new VehicleType();
 
         byte typeNumber;
