@@ -16,18 +16,18 @@ public class CustomerData {
     ArrayList<Customer> customers = new ArrayList<>();
     
     public void insertCustomer(Customer customer) {
-        customers.add(customer);
         
+        customers.add(customer);        
     }
     
     public void removeCustomer(Customer customer) {
-        customers.remove(customer);
         
+        customers.remove(customer);        
     }
     
     public ArrayList<Customer> getAllCustomers() {
-        return customers;
         
+        return customers;        
     }
     
     public Customer findCustomerById(String id) {

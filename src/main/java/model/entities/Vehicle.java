@@ -83,6 +83,14 @@ public class Vehicle {
     public void setVehicleType(VehicleType vehicleType) {
         this.vehicleType = vehicleType;
     }
+
+    public Space getSpace() {
+        return space;
+    }
+
+    public void setSpace(Space space) {
+        this.space = space;
+    }
     
     public LocalDateTime getEntryTime() {
         return entryTime;
@@ -94,11 +102,6 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        return "Vehicle{" + "plate=" + plate + ", color=" + color + ", brand=" + brand + ", model=" + model + ", customer=" + customer + ", vehicleType=" + vehicleType + ", entryTime=" + entryTime + '}';
-    }
-    
-    
-    
-    
-    
+        return "Vehicle{" + "plate=" + plate + ", color=" + color + ", brand=" + brand + ", model=" + model + ", customer=" + customer + ", vehicleType=" + vehicleType + ", space=" + space + ", entryTime=" + entryTime + '}';
+    }   
 }

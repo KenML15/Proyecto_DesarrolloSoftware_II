@@ -1,0 +1,11 @@
+VehicleType{id=0, description=2) Liviano, numberOfTires=0, fee=0.0},300.0,600.0,5000.0,25000.0,60000.0,500000.0
+VehicleType{id=0, description=1) Moto, numberOfTires=0, fee=0.0},300.0,600.0,5000.0,25000.0,60000.0,500000.0
+VehicleType{id=0, description=1) Moto, numberOfTires=0, fee=0.0},300.0,600.0,5000.0,25000.0,60000.0,500000.0
+VehicleType{id=0, description=1) Moto, numberOfTires=0, fee=0.0},300.0,600.0,5000.0,25000.0,60000.0,500000.0
+VehicleType{id=0, description=1) Moto, numberOfTires=0, fee=0.0},300.0,600.0,5000.0,25000.0,60000.0,500000.0
+VehicleType{id=0, description=1) Moto, numberOfTires=0, fee=0.0},300.0,600.0,5000.0,25000.0,60000.0,500000.0
+1) Moto,300.0,600.0,5000.0,25000.0,60000.0,500000.0
+1) Moto,300.0,600.0,5000.0,25000.0,60000.0,500000.0,
+1) Moto,300.0,600.0,5000.0,25000.0,60000.0,500000.0,
+1) Moto,300.0,600.0,5000.0,25000.0,60000.0,500000.0,
+1) Moto,300.0,600.0,5000.0,25000.0,60000.0,500000.0,

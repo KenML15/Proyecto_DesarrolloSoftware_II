@@ -4,12 +4,14 @@
 package view;
 
 import controller.CustomerController;
+import controller.FeeController;
 import controller.ParkingLotController;
 import controller.VehicleController;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import model.entities.Customer;
+import model.entities.Fee;
 import model.entities.ParkingLot;
 import model.entities.Vehicle;
 import model.entities.VehicleType;
@@ -24,6 +26,7 @@ public class Proyecto_DesarrolloSoftware_II {
     static CustomerController customerController = new CustomerController();
     static VehicleController vehicleController = new VehicleController();
     static ParkingLotController parkingLotController = new ParkingLotController();
+    static FeeController feeController = new FeeController();
 
     public static void main(String[] args) {
         showMenu();
@@ -41,7 +44,8 @@ public class Proyecto_DesarrolloSoftware_II {
                     + "\n Ingrese 3 para ver la lista de clientes en el sistema. "
                     + "\n Ingrese 4 para registrar el vehículo."
                     + "\n Ingrese 5 para mostrar la lista de vehículos"
-                    + "\n Ingrese 6 para administrar el parqueo"));
+                    + "\n Ingrese 6 para administrar el parqueo"
+                    + "\n  7 Prueba"));
             
             switch (choice) {
                 case 0 -> {
@@ -66,12 +70,55 @@ public class Proyecto_DesarrolloSoftware_II {
                 case 6 -> {
                     insertParkingLot();
                 }
-                
+                case 7 -> {
+                    prueba();
+                }
             }
         }
     }
+    
+    //=====================TESTEO============================
+    
+    //Método para probar los métodos para ingresar y consultar la tarifa
+    private static void prueba() {
+        String[] types = {"1) Moto", "2) Liviano", "3) Pesado", "4) Bicicleta", "5) Otro"};
+        VehicleType vehicleType = new VehicleType();
+        
+        String menu = "Seleccione el tipo de vehículo:\n";
+        for (String type : types) {
+            menu += type + "\n";
+        }
 
-    // ====================Todo lo del cliente===========================  
+        int option = Integer.parseInt(JOptionPane.showInputDialog(menu)) - 1;
+        
+        vehicleType.setDescription(types[option]);
+        //vehicleType.getDescription();
+
+        Fee testFee = new Fee(types[option], 300f, 600f, 5000f, 25000f, 60000f, 500000f);
+        feeController.configureFeePrices(testFee);
+        
+        ArrayList<VehicleType> allVehicleTypes = new ArrayList<>();
+        allVehicleTypes.add(vehicleType);
+        
+        Fee result = feeController.searchFee(vehicleType.getDescription(), allVehicleTypes);
+        //feeController.searchFee(vehicleType.getDescription(), allVehicleTypes);
+        
+        if (result != null) {
+            JOptionPane.showMessageDialog(null, "--- PRUEBA EXITOSA ---" 
+                    + "\nVehículo: " + result.getVehicleType()
+                    + "\nPrecio media hora: " + result.getHalfHourRate()
+                    + "\nPrecio hora: " + result.getHourlyRate()
+                    + "\nPrecio diario: " + result.getDailyRate()
+                    + "\nPrecio semanal: " + result.getWeeklyRate()
+                    + "\nPrecio mensual: " + result.getMonthlyRate()
+                    + "\nPrecio anual: " + result.getAnnualRate());
+        } else {
+            JOptionPane.showMessageDialog(null, "--- ERROR: No se encontró la tarifa ---");
+        } 
+    }
+    
+
+    // ====================CLIENTE===========================  
     public static void showAllCustomer() {
         JOptionPane.showMessageDialog(null, customerController.getAllCustomers().toString());
     }
@@ -81,7 +128,7 @@ public class Proyecto_DesarrolloSoftware_II {
 
         String name = JOptionPane.showInputDialog("Ingrese el nombre del cliente");
         
-        int hasDisability = JOptionPane.showConfirmDialog(null, "¿Presenta alguna discapacidad?", "Información", JOptionPane.YES_NO_OPTION);
+        int hasDisability = JOptionPane.showConfirmDialog(null, "¿El cliente se encuentra en situación de discapacidad?", "Información", JOptionPane.YES_NO_OPTION);
         boolean disabilityPresented = (hasDisability == JOptionPane.YES_OPTION);
       
         Customer customerToInsert = new Customer(id, name, disabilityPresented);
@@ -121,7 +168,7 @@ public class Proyecto_DesarrolloSoftware_II {
         JOptionPane.showMessageDialog(null, "El cliente ha sido removido de forma correcta del sistema");
     }*/
     
-    // ====================Todo lo del vehículo===========================
+    // ====================VEHÍCULO===========================
     public static void showAllVehicles() {
         JOptionPane.showMessageDialog(null, vehicleController.getAllVehicles().toString());
     }
@@ -138,17 +185,20 @@ public class Proyecto_DesarrolloSoftware_II {
 
         ParkingLot parkingLot = selectParkingLot();
 
-        
         Vehicle vehicleToInsert = new Vehicle(plate, color, brand, model, responsibleList, vehicleType, null, LocalDateTime.now());
 
         int spaceAssigned = parkingLotController.registerVehicleInParkingLot(vehicleToInsert, parkingLot);
-
+        
         if (spaceAssigned != -1) {
             vehicleController.insertVehicle(vehicleToInsert); 
             JOptionPane.showMessageDialog(null, "Vehículo ingresado con éxito.\nEspacio asignado: " + spaceAssigned);
         } else {
             JOptionPane.showMessageDialog(null, "ERROR: No hay espacios disponibles para este tipo de vehículo.");
         }
+        
+        JOptionPane.showMessageDialog(null, "Bienvenido al parqueo: " + parkingLot.getName()
+                + ".\n Aquí está su tiquete de entrada: \n" 
+                +showTicketToCostumer(vehicleToInsert, vehicleType));
     }
     
     //Método que retorna la lista con los dueños del vehículo
@@ -162,6 +212,16 @@ public class Proyecto_DesarrolloSoftware_II {
         } while (op == JOptionPane.YES_OPTION);
         
         return responsibleList;
+    }
+    
+    //Método para mostrar el tiquete al cliente
+    private static String showTicketToCostumer(Vehicle vehicle, VehicleType vehicleType) {
+        String ticket = "---------- TIQUETE DE ENTRADA ----------\n"
+                + "PLACA: " + vehicle.getPlate() + "\n"
+                + "TIPO: " + vehicleType.getDescription() + "\n"
+                + "ENTRADA: " + vehicle.getEntryTime() + "\n" ;
+                        
+         return ticket;   
     }
 
     private static VehicleType configureVehicleTypeOfSpaces(int position, boolean disabilityPresented) {
@@ -185,7 +245,7 @@ public class Proyecto_DesarrolloSoftware_II {
         return vehicleType;
     }
     
-     private static VehicleType selectVehicleType() {
+    private static VehicleType selectVehicleType() {
         String[] types = {"1) Moto", "2) Liviano", "3) Pesado", "4) Bicicleta", "5) Otro"};
         float[] fees = {500.0f, 1000.0f, 2500.0f, 300.0f, 1500.0f};
         byte[] tires = {2, 4, 10, 2, 4};
@@ -197,16 +257,16 @@ public class Proyecto_DesarrolloSoftware_II {
 
         int option = Integer.parseInt(JOptionPane.showInputDialog(menu)) - 1;
 
-        VehicleType vt = new VehicleType();
-        vt.setId(option + 1);
-        vt.setDescription(types[option]);
-        vt.setFee(fees[option]);
-        vt.setNumberOfTires(tires[option]);
+        VehicleType vehicleType = new VehicleType();
+        vehicleType.setId(option + 1);
+        vehicleType.setDescription(types[option]);
+        vehicleType.setFee(fees[option]);
+        vehicleType.setNumberOfTires(tires[option]);
 
-        return vt;
+        return vehicleType;
     }
     
-    // ====================Todo lo del parqueo===========================
+    // ====================PARQUEO===========================
     private static void insertParkingLot() {
 
         String name = JOptionPane.showInputDialog("Ingrese el nombre del parqueo");
@@ -228,8 +288,8 @@ public class Proyecto_DesarrolloSoftware_II {
         for (ParkingLot parkingLot : parkingLotController.getAllParkingLots()) {
 
             parkingLotsInformation += "Número de parqueo: " + parkingLot.getId() + " Nombre del parqueo: " + parkingLot.getName() + "\n";
-
         }
+        
         int option;
         ParkingLot parkingLot;
         do {

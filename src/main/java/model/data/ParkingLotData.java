@@ -44,6 +44,7 @@ public class ParkingLotData {
         }
         return false;
     }
+    
 
     public int registerVehicleInParkingLot(Vehicle vehicle, ParkingLot parkingLot) {
         ArrayList<Vehicle> vehiclesInParkingLot = parkingLot.getVehicles();
@@ -87,12 +88,10 @@ public class ParkingLotData {
                 spaces[i].setSpaceTaken(false);
                 break;
             }
-
         }
 
         parkingLot.setSpaces(spaces);
         parkingLot.setVehicles(vehiclesInParkingLot);
-
     }
 
     public ParkingLot findParkingLotById(int id) {
@@ -113,7 +112,6 @@ public class ParkingLotData {
     public ArrayList<ParkingLot> getAllParkingLots() {
 
         return parkingLots;
-
     }
 
 }

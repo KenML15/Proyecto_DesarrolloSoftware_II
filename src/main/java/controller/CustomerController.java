@@ -7,7 +7,6 @@ package controller;
 import model.data.CustomerData;
 import model.entities.Customer;
 import java.util.ArrayList;
-import model.entities.Vehicle;
 
 /**
  *
@@ -18,7 +17,7 @@ public class CustomerController {
     CustomerData customerData = new CustomerData();
     
     public String insertCustomer(Customer customer) {
-         String result;
+        String result;
     
         if (customerData.findCustomerById(customer.getId()) == null ) {
             customerData.insertCustomer(customer);
@@ -31,6 +30,7 @@ public class CustomerController {
     }
     
     public void removeCustomer(Customer customer) {
+        
         customerData.removeCustomer(customer);
     }
     
@@ -52,10 +52,12 @@ public class CustomerController {
     }*/
     
     public ArrayList<Customer> getAllCustomers() {
+        
         return customerData.getAllCustomers();
     }
     
     public Customer findCustomerById(String id) {
+        
         return customerData.findCustomerById(id);
     }
 

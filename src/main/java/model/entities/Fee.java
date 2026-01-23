@@ -9,6 +9,8 @@ package model.entities;
  * @author 50687
  */
 public class Fee {
+    private String vehicleType;
+    
     private double halfHourRate; //Tarifa de mediahora
     private double hourlyRate; //Tarifa por hora
     private double dailyRate; //Tarifa por día
@@ -19,13 +21,22 @@ public class Fee {
     public Fee() {
     }
 
-    public Fee(double halfHourRate, double hourlyRate, double dailyRate, double weeklyRate, double monthlyRate, double annualRate) {
+    public Fee(String vehicleType, double halfHourRate, double hourlyRate, double dailyRate, double weeklyRate, double monthlyRate, double annualRate) {
+        this.vehicleType = vehicleType;
         this.halfHourRate = halfHourRate;
         this.hourlyRate = hourlyRate;
         this.dailyRate = dailyRate;
         this.weeklyRate = weeklyRate;
         this.monthlyRate = monthlyRate;
         this.annualRate = annualRate;
+    }   
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     public double getHalfHourRate() {
@@ -75,6 +86,9 @@ public class Fee {
     public void setAnnualRate(double annualRate) {
         this.annualRate = annualRate;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "Fee{" + "vehicleType=" + vehicleType + ", halfHourRate=" + halfHourRate + ", hourlyRate=" + hourlyRate + ", dailyRate=" + dailyRate + ", weeklyRate=" + weeklyRate + ", monthlyRate=" + monthlyRate + ", annualRate=" + annualRate + '}';
+    }        
 }
