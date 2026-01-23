@@ -32,49 +32,89 @@ public class Proyecto_DesarrolloSoftware_II {
         showMenu();
     }
 
-    public static void showMenu() {
+public static void showMenu() {
 
         int choice = 1;
         while (choice != 0) {
 
             choice = Integer.parseInt(JOptionPane.showInputDialog(
-                    "Ingrese 0 para cerrar el sistema."
-                    + "\n Ingrese 1 para añadir a un cliente."
-                    + "\n Ingrese 2 para remover un cliente."
-                    + "\n Ingrese 3 para ver la lista de clientes en el sistema. "
-                    + "\n Ingrese 4 para registrar el vehículo."
-                    + "\n Ingrese 5 para mostrar la lista de vehículos"
-                    + "\n Ingrese 6 para administrar el parqueo"
-                    + "\n  7 Prueba"));
+                    " Ingrese 0 para cerrar el sistema."
+                    + "\n Ingrese 1 para ingresar al menu de clientes."
+                    + "\n Ingrese 2 para ingresar al menu de vehiculos."
+                    + "\n Ingrese 3 para administrar el parqueo"
+                    + "\n Ingrese 4 para Prueba"));
             
             switch (choice) {
                 case 0 -> {
                     JOptionPane.showMessageDialog(null, "Gracias por usar el sistema. \n ¡Hasta luego!");
                 }
                 case 1 -> {
-                    insertCustomer();
+                    CustomersMenu();
                 }
                 case 2 -> {
-                    removeCostumerAndVehicle();
+                    VehicleMenu();
                     //removeCustomer();
                 }
                 case 3 -> {
-                    showAllCustomer();
-                }
-                case 4 -> {
-                    insertVehicle();
-                }
-                case 5 -> {
-                    showAllVehicles();
-                }
-                case 6 -> {
                     insertParkingLot();
                 }
-                case 7 -> {
+                case 4 -> {
                     prueba();
                 }
             }
         }
+    }
+    
+    public static void CustomersMenu(){
+        int choice = 1;
+        while (choice != 0 ) {
+        
+            choice = Integer.parseInt(JOptionPane.showInputDialog(
+                    "Digite 0 para cerrar el sistema.\n"
+                            + "Digite 1 para agregar a un cliente\n"
+                            + "Digite 2 para remover un cliente\n"
+                            + "Digite 3 para ver la lista de clientes"));
+            
+            switch (choice) {
+                case 0 -> {
+                    JOptionPane.showMessageDialog(null, "Saliendo del menu de clientes");
+                    break;
+                }
+                case 1 -> {
+                    insertCustomer();
+                }
+                case 2 -> {
+                    removeCostumerAndVehicle();
+                }
+                case 3 -> {
+                    showAllCustomer();
+                }
+            }// Cierre del Switch
+        } // Cierre del while
+    }
+    
+    public static void VehicleMenu() {
+        int choice = 1;
+        while (choice != 0) {
+
+                    choice = Integer.parseInt(JOptionPane.showInputDialog(
+                    "Digite 0 para cerrar el sistema.\n"
+                            + "Digite 1 para agregar un vehiculo\n"
+                            + "Digite 2 para ver la lista de vehiculos"));
+            
+            switch (choice) {
+                case 0 -> {
+                    JOptionPane.showMessageDialog(null, "Saliendo del menu de vehiculos");
+                    break;
+                }
+                case 1 -> {
+                    insertVehicle();
+                }
+                case 2 -> {
+                showAllVehicles();
+                }
+            }// Cierre del Switch
+        } // Cierre del while 
     }
     
     //=====================TESTEO============================
