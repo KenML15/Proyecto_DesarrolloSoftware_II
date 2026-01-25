@@ -15,29 +15,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import model.entities.Customer;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import model.entities.Space;
 
 /**
  *
- * @author pablo
+ * @author 50687
  */
-public class CustomerData {
-    
-    ArrayList<Customer> customers = new ArrayList<>();
-    
-    public int exception = 0;
-   String fileName;
-    final int ID = 0, NAME = 1, EMAIL = 2, ADDRESS = 3, PHONE = 4;
+class SpaceData {
 
-    public CustomerData(String fileName) {
+    public int exception = 0;
+    String fileName;
+    final int SPACEID = 0, ADAPT = 1, TAKEN = 2, VEHICLETYPE = 3;
+
+    public SpaceData(String fileName) {
 
         this.fileName = fileName;
 
     }
 
-    public int insert(Customer customer) {
+    public int insert(Space space) {
 
         int result = -1;
         exception = 0; //limpia la excepcion
@@ -45,27 +43,26 @@ public class CustomerData {
         //control de excepciones
         try {
 
-            File customerFile = new File(fileName);
+            File spaceFile = new File(fileName);
 
             //lee el archivo 
             FileOutputStream fileOutputStream
-                    = new FileOutputStream(customerFile, true);
+                    = new FileOutputStream(spaceFile, true);
 
             //preparar para escribir en el archivo
             PrintStream printStream
                     = new PrintStream(fileOutputStream);
 
             //buscamos al cliente por su nombre y por su email por si ya existe en el archivo
-            boolean customerExists = find(customer.getName(), customer.getEmail());
+            boolean spaceExists = find(space.getId() /*space.getEmail()*/);
 
             //evaluamos si el cliente existe
-            if (!customerExists) {
+            if (!spaceExists) {
 
-                printStream.println(customer.getId() + ";"
-                        + customer.getName() + ";"
-                        + customer.getEmail() + ";"
-                        + customer.getAddress() + ";"
-                        + customer.getPhoneNumber());
+                printStream.println(space.getId() + ";"
+                        + space.isDisabilityAdaptation() + ";"
+                        + space.isSpaceTaken() + ";"
+                        + space.getVehicleTypeId() + ";");
 
                 //indicador de exito
                 result = 0;
@@ -83,23 +80,23 @@ public class CustomerData {
             exception = 1;
 
         } catch (IOException ex) {
-            
-             exception = 2;
+
+            exception = 2;
         }
 
         return result;
     }
-    
-    public void modifyCustomerFromFile(String lineToModify, String newList) {
 
-       exception = 0;
+    public void modifySpacesFromFile(String lineToModify, String newSpace) {
+
+        exception = 0;
 
         try {
 
             File file = new File(fileName);
 
             //Construct the new file that will later be renamed to the original filename. 
-            File tempFile = new File("CustomersTemp");
+            File tempFile = new File("SpacesTemp");
 
             BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
             PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
@@ -114,9 +111,9 @@ public class CustomerData {
 
                     printWriter.println(line);
                     printWriter.flush();
-                }else{
+                } else {
 
-                     printWriter.println(newList);
+                    printWriter.println(newSpace);
                 }
             }
 
@@ -148,28 +145,26 @@ public class CustomerData {
         }
     }
 
-
-    public Customer getCustomerFromFile(int customerId) {
+    public Space getSpaceFromFile(int spaceId) {
 
         exception = 0;
-        
-        String customerName = "",
-                customerEmail = "",
-                phone = "",
-                address = "";
 
-        int id = 0;
         int counter = 0;
-        
-        Customer customer = null;
+        int spaceNumber = 0;
+        boolean disabilityAdaptation = false;
+        boolean spaceTaken = false;
+        int vehicleTypeId = 0;
+
+        Space space = null;
         String currentTuple = "";
 
         try {
 
-            File customerFile = new File(fileName);
+            File spaceFile = new File(fileName);
 
             //lee linea a linea el archivo 
-            FileInputStream fileInputStream = new FileInputStream(customerFile);
+            FileInputStream fileInputStream
+                    = new FileInputStream(spaceFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -188,27 +183,25 @@ public class CustomerData {
 
                 while (stringTokenizer.hasMoreTokens()) {
 
-                    if (counter == ID) {
+                    if (counter == SPACEID) {
 
-                        id = Integer.parseInt(stringTokenizer.nextToken());
+                        spaceNumber = Integer.parseInt(stringTokenizer.nextToken());
+                    }
+                    else if (counter == ADAPT) {
 
-                    }else if (counter == NAME) {
+                        disabilityAdaptation = Boolean.parseBoolean(stringTokenizer.nextToken());
 
-                        customerName = stringTokenizer.nextToken();
+                    }
+                    else if (counter == TAKEN) {
 
-                    }else if (counter == EMAIL) {
+                        spaceTaken = Boolean.parseBoolean(stringTokenizer.nextToken());
 
-                        customerEmail = stringTokenizer.nextToken();
+                    }
+                    else if (counter == VEHICLETYPE) {
 
-                    }else if (counter == ADDRESS) {
+                        vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
 
-                        address = stringTokenizer.nextToken();
-
-                    }else if (counter == PHONE) {
-
-                        phone = stringTokenizer.nextToken();
-
-                    }else {
+                    } else {
 
                         stringTokenizer.nextToken();
 
@@ -218,8 +211,8 @@ public class CustomerData {
                 }
 
                 //esto verifica si se encontro el cliente
-                if (customerId == id) {
-                    customer = new Customer(id, customerName, customerEmail, address, phone);
+                if (spaceId == spaceNumber) {
+                    space = new Space(spaceNumber, disabilityAdaptation, spaceTaken, vehicleTypeId);
                     break; //terminamos el ciclo para que NO lea el resto de los tokens como nombre, correo, etc. Eso no nos interesa.
 
                 }
@@ -248,29 +241,26 @@ public class CustomerData {
         }
 
         //se retorna el id del último cliente 
-        return customer;
+        return space;
+
     }
-    
 // find = buscar 
-    public boolean find(String name, String email) {
+
+    public boolean find(int spaceId) {
 
         exception = 0;
-        boolean customerExists = false;
-        String customerName = "",
-                customerEmail = "",
-                phone = "",
-                address = "";
+        boolean spaceExists = false;
 
         int id = 0;
         int counter = 0;
 
         try {
 
-            File customerFile = new File(fileName);
+            File spaceFile = new File(fileName);
 
             //lee linea a linea el archivo 
             FileInputStream fileInputStream
-                    = new FileInputStream(customerFile);
+                    = new FileInputStream(spaceFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -282,7 +272,7 @@ public class CustomerData {
             String currentTuple = bufferedReader.readLine();
 
             //mientras que no se haya llegado al final del archivo y no se haya encontrado al cliente
-            while (currentTuple != null && !customerExists) {
+            while (currentTuple != null && !spaceExists) {
 
                 StringTokenizer stringTokenizer
                         = new StringTokenizer(currentTuple, ";");
@@ -290,39 +280,19 @@ public class CustomerData {
                 //mientras hayan más tokens (separados por ; en el archivo)
                 while (stringTokenizer.hasMoreTokens()) {
 
-                    if (counter == ID) {
+                    if (counter == SPACEID) {
 
                         id = Integer.parseInt(stringTokenizer.nextToken());
 
                     }
-                    if (counter == NAME) {
-
-                        customerName = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == EMAIL) {
-
-                        customerEmail = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == ADDRESS) {
-
-                        address = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == PHONE) {
-
-                        phone = stringTokenizer.nextToken();
-
-                    }
+                    
                     counter++;
                 }
 
                 //esto verifica si se encontro el cliente
-                if (name.equalsIgnoreCase(customerName)
-                        && email.equalsIgnoreCase(customerEmail)) {
+                if (spaceId == id) {
 
-                    customerExists = true;
+                    spaceExists = true;
                 } else {
 
                     //leemos la siguiente tupla (fila) del archivo.
@@ -347,26 +317,26 @@ public class CustomerData {
 
         }
 
-        return customerExists;
+        return spaceExists;
 
     }
 
     /*Este método encuentra el último id del cliente ingresado
      para que el próximo cliente tenga un id un número mayor que el encontrado.*/
-    public int findLastIdNumberOfCustomer() {
+    public int findLastIdNumberOfSpace() {
 
         exception = 0;
 
         int counter = 0;
-        int idCustomer = 0;
+        int idSpace = 0;
 
         try {
 
-            File customerFile = new File(fileName);
+            File spaceFile = new File(fileName);
 
             //lee linea a linea el archivo 
             FileInputStream fileInputStream
-                    = new FileInputStream(customerFile);
+                    = new FileInputStream(spaceFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -385,9 +355,9 @@ public class CustomerData {
 
                 while (stringTokenizer.hasMoreTokens()) {
 
-                    if (counter == ID) {
+                    if (counter == SPACEID) {
 
-                        idCustomer = Integer.parseInt(stringTokenizer.nextToken());
+                        idSpace = Integer.parseInt(stringTokenizer.nextToken());
 
                         break; //terminamos el ciclo para que NO lea el resto de los tokens como nombre, correo, etc. Eso no nos interesa.
                     }
@@ -419,20 +389,19 @@ public class CustomerData {
         }
 
         //se retorna el id del último cliente 
-        return idCustomer;
+        return idSpace;
 
     }
 
-    public ArrayList<Customer> getAllCustomers() {
+    public ArrayList<Space> getAllSpaces() {
 
         exception = 0;
-        ArrayList<Customer> allCustomers = new ArrayList<>();
-        String name = "",
-                email = "",
-                phone = "",
-                address = "";
+        ArrayList<Space> allSpaces = new ArrayList<>();
 
-        int id = 0;
+        int spaceNumber = 0;
+        boolean disabilityAdaptation = false;
+        boolean spaceTaken = false;
+        int vehicleTypeId = 0;
         int counter = 0;
 
         try {
@@ -461,36 +430,29 @@ public class CustomerData {
                 //mientras hayan más tokens (separados por ; en el archivo)
                 while (stringTokenizer.hasMoreTokens()) {
 
-                    if (counter == ID) {
+                    if (counter == SPACEID) {
 
-                        id = Integer.parseInt(stringTokenizer.nextToken());
+                        spaceNumber = Integer.parseInt(stringTokenizer.nextToken());
 
-                    }
-                    if (counter == NAME) {
+                    }else if (counter == ADAPT) {
 
-                        name = stringTokenizer.nextToken();
+                        disabilityAdaptation = Boolean.parseBoolean(stringTokenizer.nextToken());
 
-                    }
-                    if (counter == EMAIL) {
+                    }else if (counter == TAKEN) {
 
-                        email = stringTokenizer.nextToken();
+                        spaceTaken = Boolean.parseBoolean(stringTokenizer.nextToken());
 
-                    }
-                    if (counter == ADDRESS) {
+                    }else if (counter == VEHICLETYPE) {
 
-                        address = stringTokenizer.nextToken();
+                        vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
 
                     }
-                    if (counter == PHONE) {
 
-                        phone = stringTokenizer.nextToken();
-
-                    }
                     counter++;
                 }
 
-                Customer customer = new Customer(id, name, phone, address, email);
-                allCustomers.add(customer);
+                Space space = new Space(spaceNumber, disabilityAdaptation, spaceTaken, vehicleTypeId);
+                allSpaces.add(space);
                 currentTuple = bufferedReader.readLine();
 
                 //limpiamos la variable counter
@@ -508,34 +470,31 @@ public class CustomerData {
 
         }//Fin del catch
 
-
-
-        return allCustomers;
+        return allSpaces;
 
     }//Fin del método getAllCustomers
 
-    public String[][] createVehicleTypeMatrix(ArrayList<Customer> customers) {
+    public String[][] createSpaceMatrix(ArrayList<Space> spaces) {
 
-        String[][] matrixClientsFromFile
-                = new String[customers.size()][5];
+        String[][] matrixSpacesFromFile
+                = new String[spaces.size()][4];
 
-        for (int i = 0; i < customers.size(); i++) {
+        for (int i = 0; i < spaces.size(); i++) {
 
-            Customer customer = customers.get(i);
+            Space space = spaces.get(i);
 
-            matrixClientsFromFile[i][ID] = "" + customer.getId();
-            matrixClientsFromFile[i][NAME] = customer.getName();
-            matrixClientsFromFile[i][EMAIL] = customer.getEmail();
-            matrixClientsFromFile[i][ADDRESS] = customer.getAddress();
-            matrixClientsFromFile[i][PHONE] = customer.getPhoneNumber();
+            matrixSpacesFromFile[i][SPACEID] = "" + space.getId();
+            matrixSpacesFromFile[i][ADAPT] = "" + space.isDisabilityAdaptation();
+            matrixSpacesFromFile[i][TAKEN] = "" + space.isSpaceTaken();
+            matrixSpacesFromFile[i][VEHICLETYPE] = "" + space.getVehicleTypeId();
 
         }//Fin del for con contador i
-        
-        return matrixClientsFromFile;
-        
+
+        return matrixSpacesFromFile;
+
     }//Fin del método getDatosArchivo
 
-    public void deleteVehicleTypeFromFile(String lineToRemove) {
+    public void deleteSpaceFromFile(String lineToRemove) {
 
         exception = 0;
 
@@ -544,7 +503,7 @@ public class CustomerData {
             File file = new File(fileName);
 
             //Construct the new file that will later be renamed to the original filename. 
-            File tempFile = new File("CustomersTemp");
+            File tempFile = new File("SpacesTemp");
 
             BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
             PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
@@ -589,32 +548,4 @@ public class CustomerData {
             exception = 2;
         }
     }
-    
-    /*public void insertCustomer(Customer customer) {
-        
-        customers.add(customer);        
-    }
-    
-    public void removeCustomer(Customer customer) {
-        
-        customers.remove(customer);        
-    }
-    
-    public ArrayList<Customer> getAllCustomers() {
-        
-        return customers;        
-    }
-    
-    public Customer findCustomerById(String id) {
-        
-        Customer customerToReturn = null;
-        
-        for (Customer customer : customers) {
-            if (customer.getId().equals(id)) {
-                customerToReturn=customer;
-            }
-        }
-        return customerToReturn;
-    }*/
-    
 }

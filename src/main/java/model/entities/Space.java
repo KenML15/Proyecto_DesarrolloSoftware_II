@@ -14,6 +14,7 @@ public class Space {
     private boolean disabilityAdaptation;
     private boolean spaceTaken;
     private VehicleType vehicleType;
+    private int vehicleTypeId;
 
     public Space(int id, boolean disabilityAdaptation, boolean spaceTaken, VehicleType vehicleType) {
         this.id = id;
@@ -21,6 +22,16 @@ public class Space {
         this.spaceTaken = spaceTaken;
         this.vehicleType = vehicleType;
     }
+
+    //Constructor para el manejo de archivos
+    public Space(int id, boolean disabilityAdaptation, boolean spaceTaken, int vehicleTypeId) {
+        this.id = id;
+        this.disabilityAdaptation = disabilityAdaptation;
+        this.spaceTaken = spaceTaken;
+        this.vehicleTypeId = vehicleTypeId;
+    }
+    
+    
 
     public Space() {
     }
@@ -55,6 +66,14 @@ public class Space {
 
     public void setVehicleType(VehicleType vehicleType) {
         this.vehicleType = vehicleType;
+    }
+
+    public int getVehicleTypeId() {
+        return vehicleTypeId;
+    }
+
+    public void setVehicleTypeId(int vehicleTypeId) {
+        this.vehicleTypeId = vehicleTypeId;
     }
 
     @Override

@@ -21,7 +21,7 @@ import model.entities.Space;
  *
  * @author user
  */
-public class Proyecto_DesarrolloSoftware_II {
+public class RegistrationWindow {
 
     static CustomerController customerController = new CustomerController();
     static VehicleController vehicleController = new VehicleController();
@@ -32,7 +32,8 @@ public class Proyecto_DesarrolloSoftware_II {
         showMenu();
     }
 
-public static void showMenu() {
+    //=====================MENU============================
+    public static void showMenu() {
 
         int choice = 1;
         while (choice != 0) {
@@ -43,16 +44,16 @@ public static void showMenu() {
                     + "\n Ingrese 2 para ingresar al menu de vehiculos."
                     + "\n Ingrese 3 para administrar el parqueo"
                     + "\n Ingrese 4 para Prueba"));
-            
+
             switch (choice) {
                 case 0 -> {
                     JOptionPane.showMessageDialog(null, "Gracias por usar el sistema. \n ¡Hasta luego!");
                 }
                 case 1 -> {
-                    CustomersMenu();
+                    customersMenu();
                 }
                 case 2 -> {
-                    VehicleMenu();
+                    vehicleMenu();
                     //removeCustomer();
                 }
                 case 3 -> {
@@ -64,8 +65,8 @@ public static void showMenu() {
             }
         }
     }
-    
-    public static void CustomersMenu(){
+   
+    public static void customersMenu(){
         int choice = 1;
         while (choice != 0 ) {
         
@@ -93,7 +94,7 @@ public static void showMenu() {
         } // Cierre del while
     }
     
-    public static void VehicleMenu() {
+    public static void vehicleMenu() {
         int choice = 1;
         while (choice != 0) {
 
@@ -111,7 +112,7 @@ public static void showMenu() {
                     insertVehicle();
                 }
                 case 2 -> {
-                showAllVehicles();
+                    showAllVehicles();
                 }
             }// Cierre del Switch
         } // Cierre del while 
@@ -158,13 +159,13 @@ public static void showMenu() {
     }
     
 
-    // ====================CLIENTE===========================  
+    //====================CLIENTE===========================  
     public static void showAllCustomer() {
         JOptionPane.showMessageDialog(null, customerController.getAllCustomers().toString());
     }
 
     private static Customer insertCustomer() {
-        String id = JOptionPane.showInputDialog("Ingrese el número de cédula del cliente");
+        int id = Integer.parseInt(JOptionPane.showInputDialog("Ingrese el número de cédula del cliente"));
 
         String name = JOptionPane.showInputDialog("Ingrese el nombre del cliente");
         

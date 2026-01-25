@@ -13,6 +13,8 @@ public class VehicleType {
     private String description;
     private int numberOfTires;
     private float fee;
+    
+    
 
     public VehicleType() {
     }

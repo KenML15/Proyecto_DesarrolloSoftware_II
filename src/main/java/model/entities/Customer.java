@@ -12,24 +12,39 @@ import java.util.Objects;
  */
 public class Customer {
     
-    private String id;
+    private int id;
     private String name;
     private boolean disabilityPresented;
+    //Atributos para los archivos de texto
+    private String email;
+    private String address;
+    private String phoneNumber;
 
     public Customer() {
     }
 
-    public Customer(String id, String name, boolean disabilityPresented) {
+    public Customer(int id, String name, boolean disabilityPresented) {
         this.id = id;
         this.name = name;
         this.disabilityPresented = disabilityPresented;
     }
 
-    public String getId() {
+    //Constructor para los archivos
+    public Customer(int id, String name, String email, String address, String phoneNumber) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.phoneNumber = phoneNumber;
+    }
+    
+    
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -47,6 +62,30 @@ public class Customer {
 
     public void setDisabilityPresented(boolean disabilityPresented) {
         this.disabilityPresented = disabilityPresented;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author 50687
  */
 public class Vehicle {
+    private int id;
     private String plate;
     private String color;
     private String brand;
@@ -20,9 +21,28 @@ public class Vehicle {
     private VehicleType vehicleType;
     private Space space;
     private LocalDateTime entryTime;
+    //Atributos para los archivos
+    private int customerId;
+    
 
     public Vehicle() {
     }
+
+    public Vehicle(int id, String plate, String color, String brand, String model, ArrayList<Customer> customer, VehicleType vehicleType, Space space, LocalDateTime entryTime) {
+        this.id = id;
+        this.plate = plate;
+        this.color = color;
+        this.brand = brand;
+        this.model = model;
+        this.customer = customer;
+        this.vehicleType = vehicleType;
+        this.space = space;
+        this.entryTime = entryTime;
+    }
+
+    
+
+    
 
     public Vehicle(String plate, String color, String brand, String model, ArrayList <Customer> customer, VehicleType vehicleType, Space space, LocalDateTime entryTime) {
         this.entryTime = LocalDateTime.now();
@@ -34,6 +54,14 @@ public class Vehicle {
         this.vehicleType = vehicleType;
         this.space = space;
         this.entryTime = entryTime;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPlate() {
