@@ -180,7 +180,7 @@ public class RegistrationWindow {
     }
     
     private static void removeCostumerAndVehicle() {
-        String id = JOptionPane.showInputDialog("Ingrese la cédula del cliente a eliminar");
+        int id = Integer.parseInt(JOptionPane.showInputDialog("Ingrese la cédula del cliente a eliminar"));
         String plate = JOptionPane.showInputDialog("Ingrese la placa del vehiculo del cliente a eliminar");
 
         Customer customerToRemove = customerController.findCustomerById(id);

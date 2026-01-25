@@ -56,7 +56,7 @@ public class CustomerController {
         return customerData.getAllCustomers();
     }
     
-    public Customer findCustomerById(String id) {
+    public Customer findCustomerById(int id) {
         
         return customerData.findCustomerById(id);
     }

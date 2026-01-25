@@ -15,27 +15,29 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import model.entities.Customer;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-import model.entities.VehicleType;
 
 /**
  *
- * @author 50687
+ * @author pablo
  */
-class VehicleTypeData {
-
+public class CustomerDataFile {
+    
+    
+    
     public int exception = 0;
-    String fileName;
-    final int ID = 0, DESCRIPTION = 1, TIRES = 2, FEE = 3;
+   String fileName;
+    final int ID = 0, NAME = 1, EMAIL = 2, ADDRESS = 3, PHONE = 4;
 
-    public VehicleTypeData(String fileName) {
+    public CustomerDataFile(String fileName) {
 
         this.fileName = fileName;
 
     }
 
-    public int insert(VehicleType vehicleType) {
+    public int insert(Customer customer) {
 
         int result = -1;
         exception = 0; //limpia la excepcion
@@ -43,27 +45,27 @@ class VehicleTypeData {
         //control de excepciones
         try {
 
-            File vehicleTypeFile = new File(fileName);
+            File customerFile = new File(fileName);
 
             //lee el archivo 
             FileOutputStream fileOutputStream
-                    = new FileOutputStream(vehicleTypeFile, true);
+                    = new FileOutputStream(customerFile, true);
 
             //preparar para escribir en el archivo
             PrintStream printStream
                     = new PrintStream(fileOutputStream);
 
             //buscamos al cliente por su nombre y por su email por si ya existe en el archivo
-            boolean vehicleTypeExists
-                    = find(vehicleType.getId());
+            boolean customerExists = find(customer.getName(), customer.getEmail());
 
             //evaluamos si el cliente existe
-            if (!vehicleTypeExists) {
+            if (!customerExists) {
 
-                printStream.println(vehicleType.getId() + ";"
-                        + vehicleType.getDescription() + ";"
-                        + vehicleType.getNumberOfTires() + ";"
-                        + vehicleType.getFee() + ";");
+                printStream.println(customer.getId() + ";"
+                        + customer.getName() + ";"
+                        + customer.getEmail() + ";"
+                        + customer.getAddress() + ";"
+                        + customer.getPhoneNumber());
 
                 //indicador de exito
                 result = 0;
@@ -81,23 +83,23 @@ class VehicleTypeData {
             exception = 1;
 
         } catch (IOException ex) {
-
-            exception = 2;
+            
+             exception = 2;
         }
 
         return result;
     }
+    
+    public void modifyCustomerFromFile(String lineToModify, String newList) {
 
-    public void modifyVehicleTypeFromFile(String lineToModify, String newList) {
-
-        exception = 0;
+       exception = 0;
 
         try {
 
             File file = new File(fileName);
 
             //Construct the new file that will later be renamed to the original filename. 
-            File tempFile = new File("VehicleTypeTemp");
+            File tempFile = new File("CustomersTemp");
 
             BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
             PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
@@ -112,9 +114,9 @@ class VehicleTypeData {
 
                     printWriter.println(line);
                     printWriter.flush();
-                } else {
+                }else{
 
-                    printWriter.println(newList);
+                     printWriter.println(newList);
                 }
             }
 
@@ -146,27 +148,28 @@ class VehicleTypeData {
         }
     }
 
-    //TODO
-    public VehicleType getVehicleTypeFromFile(int id) {
+
+    public Customer getCustomerFromFile(int customerId) {
 
         exception = 0;
+        
+        String customerName = "",
+                customerEmail = "",
+                phone = "",
+                address = "";
 
+        int id = 0;
         int counter = 0;
-        int vehicleTypeId = 0;
-        String description = "";
-        int numberOfTires = 0;
-        float fee = 0;
-
-        VehicleType vehicleType = null;
+        
+        Customer customer = null;
         String currentTuple = "";
 
         try {
 
-            File vehicleTypeFile = new File(fileName);
+            File customerFile = new File(fileName);
 
             //lee linea a linea el archivo 
-            FileInputStream fileInputStream
-                    = new FileInputStream(vehicleTypeFile);
+            FileInputStream fileInputStream = new FileInputStream(customerFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -185,23 +188,27 @@ class VehicleTypeData {
 
                 while (stringTokenizer.hasMoreTokens()) {
 
-                    if (counter == ID){
-                        
-                        vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-                    else if (counter == DESCRIPTION) {
+                    if (counter == ID) {
 
-                        description = stringTokenizer.nextToken();
+                        id = Integer.parseInt(stringTokenizer.nextToken());
 
-                    } else if (counter == TIRES) {
+                    }else if (counter == NAME) {
 
-                        numberOfTires = Integer.parseInt(stringTokenizer.nextToken());
+                        customerName = stringTokenizer.nextToken();
 
-                    } else if (counter == FEE) {
+                    }else if (counter == EMAIL) {
 
-                        fee = Float.parseFloat(stringTokenizer.nextToken());
+                        customerEmail = stringTokenizer.nextToken();
 
-                    } else {
+                    }else if (counter == ADDRESS) {
+
+                        address = stringTokenizer.nextToken();
+
+                    }else if (counter == PHONE) {
+
+                        phone = stringTokenizer.nextToken();
+
+                    }else {
 
                         stringTokenizer.nextToken();
 
@@ -211,8 +218,8 @@ class VehicleTypeData {
                 }
 
                 //esto verifica si se encontro el cliente
-                if (id == vehicleTypeId) {
-                    vehicleType = new VehicleType(vehicleTypeId, description, numberOfTires, fee);
+                if (customerId == id) {
+                    customer = new Customer(id, customerName, customerEmail, address, phone);
                     break; //terminamos el ciclo para que NO lea el resto de los tokens como nombre, correo, etc. Eso no nos interesa.
 
                 }
@@ -241,27 +248,29 @@ class VehicleTypeData {
         }
 
         //se retorna el id del último cliente 
-        return vehicleType;
-
+        return customer;
     }
+    
 // find = buscar 
-
-    public boolean find(int vehicleTypeId) {
+    public boolean find(String name, String email) {
 
         exception = 0;
-        boolean vehicleTypeExists = false;
-        
+        boolean customerExists = false;
+        String customerName = "",
+                customerEmail = "",
+                phone = "",
+                address = "";
+
         int id = 0;
-        
         int counter = 0;
 
         try {
 
-            File vehicleTypeFile = new File(fileName);
+            File customerFile = new File(fileName);
 
             //lee linea a linea el archivo 
             FileInputStream fileInputStream
-                    = new FileInputStream(vehicleTypeFile);
+                    = new FileInputStream(customerFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -273,7 +282,7 @@ class VehicleTypeData {
             String currentTuple = bufferedReader.readLine();
 
             //mientras que no se haya llegado al final del archivo y no se haya encontrado al cliente
-            while (currentTuple != null && !vehicleTypeExists) {
+            while (currentTuple != null && !customerExists) {
 
                 StringTokenizer stringTokenizer
                         = new StringTokenizer(currentTuple, ";");
@@ -286,14 +295,34 @@ class VehicleTypeData {
                         id = Integer.parseInt(stringTokenizer.nextToken());
 
                     }
+                    if (counter == NAME) {
 
+                        customerName = stringTokenizer.nextToken();
+
+                    }
+                    if (counter == EMAIL) {
+
+                        customerEmail = stringTokenizer.nextToken();
+
+                    }
+                    if (counter == ADDRESS) {
+
+                        address = stringTokenizer.nextToken();
+
+                    }
+                    if (counter == PHONE) {
+
+                        phone = stringTokenizer.nextToken();
+
+                    }
                     counter++;
                 }
 
                 //esto verifica si se encontro el cliente
-                if (vehicleTypeId == id) {
+                if (name.equalsIgnoreCase(customerName)
+                        && email.equalsIgnoreCase(customerEmail)) {
 
-                    vehicleTypeExists = true;
+                    customerExists = true;
                 } else {
 
                     //leemos la siguiente tupla (fila) del archivo.
@@ -318,26 +347,26 @@ class VehicleTypeData {
 
         }
 
-        return vehicleTypeExists;
+        return customerExists;
 
     }
 
     /*Este método encuentra el último id del cliente ingresado
      para que el próximo cliente tenga un id un número mayor que el encontrado.*/
-    public int findLastIdNumberOfVehicleType() {
+    public int findLastIdNumberOfCustomer() {
 
         exception = 0;
 
         int counter = 0;
-        int idVehicleType = 0;
+        int idCustomer = 0;
 
         try {
 
-            File vehicleTypeFile = new File(fileName);
+            File customerFile = new File(fileName);
 
             //lee linea a linea el archivo 
             FileInputStream fileInputStream
-                    = new FileInputStream(vehicleTypeFile);
+                    = new FileInputStream(customerFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -358,7 +387,7 @@ class VehicleTypeData {
 
                     if (counter == ID) {
 
-                        idVehicleType = Integer.parseInt(stringTokenizer.nextToken());
+                        idCustomer = Integer.parseInt(stringTokenizer.nextToken());
 
                         break; //terminamos el ciclo para que NO lea el resto de los tokens como nombre, correo, etc. Eso no nos interesa.
                     }
@@ -390,29 +419,29 @@ class VehicleTypeData {
         }
 
         //se retorna el id del último cliente 
-        return idVehicleType;
+        return idCustomer;
 
     }
 
-    public ArrayList<VehicleType> getAllVehicleTypes() {
+    public ArrayList<Customer> getAllCustomers() {
 
         exception = 0;
-        ArrayList<VehicleType> allVehicleTypes = new ArrayList<>();
-        int id = 0;
-        String description = "";
-        int numberOfTires = 0;
-        float fee = 0;
+        ArrayList<Customer> allCustomers = new ArrayList<>();
+        String name = "",
+                email = "",
+                phone = "",
+                address = "";
 
-        
+        int id = 0;
         int counter = 0;
 
         try {
 
-            File vehicleTypeFile = new File(fileName);
+            File customerFile = new File(fileName);
 
             //lee linea a linea el archivo 
             FileInputStream fileInputStream
-                    = new FileInputStream(vehicleTypeFile);
+                    = new FileInputStream(customerFile);
 
             //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -437,27 +466,31 @@ class VehicleTypeData {
                         id = Integer.parseInt(stringTokenizer.nextToken());
 
                     }
-                    else if (counter == DESCRIPTION) {
+                    if (counter == NAME) {
 
-                        description = stringTokenizer.nextToken();
-
-                    }
-                    else if (counter == TIRES) {
-
-                        numberOfTires = Integer.parseInt(stringTokenizer.nextToken());
+                        name = stringTokenizer.nextToken();
 
                     }
-                    else if (counter == FEE) {
+                    if (counter == EMAIL) {
 
-                        fee = Float.parseFloat(stringTokenizer.nextToken());
+                        email = stringTokenizer.nextToken();
 
                     }
+                    if (counter == ADDRESS) {
 
+                        address = stringTokenizer.nextToken();
+
+                    }
+                    if (counter == PHONE) {
+
+                        phone = stringTokenizer.nextToken();
+
+                    }
                     counter++;
                 }
 
-                VehicleType vehicleType = new VehicleType(id, description, numberOfTires, fee);
-                allVehicleTypes.add(vehicleType);
+                Customer customer = new Customer(id, name, phone, address, email);
+                allCustomers.add(customer);
                 currentTuple = bufferedReader.readLine();
 
                 //limpiamos la variable counter
@@ -469,33 +502,37 @@ class VehicleTypeData {
             fileInputStream.close();
             inputStreamReader.close();
 
-        }//Fin del try//Fin del try//Fin del try//Fin del try//Fin del try//Fin del try//Fin del try//Fin del try
+        }//Fin del try//Fin del try
         catch (IOException ioE) {
             exception = 2;
 
         }//Fin del catch
 
-        return allVehicleTypes;
+
+
+        return allCustomers;
 
     }//Fin del método getAllCustomers
 
-    public String[][] createVehicleTypeMatrix(ArrayList<VehicleType> vehicleTypes) {
+    public String[][] createVehicleTypeMatrix(ArrayList<Customer> customers) {
 
-        String[][] matrixVehicleTypesFromFile = new String[vehicleTypes.size()][4];
+        String[][] matrixClientsFromFile
+                = new String[customers.size()][5];
 
-        for (int i = 0; i < vehicleTypes.size(); i++) {
+        for (int i = 0; i < customers.size(); i++) {
 
-            VehicleType vehicleType = vehicleTypes.get(i);
+            Customer customer = customers.get(i);
 
-            matrixVehicleTypesFromFile[i][ID] = "" + vehicleType.getId();
-            matrixVehicleTypesFromFile[i][DESCRIPTION] = vehicleType.getDescription();
-            matrixVehicleTypesFromFile[i][TIRES] = "" + vehicleType.getNumberOfTires();
-            matrixVehicleTypesFromFile[i][FEE] = "" + vehicleType.getFee();
+            matrixClientsFromFile[i][ID] = "" + customer.getId();
+            matrixClientsFromFile[i][NAME] = customer.getName();
+            matrixClientsFromFile[i][EMAIL] = customer.getEmail();
+            matrixClientsFromFile[i][ADDRESS] = customer.getAddress();
+            matrixClientsFromFile[i][PHONE] = customer.getPhoneNumber();
 
         }//Fin del for con contador i
-
-        return matrixVehicleTypesFromFile;
-
+        
+        return matrixClientsFromFile;
+        
     }//Fin del método getDatosArchivo
 
     public void deleteVehicleTypeFromFile(String lineToRemove) {
@@ -507,7 +544,7 @@ class VehicleTypeData {
             File file = new File(fileName);
 
             //Construct the new file that will later be renamed to the original filename. 
-            File tempFile = new File("VehicleTypeTemp");
+            File tempFile = new File("CustomersTemp");
 
             BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
             PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
@@ -552,4 +589,7 @@ class VehicleTypeData {
             exception = 2;
         }
     }
+    
+    
+    
 }
