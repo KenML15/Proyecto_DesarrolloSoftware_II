@@ -6,6 +6,8 @@ package view;
 
 import controller.ClerkController;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,27 +29,28 @@ import model.entities.User;
  *
  * @author 50687
  */
-public class LoginWindow extends JFrame implements ActionListener{
+public class LoginWindow extends JFrame implements ActionListener {
+
     private JTextField txtUsername;
     private JPasswordField txtPassword;
     private JButton btnSignIn;
 
     ClerkController clerkController = new ClerkController();
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         new LoginWindow().setVisible(true);
     }
-    
-     public LoginWindow() {
-        
+
+    public LoginWindow() {
+
         setTitle("Login"); //Settea el título al frame
         setSize(380, 250); //Settea el tamaño
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Si cierra el frame se cierra todo el programa
         setLocationRelativeTo(null); //Hace que el frame se posicione en un lugar relativo
-        
+
         initComponents();
-    }  	
-    
+    }
+
     private void initComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -119,23 +122,33 @@ public class LoginWindow extends JFrame implements ActionListener{
                             "Error",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Welcome " + username,
-                            "Login successful",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
-                    
-                    RegistrationWindow registrationWindow = new RegistrationWindow();
+                    JOptionPane.showMessageDialog(this, "Welcome " + username, "Login successful", JOptionPane.INFORMATION_MESSAGE);
+
+                    // Abrir la ventana de registro y cerrar el login
+                    new RegistrationWindow().setVisible(true);
+                    this.dispose();
                 }
             }
         }
     }
-    
-       void insertClerk(){
+
+
+    private void styleButton(JButton button) {
+        button.setFocusPainted(false);
+        button.setBackground(new Color(70, 130, 180)); // Azul acero
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(70, 130, 180)),
+                BorderFactory.createEmptyBorder(10, 25, 10, 25)
+        ));
+    }
+
+    void insertClerk() {
         Clerk clerkPrueba = new Clerk(123, "Random", 43, null, "123456", "Fulano", "Fuli", "abc123");
         Clerk clerkPrueba2 = new Clerk(123, "Nose", 32, null, "jsjsjs", "Filomeno", "menoFuli", "filo12");
-        
+
         clerkController.insertClerk(clerkPrueba);
         clerkController.insertClerk(clerkPrueba2);
     }
