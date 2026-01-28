@@ -7,9 +7,22 @@ import controller.CustomerController;
 import controller.FeeController;
 import controller.ParkingLotController;
 import controller.VehicleController;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import model.entities.Customer;
 import model.entities.Fee;
 import model.entities.ParkingLot;
@@ -21,7 +34,63 @@ import model.entities.Space;
  *
  * @author user
  */
-public class RegistrationWindow extends javax.swing.JFrame{
+public class RegistrationWindow extends JFrame implements ActionListener {
+
+    private JButton btnCustomers, btnVehicles, btnParking, btnLogout;
+
+    public RegistrationWindow() {
+        setTitle("Parking Management System - Main Menu");
+        setSize(500, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(45, 52, 54));
+        JLabel lblTitle = new JLabel("Main Administration Menu");
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        headerPanel.add(lblTitle);
+
+        JPanel menuPanel = new JPanel(new GridLayout(4, 1, 15, 15));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+
+        btnCustomers = new JButton("Manage Customers");
+        btnVehicles = new JButton("Manage Vehicles");
+        btnParking = new JButton("Parking Lot Administration");
+        btnLogout = new JButton("Exit System");
+
+        JButton[] buttons = {btnCustomers, btnVehicles, btnParking, btnLogout};
+        for (JButton btn : buttons) {
+            styleMenuButton(btn);
+            btn.addActionListener(this);
+            menuPanel.add(btn);
+        }
+
+        add(headerPanel, BorderLayout.NORTH);
+        add(menuPanel, BorderLayout.CENTER);
+    }
+
+    private void styleMenuButton(JButton button) {
+        button.setFocusPainted(false);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        button.setBackground(Color.WHITE);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnCustomers) {
+            customersMenu(); 
+        } else if (e.getSource() == btnVehicles) {
+            vehicleMenu();
+        } else if (e.getSource() == btnParking) {
+            insertParkingLot();
+        } else if (e.getSource() == btnLogout) {
+            System.exit(0);
+        }
+    }
 
     static CustomerController customerController = new CustomerController();
     static VehicleController vehicleController = new VehicleController();
@@ -29,8 +98,11 @@ public class RegistrationWindow extends javax.swing.JFrame{
     static FeeController feeController = new FeeController();
 
     public static void main(String[] args) {
-        showMenu();
-    }
+    // Esto asegura que la interfaz se cree de forma segura
+    SwingUtilities.invokeLater(() -> {
+        new RegistrationWindow().setVisible(true);
+    });
+}
 
     //=====================MENU============================
     public static void showMenu() {
@@ -178,6 +250,8 @@ public class RegistrationWindow extends javax.swing.JFrame{
 
         return customerToInsert;
     }
+
+    
     
     private static void removeCostumerAndVehicle() {
         int id = Integer.parseInt(JOptionPane.showInputDialog("Ingrese la cédula del cliente a eliminar"));
@@ -373,4 +447,5 @@ public class RegistrationWindow extends javax.swing.JFrame{
 
         return spaces;
     }
+    
 }
