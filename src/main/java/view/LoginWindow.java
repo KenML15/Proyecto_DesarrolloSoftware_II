@@ -146,10 +146,12 @@ public class LoginWindow extends JFrame implements ActionListener {
     }
 
     void insertClerk() {
-        Clerk clerkPrueba = new Clerk(123, "Random", 43, null, "123456", "Fulano", "Fuli", "abc123");
-        Clerk clerkPrueba2 = new Clerk(123, "Nose", 32, null, "jsjsjs", "Filomeno", "menoFuli", "filo12");
+        Clerk clerkPrueba = new Clerk(1, null, 18, null, "123", "Pablo Solano", "Pablo", "Pablo123");
+        Clerk clerkPrueba2 = new Clerk(2, null, 19, null, "123", "Kenneth Miranda", "Kenneth", "Kenneth123");
+        Clerk clerkPrueba3 = new Clerk(3, null, 19, null, "123", "Eilyn Rivera", "Eilyn", "Eilyn123");
 
         clerkController.insertClerk(clerkPrueba);
         clerkController.insertClerk(clerkPrueba2);
+        clerkController.insertClerk(clerkPrueba3);
     }
 }
