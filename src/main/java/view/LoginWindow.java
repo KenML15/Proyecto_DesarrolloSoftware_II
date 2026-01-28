@@ -125,7 +125,7 @@ public class LoginWindow extends JFrame implements ActionListener {
                     JOptionPane.showMessageDialog(this, "Welcome " + username, "Login successful", JOptionPane.INFORMATION_MESSAGE);
 
                     // Abrir la ventana de registro y cerrar el login
-                   
+                   new RegistrationWindow().setVisible(true);
                     this.dispose();
                 }
             }
