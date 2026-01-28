@@ -33,8 +33,6 @@ public class VehicleDataFile {
     SpaceDataFile spaceData;
     VehicleTypeDataFile vehicleTypeData;
     CustomerDataFile customerData;
-    
-    //Los ID's no existen para mostrarse, existen para relacionar
 
     public VehicleDataFile(String fileName) {
 
@@ -49,19 +47,15 @@ public class VehicleDataFile {
     
     public int insertVehicle(Vehicle vehicle){
         int result = -1;
-        exception = 0; //limpia la excepcion
+        exception = 0; 
         
-        //para controlar las excepciones de la vista
         try{
             File vehicleFile = new File(fileName);
-            
-            //lee el archivo 
+ 
             FileOutputStream fileOutputStream = new FileOutputStream(vehicleFile, true);
-            
-            //preparar para escribir en el archivo
+
             PrintStream printStream = new PrintStream(fileOutputStream);
-            
-            //se buscan los vehiculos por su placa, espacio asignado y por el customer para saber si existe
+
             boolean vehicleExist = findVehicleByPlate(vehicle.getPlate());
             
             
@@ -75,7 +69,7 @@ public class VehicleDataFile {
                     customerIdsText += ",";
                 }
             }
-            //evaluamos si el cliente existe
+
             if (!vehicleExist){
                 printStream.println(vehicle.getPlate() + ";"
                         + vehicle.getColor() + ";"
@@ -85,11 +79,10 @@ public class VehicleDataFile {
                         + vehicle.getVehicleType() + ";"
                         + vehicle.getSpace() + ";"
                         + vehicle.getEntryTime() + ";");
-                
-                //indicador de exito
+
                 result = 0;
             } else {
-                exception = 3;//El vehículo ya existe
+                exception = 3;
             } 
             
             fileOutputStream.close();
@@ -124,26 +117,20 @@ public class VehicleDataFile {
 
             File vehicleFile = new File(fileName);
 
-            //lee linea a linea el archivo 
             FileInputStream fileInputStream
                     = new FileInputStream(vehicleFile);
 
-            //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
 
-            //lee cada parte de registro
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            //lee la primera tupla
             String currentTuple = bufferedReader.readLine();
 
-            //mientras que no se haya llegado al final del archivo y no se haya encontrado al cliente
             while (currentTuple != null && !vehicleExists) {
 
                 StringTokenizer stringTokenizer
                         = new StringTokenizer(currentTuple, ";");
 
-                //mientras hayan más tokens (separados por ; en el archivo)
                 while (stringTokenizer.hasMoreTokens()) {
 
                     if (counter == PLATE) {
@@ -189,16 +176,14 @@ public class VehicleDataFile {
                     counter++;
                 }
 
-                //esto verifica si se encontro el cliente
-                if (plate.equalsIgnoreCase(vehiclePlate) /*&& email.equalsIgnoreCase(customerEmail)*/) {
+                if (plate.equalsIgnoreCase(vehiclePlate)) {
                     
                     vehicleExists = true;
                 } else {
 
-                    //leemos la siguiente tupla (fila) del archivo.
                     currentTuple = bufferedReader.readLine();
                 }
-                //limpiamos la variable counter
+
                 counter = 0;
 
             }
@@ -233,19 +218,14 @@ public class VehicleDataFile {
 
             File vehicleFile = new File(fileName);
 
-            //lee linea a linea el archivo 
             FileInputStream fileInputStream = new FileInputStream(vehicleFile);
 
-            //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
 
-            //lee cada parte de registro
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            //lee la primera tupla
             currentTuple = bufferedReader.readLine();
 
-            //mientras que no se haya llegado al final del archivo...
             while (currentTuple != null) {
 
                 StringTokenizer stringTokenizer = new StringTokenizer(currentTuple, ";");
@@ -265,17 +245,14 @@ public class VehicleDataFile {
                     counter++;
                 }
 
-                //esto verifica si se encontro el cliente
-                if (plate.equalsIgnoreCase(vehiclePlate) /*&& email.equalsIgnoreCase(customerEmail)*/) {
+                if (plate.equalsIgnoreCase(vehiclePlate)) {
 
-                    break; //terminamos el ciclo para que NO lea el resto de los tokens como nombre, correo, etc. Eso no nos interesa.
+                    break;
 
                 }
 
-                //leemos la siguiente tupla (fila) del archivo.
                 currentTuple = bufferedReader.readLine();
 
-                //limpiamos la variable counter
                 counter = 0;
 
             }
@@ -284,18 +261,15 @@ public class VehicleDataFile {
             fileInputStream.close();
             inputStreamReader.close();
 
-            //no encontró el archivo
         } catch (FileNotFoundException fileException) {
 
             exception = 1;
 
-            //no pudo leer el archivo
         } catch (IOException ioException) {
 
             exception = 2;
         }
 
-        //se retorna el id del último cliente 
         return currentTuple;
 
     }
@@ -306,7 +280,6 @@ public class VehicleDataFile {
 
         ArrayList<Vehicle> allVehicles = new ArrayList<>();
 
-        //ArrayList<Customer> allCustomers = new ArrayList<>();
         String plate = "",
                 color = "",
                 brand = "",
@@ -324,25 +297,19 @@ public class VehicleDataFile {
         try {
 
             File vehicleFile = new File(fileName);
-
-            //lee linea a linea el archivo 
+ 
             FileInputStream fileInputStream = new FileInputStream(vehicleFile);
 
-            //helper de InputStream
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
 
-            //lee cada parte de registro
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            //lee la primera tupla
             String currentTuple = bufferedReader.readLine();
 
-            //mientras que no se haya llegado al final del archivo y no se haya encontrado al cliente
             while (currentTuple != null) {
 
                 StringTokenizer stringTokenizer = new StringTokenizer(currentTuple, ";");
 
-                //mientras hayan más tokens (separados por ; en el archivo)
                 while (stringTokenizer.hasMoreTokens()) {
 
                     if (counter == ID) {
@@ -410,7 +377,6 @@ public class VehicleDataFile {
                 allVehicles.add(vehicle);
                 currentTuple = bufferedReader.readLine();
 
-                //limpiamos la variable counter
                 counter = 0;
 
             }
@@ -419,11 +385,11 @@ public class VehicleDataFile {
             fileInputStream.close();
             inputStreamReader.close();
 
-        }//Fin del try//Fin del try
+        }
         catch (IOException ioE) {
             exception = 2;
 
-        }//Fin del catch
+        }
         return allVehicles;
     }
     
@@ -446,11 +412,11 @@ public class VehicleDataFile {
             matrixVehiclesFromFile[i][SPACE] = "" + vehicle.getSpace();
             matrixVehiclesFromFile[i][ENTRYTIME] = "" + vehicle.getEntryTime();
 
-        }//Fin del for con contador i
+        }
         
         return matrixVehiclesFromFile;
         
-    }//Fin del método getDatosArchivo
+    }
         
     public void deleteVehicleFromFile(String lineToRemove) {
 
@@ -460,7 +426,6 @@ public class VehicleDataFile {
 
             File file = new File(fileName);
 
-            //Construct the new file that will later be renamed to the original filename. 
             File tempFile = new File("VehiclesTemp");
 
             BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
@@ -468,8 +433,6 @@ public class VehicleDataFile {
 
             String line = null;
 
-            //Read from the original file and write to the new 
-            //unless content matches data to be removed.
             while ((line = bufferReader.readLine()) != null) {
 
                 if (!line.trim().equals(lineToRemove)) {
@@ -482,17 +445,13 @@ public class VehicleDataFile {
             bufferReader.close();
             printWriter.close();
 
-            //Delete the original file
             if (!file.delete()) {
 
-                //no se pudo eliminar el archivo
                 exception = 4;
             }
 
-            //Rename the new file to the filename the original file had.
             if (!tempFile.renameTo(file)) {
 
-                //no se pudo renombrar el archivo
                 exception = 5;
 
             }

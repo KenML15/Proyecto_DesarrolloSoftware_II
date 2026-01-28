@@ -11,12 +11,12 @@ package model.entities;
 public class Fee {
     private String vehicleType;
     
-    private double halfHourRate; //Tarifa de mediahora
-    private double hourlyRate; //Tarifa por hora
-    private double dailyRate; //Tarifa por día
-    private double weeklyRate; //Tarifa por semana
-    private double monthlyRate; //Tarifa por mes
-    private double annualRate; //Tarifa anual
+    private double halfHourRate;
+    private double hourlyRate;
+    private double dailyRate;
+    private double weeklyRate;
+    private double monthlyRate;
+    private double annualRate;
 
     public Fee() {
     }

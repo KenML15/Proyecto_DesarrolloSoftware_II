@@ -31,8 +31,6 @@ public class Clerk extends User implements Employee{
         this.age = age;
         this.parkingLot = parkingLot;
     }
-    
-    
 
     public int getEmployeeCode() {
         return employeeCode;
@@ -78,12 +76,12 @@ public class Clerk extends User implements Employee{
 
     @Override
     public float calculateSalary(float dailySalary) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public ParkingLot assignWorkplace(int parkingLotId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
     

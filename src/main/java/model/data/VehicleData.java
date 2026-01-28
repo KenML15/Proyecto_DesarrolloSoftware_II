@@ -3,23 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package model.data;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import model.entities.Customer;
-import model.entities.Space;
 import model.entities.Vehicle;
 
 /**
@@ -56,9 +41,7 @@ public class VehicleData {
     public void removeVehicle(Vehicle vehicle){
         vehicles.remove(vehicle);
     }
-    
-    
-   //Este método encuentra el vehículo por medio de la placa
+
     public Vehicle findVehicleByPlate(String plate) {
         
         Vehicle vehicleToReturn = null;

@@ -34,23 +34,6 @@ public class CustomerController {
         customerData.removeCustomer(customer);
     }
     
-    
-    //Metodo de Pablo
-    /*public String removeCustomer(String id) {
-
-        String result;
-
-        Customer found = customerData.findCustomerById(id);
-
-        if (found != null) {
-            customerData.removeCustomer(found);
-            result = "El cliente ha sido removido de forma correcta";
-        } else {
-            result = "El cliente no existe en el sistema";
-        }
-        return result;
-    }*/
-    
     public ArrayList<Customer> getAllCustomers() {
         
         return customerData.getAllCustomers();

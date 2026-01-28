@@ -114,8 +114,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
                     " Ingrese 0 para cerrar el sistema."
                     + "\n Ingrese 1 para ingresar al menu de clientes."
                     + "\n Ingrese 2 para ingresar al menu de vehiculos."
-                    + "\n Ingrese 3 para administrar el parqueo"
-                    + "\n Ingrese 4 para Prueba"));
+                    + "\n Ingrese 3 para administrar el parqueo"));
 
             switch (choice) {
                 case 0 -> {
@@ -126,13 +125,10 @@ public class RegistrationWindow extends JFrame implements ActionListener {
                 }
                 case 2 -> {
                     vehicleMenu();
-                    //removeCustomer();
+                    
                 }
                 case 3 -> {
                     insertParkingLot();
-                }
-                case 4 -> {
-                    prueba();
                 }
             }
         }
@@ -162,8 +158,8 @@ public class RegistrationWindow extends JFrame implements ActionListener {
                 case 3 -> {
                     showAllCustomer();
                 }
-            }// Cierre del Switch
-        } // Cierre del while
+            }
+        }
     }
     
     public static void vehicleMenu() {
@@ -186,50 +182,9 @@ public class RegistrationWindow extends JFrame implements ActionListener {
                 case 2 -> {
                     showAllVehicles();
                 }
-            }// Cierre del Switch
-        } // Cierre del while 
-    }
-    
-    //=====================TESTEO============================
-    
-    //Método para probar los métodos para ingresar y consultar la tarifa
-    private static void prueba() {
-        String[] types = {"1) Moto", "2) Liviano", "3) Pesado", "4) Bicicleta", "5) Otro"};
-        VehicleType vehicleType = new VehicleType();
-        
-        String menu = "Seleccione el tipo de vehículo:\n";
-        for (String type : types) {
-            menu += type + "\n";
-        }
-
-        int option = Integer.parseInt(JOptionPane.showInputDialog(menu)) - 1;
-        
-        vehicleType.setDescription(types[option]);
-        //vehicleType.getDescription();
-
-        Fee testFee = new Fee(types[option], 300f, 600f, 5000f, 25000f, 60000f, 500000f);
-        feeController.configureFeePrices(testFee);
-        
-        ArrayList<VehicleType> allVehicleTypes = new ArrayList<>();
-        allVehicleTypes.add(vehicleType);
-        
-        Fee result = feeController.searchFee(vehicleType.getDescription(), allVehicleTypes);
-        //feeController.searchFee(vehicleType.getDescription(), allVehicleTypes);
-        
-        if (result != null) {
-            JOptionPane.showMessageDialog(null, "--- PRUEBA EXITOSA ---" 
-                    + "\nVehículo: " + result.getVehicleType()
-                    + "\nPrecio media hora: " + result.getHalfHourRate()
-                    + "\nPrecio hora: " + result.getHourlyRate()
-                    + "\nPrecio diario: " + result.getDailyRate()
-                    + "\nPrecio semanal: " + result.getWeeklyRate()
-                    + "\nPrecio mensual: " + result.getMonthlyRate()
-                    + "\nPrecio anual: " + result.getAnnualRate());
-        } else {
-            JOptionPane.showMessageDialog(null, "--- ERROR: No se encontró la tarifa ---");
+            }
         } 
     }
-    
 
     //====================CLIENTE===========================  
     public static void showAllCustomer() {
@@ -251,8 +206,6 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         return customerToInsert;
     }
 
-    
-    
     private static void removeCostumerAndVehicle() {
         int id = Integer.parseInt(JOptionPane.showInputDialog("Ingrese la cédula del cliente a eliminar"));
         String plate = JOptionPane.showInputDialog("Ingrese la placa del vehiculo del cliente a eliminar");
@@ -272,21 +225,32 @@ public class RegistrationWindow extends JFrame implements ActionListener {
             }
         }
     }
-
-    //Método de Pablo
-    /*private static void removeCustomer() {
-        String id = JOptionPane.showInputDialog("Ingrese la cédula del cliente a eliminar");
-        String plate = JOptionPane.showInputDialog("Ingrese la placa del vehiculo del cliente a eliminar");
-        // Llamamos al controlador pasando solo el ID
-        customerController.removeCustomer(id);
-
-        JOptionPane.showMessageDialog(null, "El cliente ha sido removido de forma correcta del sistema");
-    }*/
     
     // ====================VEHÍCULO===========================
     public static void showAllVehicles() {
-        JOptionPane.showMessageDialog(null, vehicleController.getAllVehicles().toString());
+        StringBuilder report = new StringBuilder("--- VEHÍCULOS Y CLIENTES ACTUALES ---\n\n");
+        ArrayList<Vehicle> list = vehicleController.getAllVehicles();
+
+        if (list.isEmpty()) {
+            report.append("No hay vehículos en el parqueo.");
+        } else {
+            for (Vehicle vehicle : list) {
+                report.append("PLACA: ").append(vehicle.getPlate())
+                        .append(" | ESPACIO: ").append(vehicle.getSpace() != null ? vehicle.getSpace().getId() : "N/A").append("\n")
+                        .append("RESPONSABLES: ");
+
+                for (int i = 0; i < vehicle.getCustomer().size(); i++) {
+                    report.append(vehicle.getCustomer().get(i).getName());
+                    if (i < vehicle.getCustomer().size() - 1) {
+                        report.append(", ");
+                    }
+                }
+                report.append("\n----------------------------------------------\n");
+            }
+        }
+        JOptionPane.showMessageDialog(null, report.toString());
     }
+    
 
     private static void insertVehicle() {
         String plate = JOptionPane.showInputDialog("Ingrese la placa del vehículo");
@@ -303,10 +267,12 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         Vehicle vehicleToInsert = new Vehicle(plate, color, brand, model, responsibleList, vehicleType, null, LocalDateTime.now());
 
         int spaceAssigned = parkingLotController.registerVehicleInParkingLot(vehicleToInsert, parkingLot);
+        Space space = new Space(spaceAssigned);
+        vehicleToInsert.setSpace(space);
         
         if (spaceAssigned != -1) {
             vehicleController.insertVehicle(vehicleToInsert); 
-            JOptionPane.showMessageDialog(null, "Vehículo ingresado con éxito.\nEspacio asignado: " + spaceAssigned);
+            JOptionPane.showMessageDialog(null, "Vehículo ingresado con éxito.\nEspacio asignado: " + vehicleToInsert.getSpace());
         } else {
             JOptionPane.showMessageDialog(null, "ERROR: No hay espacios disponibles para este tipo de vehículo.");
         }
@@ -315,24 +281,24 @@ public class RegistrationWindow extends JFrame implements ActionListener {
                 + ".\n Aquí está su tiquete de entrada: \n" 
                 +showTicketToCostumer(vehicleToInsert, vehicleType));
     }
-    
-    //Método que retorna la lista con los dueños del vehículo
+
     private static ArrayList<Customer> vehicleResponsibles(){
         
         ArrayList<Customer> responsibleList = new ArrayList<>();
         int op;
         do {
             responsibleList.add(insertCustomer());
-            op = JOptionPane.showConfirmDialog(null, "¿Desea agregar otro dueño?", "Múltiples Dueños", JOptionPane.YES_NO_OPTION);
+            op = JOptionPane.showConfirmDialog(null, "¿Desea agregar otro cliente?", "Múltiples Dueños", JOptionPane.YES_NO_OPTION);
         } while (op == JOptionPane.YES_OPTION);
         
         return responsibleList;
     }
-    
-    //Método para mostrar el tiquete al cliente
+
     private static String showTicketToCostumer(Vehicle vehicle, VehicleType vehicleType) {
         String ticket = "---------- TIQUETE DE ENTRADA ----------\n"
                 + "PLACA: " + vehicle.getPlate() + "\n"
+                + "CLIENTES: " + vehicle.getCustomer() + "\n"
+                + "ESPACIO: " + vehicle.getSpace().getId() + "\n"
                 + "TIPO: " + vehicleType.getDescription() + "\n"
                 + "ENTRADA: " + vehicle.getEntryTime() + "\n" ;
                         

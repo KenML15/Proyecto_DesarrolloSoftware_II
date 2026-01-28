@@ -9,11 +9,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import model.entities.Fee;
-import model.entities.Vehicle;
 import model.entities.VehicleType;
 
 /**
@@ -24,18 +21,16 @@ public class FeeData {
     private static final String FEE = "fee.txt";
     private static final String CONFG = "config_fee_prices.txt";
 
-    //Método para que el usuario configure los 
-    //precios de la tarifa según el tipo de vehículo
     public boolean configureFeePrices(Fee newFee){
         boolean works = false;
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CONFG, true))){//Para que guarde todos los tipos de vehículo
-            String line = newFee.getVehicleType() + ","
-                    + newFee.getHalfHourRate() + ","
-                    + newFee.getHourlyRate() + ","
-                    + newFee.getDailyRate() + ","
-                    + newFee.getWeeklyRate() + ","
-                    + newFee.getMonthlyRate() + ","
-                    + newFee.getAnnualRate() + ",";
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CONFG, true))){
+            String line = newFee.getVehicleType() + ";"
+                    + newFee.getHalfHourRate() + ";"
+                    + newFee.getHourlyRate() + ";"
+                    + newFee.getDailyRate() + ";"
+                    + newFee.getWeeklyRate() + ";"
+                    + newFee.getMonthlyRate() + ";"
+                    + newFee.getAnnualRate() + ";";
             
             bufferedWriter.write(line);
             bufferedWriter.newLine();
@@ -51,13 +46,12 @@ public class FeeData {
         Fee feeToReturn = null;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(CONFG))) {
 
-            String line; //Almacena cada reglón del texto conforme se va leyendo
+            String line;
             
-            while ((line = bufferedReader.readLine()) != null) {//Lee el archivo líneaporr línea y deja de leer hasta que sea null
+            while ((line = bufferedReader.readLine()) != null) {
 
-                String[] splitLines = line.split(",");//Divide la línea en pedazos cada vez que encuentra una coma
-
-                if (splitLines[0].equalsIgnoreCase(vehicleType)) {//Compara el primer elemento del arreglo con el tipo de vehículo
+                String[] splitLines = line.split(",");
+                if (splitLines[0].equalsIgnoreCase(vehicleType)) {
 
                     String foundType = null;
                     for (VehicleType vehicleTypeToFound : allVehicleTypes) {
@@ -73,28 +67,8 @@ public class FeeData {
                 
             }
         } catch (IOException e) {
-            feeToReturn = null;// Si no existe el tipo de vehículo 
+            feeToReturn = null;
         }
         return feeToReturn;
-    }
-    
-    
-    //Esto es para cuando el vehículo salga del parqueo
-    /*public Fee getFeePrices(Fee newFee){
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CONFG))){
-            String line = newFee.getVehicleType() + ","
-                    + newFee.getHalfHourRate() + ","
-                    + newFee.getDailyRate() + ","
-                    + newFee.getWeeklyRate() + ","
-                    + newFee.getMonthlyRate() + ","
-                    + newFee.getAnnualRate();
-            
-            bufferedWriter.write(line);
-            bufferedWriter.newLine();
-            
-        }catch(IOException e){
-            JOptionPane.showMessageDialog(null, e);
-        }
-    }*/
-    
+    }   
 }

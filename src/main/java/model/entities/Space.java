@@ -16,6 +16,10 @@ public class Space {
     private VehicleType vehicleType;
     private int vehicleTypeId;
 
+    public Space(int id) {
+        this.id = id;
+    }
+
     public Space(int id, boolean disabilityAdaptation, boolean spaceTaken, VehicleType vehicleType) {
         this.id = id;
         this.disabilityAdaptation = disabilityAdaptation;
@@ -30,8 +34,6 @@ public class Space {
         this.spaceTaken = spaceTaken;
         this.vehicleTypeId = vehicleTypeId;
     }
-    
-    
 
     public Space() {
     }
@@ -78,7 +80,8 @@ public class Space {
 
     @Override
     public String toString() {
-        return "Space{" + "id=" + id + ", disabilityAdaptation=" + disabilityAdaptation + ", spaceTaken=" + spaceTaken + ", vehicleType=" + vehicleType + '}';
+        return "Space{" + "id=" + id + ", disabilityAdaptation=" + disabilityAdaptation + ", spaceTaken=" + spaceTaken + ", vehicleType=" + vehicleType + ", vehicleTypeId=" + vehicleTypeId + '}';
     }
 
+    
 }

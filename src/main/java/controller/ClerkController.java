@@ -26,9 +26,6 @@ public class ClerkController implements UserOperations{
         return clerkData.getAllClerks();
     }
 
-    //Si se hubiera creado una instancia de User igual funcionaria ya que
-    //identification pertenece a la clase padre. Sin embargo, no es específico,
-    //osea que no se especificaría qué user
     @Override
     public User searchUser(String identification) {
         ArrayList<Clerk> clerks = clerkData.getAllClerks();

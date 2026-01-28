@@ -40,12 +40,8 @@ public class Vehicle {
         this.entryTime = entryTime;
     }
 
-    
-
-    
-
     public Vehicle(String plate, String color, String brand, String model, ArrayList <Customer> customer, VehicleType vehicleType, Space space, LocalDateTime entryTime) {
-        this.entryTime = LocalDateTime.now();
+        //this.entryTime = LocalDateTime.now();
         this.plate = plate;
         this.color = color;
         this.brand = brand;
