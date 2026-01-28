@@ -21,7 +21,7 @@ import model.entities.Space;
  *
  * @author user
  */
-public class RegistrationWindow {
+public class RegistrationWindow extends javax.swing.JFrame{
 
     static CustomerController customerController = new CustomerController();
     static VehicleController vehicleController = new VehicleController();
@@ -373,5 +373,4 @@ public class RegistrationWindow {
 
         return spaces;
     }
-    
 }
