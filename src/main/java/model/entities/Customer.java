@@ -90,7 +90,9 @@ public class Customer {
 
     @Override
     public String toString() {
-        return "Customer{" + "id=" + id + ", name=" + name + ", disabilityPresented=" + disabilityPresented + '}' + "\n";
+        return """
+               Customers 
+               Name = """ + name + ", Id = " + id + ", Disability presented = " + disabilityPresented + ".\n";
     }
     
     @Override

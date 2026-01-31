@@ -58,7 +58,10 @@ public class VehicleType {
 
     @Override
     public String toString() {
-        return "VehicleType{" + "id=" + id + ", description=" + description + ", numberOfTires=" + numberOfTires + ", fee=" + fee + '}';
+        return """
+           Vehicle Types
+           Id = """ + id + ", Description = " + description + 
+           ", Number of Tires = " + numberOfTires + ", Fee = " + fee + ".\n";
     }
     
     

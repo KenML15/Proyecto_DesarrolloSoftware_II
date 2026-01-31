@@ -126,6 +126,11 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        return "Vehicle{" + "plate=" + plate + ", color=" + color + ", brand=" + brand + ", model=" + model + ", customer=" + customer + ", vehicleType=" + vehicleType + ", space=" + space + ", entryTime=" + entryTime + '}';
+        return """
+           Vehicles
+           Plate = """ + plate + ", Color = " + color + ", Brand = " + brand + 
+           ", Model = " + model + ", Customer = " + customer + 
+           ", Vehicle Type = " + vehicleType + ", Space = " + space + 
+           ", Entry Time = " + entryTime + ".\n";
     }   
 }

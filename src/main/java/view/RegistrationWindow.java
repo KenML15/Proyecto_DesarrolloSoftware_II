@@ -288,7 +288,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         int op;
         do {
             responsibleList.add(insertCustomer());
-            op = JOptionPane.showConfirmDialog(null, "¿Do you want to add other customer?", "Múltiples Dueños", JOptionPane.YES_NO_OPTION);
+            op = JOptionPane.showConfirmDialog(null, "¿Do you want to add other customer?", "Many owners", JOptionPane.YES_NO_OPTION);
         } while (op == JOptionPane.YES_OPTION);
         
         return responsibleList;
@@ -365,7 +365,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     
     private static ParkingLot selectParkingLot() {
 
-        String parkingLotsInformation = "Lista de parqueos en el sistema\n\n";
+        String parkingLotsInformation = "List to the parking lots in the system\n\n";
         for (ParkingLot parkingLot : parkingLotController.getAllParkingLots()) {
 
             parkingLotsInformation += "Number to parking lot: " + parkingLot.getId() + " Name to the parking lot: " + parkingLot.getName() + "\n";
