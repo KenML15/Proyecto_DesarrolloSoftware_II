@@ -23,12 +23,15 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import model.entities.Administrator;
+import model.entities.Clerk;
 import model.entities.Customer;
 import model.entities.Fee;
 import model.entities.ParkingLot;
 import model.entities.Vehicle;
 import model.entities.VehicleType;
 import model.entities.Space;
+import model.entities.User;
 
 /**
  *
@@ -37,19 +40,51 @@ import model.entities.Space;
 public class RegistrationWindow extends JFrame implements ActionListener {
 
     private JButton btnCustomers, btnVehicles, btnParking, btnLogout;
+    private JLabel lblTitle;
+    private JPanel headerPanel;
+    private User currentUser;
 
-    public RegistrationWindow() {
-        setTitle("Parking Management System - Main Menu");
+    // Controladores (Instancias para acceder a la lógica)
+    static CustomerController customerController = new CustomerController();
+    static VehicleController vehicleController = new VehicleController();
+    static ParkingLotController parkingLotController = new ParkingLotController();
+
+    public RegistrationWindow(User user) {
+        this.currentUser = user; // Recibimos el usuario del Login
+        initComponents();
+        applyPermissions(); // Ajustar qué se ve y qué no
+    }
+
+    private void applyPermissions() {
+    
+    if (currentUser instanceof Administrator) {
+
+        headerPanel.setBackground(new Color(192, 57, 43)); 
+        lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
+        btnParking.setVisible(true); // El admin ve la configuración
+        btnParking.setText("System Configuration");
+    } 
+    else if (currentUser instanceof Clerk) {
+  
+        headerPanel.setBackground(new Color(39, 174, 96));
+        lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
+        
+     
+        btnParking.setVisible(false); 
+    }
+}
+
+    private void initComponents() {
+        setTitle("Parking System");
         setSize(500, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(45, 52, 54));
-        JLabel lblTitle = new JLabel("Main Administration Menu");
+        headerPanel = new JPanel();
+        lblTitle = new JLabel();
         lblTitle.setForeground(Color.WHITE);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
         headerPanel.add(lblTitle);
 
         JPanel menuPanel = new JPanel(new GridLayout(4, 1, 15, 15));
@@ -57,8 +92,8 @@ public class RegistrationWindow extends JFrame implements ActionListener {
 
         btnCustomers = new JButton("Manage Customers");
         btnVehicles = new JButton("Manage Vehicles");
-        btnParking = new JButton("Parking Lot Administration");
-        btnLogout = new JButton("Exit System");
+        btnParking = new JButton("Parking Lot Settings");
+        btnLogout = new JButton("Logout");
 
         JButton[] buttons = {btnCustomers, btnVehicles, btnParking, btnLogout};
         for (JButton btn : buttons) {
@@ -71,120 +106,50 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         add(menuPanel, BorderLayout.CENTER);
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnCustomers) {
+            showCustomerSubMenu();
+        } else if (e.getSource() == btnVehicles) {
+            showVehicleSubMenu();
+        } else if (e.getSource() == btnParking) {
+            insertParkingLot();
+        } else if (e.getSource() == btnLogout) {
+            this.dispose();
+            new LoginWindow().setVisible(true); // Regresar al login
+        }
+    }
+
+    // Usamos OptionDialog en lugar de bucles While para menús secundarios
+    private void showCustomerSubMenu() {
+        String[] options = {"Add Customer", "Remove Customer", "View List", "Cancel"};
+        int selection = JOptionPane.showOptionDialog(this, "Customer Management", "Select Action",
+                0, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (selection == 0) insertCustomer();
+        if (selection == 1) removeCostumerAndVehicle();
+        if (selection == 2) showAllCustomer();
+    }
+
+    private void showVehicleSubMenu() {
+        String[] options = {"Register Entry", "View Vehicles", "Back"};
+        int selection = JOptionPane.showOptionDialog(this, "Select an action", "Vehicle Management",
+                0, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (selection == 0) insertVehicle();
+        if (selection == 1) showAllVehicles();
+    }
+
+    // --- Estilos y métodos de soporte ---
     private void styleMenuButton(JButton button) {
         button.setFocusPainted(false);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setBackground(Color.WHITE);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnCustomers) {
-            customersMenu(); 
-        } else if (e.getSource() == btnVehicles) {
-            vehicleMenu();
-        } else if (e.getSource() == btnParking) {
-            insertParkingLot();
-        } else if (e.getSource() == btnLogout) {
-            System.exit(0);
-        }
-    }
-
-    static CustomerController customerController = new CustomerController();
-    static VehicleController vehicleController = new VehicleController();
-    static ParkingLotController parkingLotController = new ParkingLotController();
-    static FeeController feeController = new FeeController();
-
-    public static void main(String[] args) {
-    // Esto asegura que la interfaz se cree de forma segura
-    SwingUtilities.invokeLater(() -> {
-        new RegistrationWindow().setVisible(true);
-    });
-}
-
-    //=====================MENU============================
-    public static void showMenu() {
-
-        int choice = 1;
-        while (choice != 0) {
-
-            choice = Integer.parseInt(JOptionPane.showInputDialog(
-                    " Type 0 to exit the system."
-                    + "\n Type 1 to enter the customer´s menu. "
-                    + "\n Type 2 to enter the vehicle´s menu. "
-                    + "\n Type 3 to manage the parcking lots. "));
-
-            switch (choice) {
-                case 0 -> {
-                    JOptionPane.showMessageDialog(null, "Thanks for use our system. \n ¡See you later!");
-                }
-                case 1 -> {
-                    customersMenu();
-                }
-                case 2 -> {
-                    vehicleMenu();
-                    
-                }
-                case 3 -> {
-                    insertParkingLot();
-                }
-            }
-        }
-    }
-   
-    public static void customersMenu(){
-        int choice = 1;
-        while (choice != 0 ) {
-        
-            choice = Integer.parseInt(JOptionPane.showInputDialog(
-                    "Type 0 to exit the system.\n"
-                            + "Type 1 to add a custumer. \n"
-                            + "Type 2 to remove a customer. \n"
-                            + "Type 3 to view the list of customers. "));
-            
-            switch (choice) {
-                case 0 -> {
-                    JOptionPane.showMessageDialog(null, "Leaving the customer´s menu. ");
-                    break;
-                }
-                case 1 -> {
-                    insertCustomer();
-                }
-                case 2 -> {
-                    removeCostumerAndVehicle();
-                }
-                case 3 -> {
-                    showAllCustomer();
-                }
-            }
-        }
-    }
     
-    public static void vehicleMenu() {
-        int choice = 1;
-        while (choice != 0) {
-
-                    choice = Integer.parseInt(JOptionPane.showInputDialog(
-                    "Type 0 to exit the system.\n"
-                            + "Type 1 to add a vehicle. \n"
-                            + "Type 2 to view the list of vehicle´s. "));
-            
-            switch (choice) {
-                case 0 -> {
-                    JOptionPane.showMessageDialog(null, "Leaving the vehicle´s menu. ");
-                    break;
-                }
-                case 1 -> {
-                    insertVehicle();
-                }
-                case 2 -> {
-                    showAllVehicles();
-                }
-            }
-        } 
-    }
+  
 
     //====================CLIENTE===========================  
     public static void showAllCustomer() {
