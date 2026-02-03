@@ -219,6 +219,29 @@ class SpaceDataFile {
         return space;
 
     }
+    
+    public Space buildSpaceFromLine(String spaceFromFile) {
+        if (spaceFromFile == null || spaceFromFile.trim().isEmpty()) {
+            return null;
+        }
+
+        StringTokenizer stringTokenizer = new StringTokenizer(spaceFromFile, ";");
+
+        // El orden según tus constantes: ID=0, DESCRIPTION=1, TIRES=2, FEE=3
+        int id = Integer.parseInt(stringTokenizer.nextToken());
+        boolean adapt = Boolean.parseBoolean(stringTokenizer.nextToken());
+        boolean taken = Boolean.parseBoolean(stringTokenizer.nextToken());
+        int vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
+
+        Space space = new Space();
+        space.setId(id);
+        space.setDisabilityAdaptation(adapt);
+        space.setSpaceTaken(taken);
+        //Nota: Guardas el ID del tipo, podrías luego cargar el objeto completo si fuera necesario
+        space.setVehicleTypeId(vehicleTypeId);
+
+        return space;
+    }
 
     public boolean find(int spaceId) {
 

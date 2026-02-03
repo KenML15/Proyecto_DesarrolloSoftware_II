@@ -34,6 +34,9 @@ public class CustomerDataFile {
         this.fileName = fileName;
     }
 
+    public CustomerDataFile() {
+    }
+
     public int insert(Customer customer) {
 
         int result = -1;
@@ -216,6 +219,32 @@ public class CustomerDataFile {
 
         return customer;
     }
+    
+    /*public Customer buildCustomerFromLine(String customerFromFile) {
+        if (customerFromFile == null || customerFromFile.trim().isEmpty()) {
+            return null;
+        }
+
+        StringTokenizer stringTokenizer = new StringTokenizer(customerFromFile, ";");
+
+        // Orden: ID=0, NAME=1, EMAIL=2, ADDRESS=3, PHONE=4
+        int id = Integer.parseInt(stringTokenizer.nextToken());
+        String name = stringTokenizer.nextToken();
+        boolean disability = Boolean.parseBoolean(stringTokenizer.nextToken());
+        String email = stringTokenizer.nextToken();
+        String address = stringTokenizer.nextToken();
+        String phone = stringTokenizer.nextToken();
+
+        Customer customer = new Customer();
+        customer.setId(id);
+        customer.setName(name);
+        customer.setDisabilityPresented(disability);
+        customer.setEmail(email);
+        customer.setAddress(address);
+        customer.setPhoneNumber(phone);
+
+        return customer;
+    }*/
 
     public boolean find(String name, String email) {
 
@@ -443,7 +472,7 @@ public class CustomerDataFile {
         return allCustomers;
     }
 
-    public String[][] createVehicleTypeMatrix(ArrayList<Customer> customers) {
+    public String[][] createCustomerMatrix(ArrayList<Customer> customers) {
 
         String[][] matrixClientsFromFile
                 = new String[customers.size()][5];
@@ -463,7 +492,7 @@ public class CustomerDataFile {
         return matrixClientsFromFile;
     }
 
-    public void deleteVehicleTypeFromFile(String lineToRemove) {
+    public void deleteCustomerFromFile(String lineToRemove) {
 
         exception = 0;
 

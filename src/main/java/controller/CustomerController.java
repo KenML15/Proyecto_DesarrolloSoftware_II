@@ -21,10 +21,9 @@ public class CustomerController {
     
         if (customerData.findCustomerById(customer.getId()) == null ) {
             customerData.insertCustomer(customer);
-            result = "El cliente ha sido agregado al sistema";
+            result = "The client has been added to the system";
         } else {
-            result = "El cliente no se ha podido agregar al sistema"
-                    + ", porque ya existe un cliente en el sistema";
+            result = "The client could not be added to the system because a client already exists in the system.";
         }
         return result;
     }

@@ -218,6 +218,28 @@ class VehicleTypeDataFile {
         return vehicleType;
 
     }
+    
+    public VehicleType buildVehicleTypeFromLine(String vehicleTypeFromFile) {
+        if (vehicleTypeFromFile == null || vehicleTypeFromFile.trim().isEmpty()) {
+            return null;
+        }
+
+        StringTokenizer stringTokenizer = new StringTokenizer(vehicleTypeFromFile, ";");
+
+        // El orden según tus constantes: ID=0, DESCRIPTION=1, TIRES=2, FEE=3
+        int id = Integer.parseInt(stringTokenizer.nextToken());
+        String description = stringTokenizer.nextToken();
+        int tires = Integer.parseInt(stringTokenizer.nextToken());
+        float fee = Float.parseFloat(stringTokenizer.nextToken());
+
+        VehicleType vehicleType = new VehicleType();
+        vehicleType.setId(id);
+        vehicleType.setDescription(description);
+        vehicleType.setNumberOfTires(tires);
+        vehicleType.setFee(fee);
+
+        return vehicleType;
+    }
 
     public boolean find(int vehicleTypeId) {
 
