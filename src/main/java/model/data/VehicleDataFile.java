@@ -26,10 +26,11 @@ import model.entities.Vehicle;
  * @author 50687
  */
 public class VehicleDataFile {
+
     public int exception = 0;
     String fileName;
     final int ID = 0, PLATE = 1, COLOR = 2, BRAND = 3, MODEL = 4, CUSTOMER = 5, VEHICLETYPE = 6, SPACE = 7, ENTRYTIME = 8;
-    
+
     SpaceDataFile spaceData;
     VehicleTypeDataFile vehicleTypeData;
     CustomerDataFile customerData;
@@ -39,26 +40,28 @@ public class VehicleDataFile {
         this.fileName = fileName;
     }
 
+    public VehicleDataFile() {
+    }
+
     public VehicleDataFile(CustomerDataFile customerData, SpaceDataFile spaceData, VehicleTypeDataFile vehicleTypeData) {
         this.customerData = customerData;
         this.spaceData = spaceData;
         this.vehicleTypeData = vehicleTypeData;
     }
-    
-    public int insertVehicle(Vehicle vehicle){
+
+    public int insertVehicle(Vehicle vehicle) {
         int result = -1;
-        exception = 0; 
-        
-        try{
+        exception = 0;
+
+        try {
             File vehicleFile = new File(fileName);
- 
+
             FileOutputStream fileOutputStream = new FileOutputStream(vehicleFile, true);
 
             PrintStream printStream = new PrintStream(fileOutputStream);
 
             boolean vehicleExist = findVehicleByPlate(vehicle.getPlate());
-            
-            
+
             String customerIdsText = "";
 
             ArrayList<Customer> customers = vehicle.getCustomer();
@@ -70,7 +73,7 @@ public class VehicleDataFile {
                 }
             }
 
-            if (!vehicleExist){
+            if (!vehicleExist) {
                 printStream.println(vehicle.getPlate() + ";"
                         + vehicle.getColor() + ";"
                         + vehicle.getBrand() + ";"
@@ -83,21 +86,21 @@ public class VehicleDataFile {
                 result = 0;
             } else {
                 exception = 3;
-            } 
-            
+            }
+
             fileOutputStream.close();
             printStream.close();
         } catch (FileNotFoundException fileException) {
 
             exception = 1;
-   
-        }catch(IOException e){
+
+        } catch (IOException e) {
             exception = 2;
         }
-        
+
         return result;
     }
-    
+
     public boolean findVehicleByPlate(String plate) {
 
         exception = 0;
@@ -177,7 +180,7 @@ public class VehicleDataFile {
                 }
 
                 if (plate.equalsIgnoreCase(vehiclePlate)) {
-                    
+
                     vehicleExists = true;
                 } else {
 
@@ -204,13 +207,23 @@ public class VehicleDataFile {
 
         return vehicleExists;
     }
-    
-    public String getVehicleFromFile(String plate) {
+
+    public Vehicle getVehicleFromFile(String plate) {
 
         exception = 0;
 
+        String vehiclePlate = "",
+                color = "",
+                brand = "",
+                model = "";
+
+        int customerIds = 0;
+        int vehicleTypeId = 0;
+        int spaceId = 0;
+        LocalDateTime entryTime = null;
         int counter = 0;
-        String vehiclePlate = "";
+
+        Vehicle vehicleToReturn = null;
 
         String currentTuple = "";
 
@@ -233,22 +246,36 @@ public class VehicleDataFile {
                 while (stringTokenizer.hasMoreTokens()) {
 
                     if (counter == PLATE) {
-
                         vehiclePlate = stringTokenizer.nextToken();
-
+                    } else if (counter == COLOR) {
+                        color = stringTokenizer.nextToken();
+                    } else if (counter == BRAND) {
+                        brand = stringTokenizer.nextToken();
+                    } else if (counter == MODEL) {
+                        model = stringTokenizer.nextToken();
+                    } else if (counter == CUSTOMER) {
+                        customerIds = Integer.parseInt(stringTokenizer.nextToken());
+                    } else if (counter == VEHICLETYPE) {
+                        vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
+                    } else if (counter == SPACE) {
+                        spaceId = Integer.parseInt(stringTokenizer.nextToken());
+                    } else if (counter == ENTRYTIME) {
+                        entryTime = LocalDateTime.parse(stringTokenizer.nextToken());
                     } else {
-
                         stringTokenizer.nextToken();
-
                     }
 
                     counter++;
                 }
 
                 if (plate.equalsIgnoreCase(vehiclePlate)) {
+                    ArrayList<Customer> customerList = new ArrayList<>();
+                    customerList.add(customerData.getCustomerFromFile(customerIds));
 
+                    vehicleToReturn = new Vehicle(vehiclePlate, color, brand, model, customerList,
+                            vehicleTypeData.getVehicleTypeFromFile(vehicleTypeId),
+                            spaceData.getSpaceFromFile(spaceId), entryTime);
                     break;
-
                 }
 
                 currentTuple = bufferedReader.readLine();
@@ -270,10 +297,45 @@ public class VehicleDataFile {
             exception = 2;
         }
 
-        return currentTuple;
+        return vehicleToReturn;
 
     }
-    
+
+    // Método nuevo en VehicleDataFile.java
+    /*public Vehicle buildVehicleFromLine(String vehicleFromFile) {
+        if (vehicleFromFile == null || vehicleFromFile.isEmpty()) {
+            return null;
+        }
+
+        StringTokenizer stringTokenizer = new StringTokenizer(vehicleFromFile, ";");
+
+        // Extraemos los datos en el orden exacto del archivo
+        int id = Integer.parseInt(stringTokenizer.nextToken());
+        String plate = stringTokenizer.nextToken();
+        String color = stringTokenizer.nextToken();
+        String brand = stringTokenizer.nextToken();
+        String model = stringTokenizer.nextToken();
+        int customerId = Integer.parseInt(stringTokenizer.nextToken());
+        int vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
+        int spaceId = Integer.parseInt(stringTokenizer.nextToken());
+
+        
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(id);
+        vehicle.setPlate(plate);
+        vehicle.setColor(color);
+        vehicle.setBrand(brand);
+        vehicle.setModel(model);
+        
+        ArrayList <Customer> customerList = new ArrayList<>();
+        customerList.add(customerData.getCustomerFromFile(customerId));
+        
+        vehicle.setCustomer(customerList);
+        vehicle.setVehicleType(vehicleTypeData.getVehicleTypeFromFile(vehicleTypeId));
+        vehicle.setSpace(spaceData.getSpaceFromFile(spaceId));
+
+        return vehicle;
+    }*/
     public ArrayList<Vehicle> getAllVehicles() {
 
         exception = 0;
@@ -297,7 +359,7 @@ public class VehicleDataFile {
         try {
 
             File vehicleFile = new File(fileName);
- 
+
             FileInputStream fileInputStream = new FileInputStream(vehicleFile);
 
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -385,14 +447,13 @@ public class VehicleDataFile {
             fileInputStream.close();
             inputStreamReader.close();
 
-        }
-        catch (IOException ioE) {
+        } catch (IOException ioE) {
             exception = 2;
 
         }
         return allVehicles;
     }
-    
+
     public String[][] createVehicleMatrix(ArrayList<Vehicle> vehicles) {
 
         String[][] matrixVehiclesFromFile
@@ -413,11 +474,11 @@ public class VehicleDataFile {
             matrixVehiclesFromFile[i][ENTRYTIME] = "" + vehicle.getEntryTime();
 
         }
-        
+
         return matrixVehiclesFromFile;
-        
+
     }
-        
+
     public void deleteVehicleFromFile(String lineToRemove) {
 
         exception = 0;
@@ -465,5 +526,113 @@ public class VehicleDataFile {
             exception = 2;
         }
     }
-    
+
+    public void modifyVehicleFromFile(String lineToModify, String newList) {
+
+        exception = 0;
+
+        try {
+
+            File file = new File(fileName);
+
+            File tempFile = new File("VehiclesTemp");
+
+            BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
+            PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
+
+            String line = null;
+
+            while ((line = bufferReader.readLine()) != null) {
+
+                if (!line.trim().equals(lineToModify)) {
+
+                    printWriter.println(line);
+                    printWriter.flush();
+                } else {
+
+                    printWriter.println(newList);
+                }
+            }
+
+            bufferReader.close();
+            printWriter.close();
+
+            if (!file.delete()) {
+
+                exception = 4;
+            }
+
+            if (!tempFile.renameTo(file)) {
+
+                exception = 5;
+            }
+
+        } catch (FileNotFoundException ex) {
+
+            exception = 1;
+
+        } catch (IOException ex) {
+
+            exception = 2;
+        }
+    }
+
+    public int findLastIdNumberOfVehicle() {
+
+        exception = 0;
+
+        int counter = 0;
+        int idVehicle = 0;
+
+        try {
+
+            File vehicleFile = new File(fileName);
+
+            FileInputStream fileInputStream
+                    = new FileInputStream(vehicleFile);
+
+            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String currentTuple = bufferedReader.readLine();
+
+            while (currentTuple != null) {
+
+                StringTokenizer stringTokenizer
+                        = new StringTokenizer(currentTuple, ";");
+
+                while (stringTokenizer.hasMoreTokens()) {
+
+                    if (counter == ID) {
+
+                        idVehicle = Integer.parseInt(stringTokenizer.nextToken());
+
+                        break;
+                    }
+
+                    counter++;
+                }
+
+                currentTuple = bufferedReader.readLine();
+
+                counter = 0;
+            }
+
+            bufferedReader.close();
+            fileInputStream.close();
+            inputStreamReader.close();
+
+        } catch (FileNotFoundException fileException) {
+
+            exception = 1;
+
+        } catch (IOException ioException) {
+
+            exception = 2;
+        }
+
+        return idVehicle;
+    }
+
 }
