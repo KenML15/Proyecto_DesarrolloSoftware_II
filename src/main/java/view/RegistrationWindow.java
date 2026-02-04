@@ -35,6 +35,9 @@ import model.entities.Vehicle;
 import model.entities.VehicleType;
 import model.entities.Space;
 import model.entities.User;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  *
@@ -51,54 +54,56 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     static CustomerController customerController = new CustomerController();
     static VehicleController vehicleController = new VehicleController();
     static ParkingLotController parkingLotController = new ParkingLotController();
+    private JTextField txtUsername;
+    private JButton btnSignIn;
+    private JTextField txtPassword;
 
     public RegistrationWindow(User user) {
-        this.currentUser = user; // Recibimos el usuario del Login
-        initComponents();
-        applyPermissions(); // Ajustar qué se ve y qué no
+        this.currentUser = user; // 1. Guardamos el usuario
+
+        initComponents();        // 2. CREAMOS los botones, etiquetas y paneles (Esto DEBE ir aquí)
+
+        applyPermissions();     // 3. MODIFICAMOS lo que creamos antes según el usuario
     }
 
     private void applyPermissions() {
-    
-    if (currentUser instanceof Administrator) {
+        // Verificamos que los componentes existan antes de tocarlos
+        if (lblTitle == null || headerPanel == null || btnParking == null) {
+            System.err.println("Error: Los componentes no se han inicializado aún.");
+            return;
+        }
 
-        headerPanel.setBackground(new Color(192, 57, 43)); 
-        lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
-        btnParking.setVisible(true); // El admin ve la configuración
-        btnParking.setText("System Configuration");
-    } 
-    else if (currentUser instanceof Clerk) {
-  
-        headerPanel.setBackground(new Color(39, 174, 96));
-        lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
-        
-     
-        btnParking.setVisible(false); 
+        if (currentUser instanceof Administrator) {
+            headerPanel.setBackground(new Color(192, 57, 43));
+            lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
+            btnParking.setVisible(true);
+        } else {
+            headerPanel.setBackground(new Color(39, 174, 96));
+            lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
+            btnParking.setVisible(false);
+        }
     }
-}
 
-private void initComponents() {
+    private void initComponents() {
     setLayout(new BorderLayout());
-    getContentPane().setBackground(new Color(245, 246, 250)); // Gris muy claro
+    getContentPane().setBackground(new Color(245, 246, 250));
 
-    // --- HEADER (Barra Superior) ---
-    headerPanel = new JPanel(new BorderLayout());
+    // --- 1. HEADER (Primero crear el panel, luego agregar cosas) ---
+    headerPanel = new JPanel(new BorderLayout()); 
     headerPanel.setPreferredSize(new Dimension(800, 70));
     headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
-    
-    lblTitle = new JLabel("PARKING MANAGEMENT SYSTEM");
+
+    lblTitle = new JLabel("PARKING MANAGEMENT SYSTEM"); 
     lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
     lblTitle.setForeground(Color.WHITE);
     headerPanel.add(lblTitle, BorderLayout.WEST);
 
     btnLogout = new JButton("LOG OUT");
-    styleMenuButton(btnLogout);
-    btnLogout.setForeground(Color.WHITE);
-    btnLogout.setBackground(new Color(0, 0, 0, 40)); // Fondo sutil
+    styleButton(btnLogout); // Usamos tu método de estilo aquí
     btnLogout.addActionListener(this);
     headerPanel.add(btnLogout, BorderLayout.EAST);
 
-    // --- PANEL CENTRAL DE ACCIONES ---
+    // --- 2. PANEL CENTRAL ---
     JPanel contentPanel = new JPanel(new GridLayout(1, 3, 25, 0));
     contentPanel.setBackground(new Color(245, 246, 250));
     contentPanel.setBorder(BorderFactory.createEmptyBorder(60, 40, 60, 40));
@@ -107,7 +112,6 @@ private void initComponents() {
     btnVehicles = new JButton("VEHICLE REGISTRATION");
     btnParking = new JButton("SYSTEM CONFIGURATION");
 
-    // Aplicar estilo de tarjeta técnica
     styleActionCard(btnCustomers);
     styleActionCard(btnVehicles);
     styleActionCard(btnParking);
@@ -127,38 +131,23 @@ private void initComponents() {
     setLocationRelativeTo(null);
 }
 
-// Estilo para botones de acción principal (Cards)
-private void styleActionCard(JButton button) {
-    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-    button.setBackground(Color.WHITE);
-    button.setForeground(new Color(52, 73, 94));
-    button.setFocusPainted(false);
-    // Borde lateral para dar un aspecto de pestaña técnica
-    button.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(new Color(210, 214, 222), 1),
-        BorderFactory.createEmptyBorder(20, 20, 20, 20)
-    ));
-    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-}
+    private void styleTextField(JTextField field) {
+        field.setPreferredSize(new Dimension(200, 35));
+        // Crea una línea azul en la parte inferior (estilo moderno)
+        field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(52, 152, 219)));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setBackground(Color.WHITE);
+    }
 
-// Método auxiliar para que los inputs se vean modernos
-private void styleTextField(JTextField field) {
-    field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
-    field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(189, 195, 199)));
-    field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-}
-
+    private void styleButton(JButton button) {
+        button.setFocusPainted(false);
+        button.setBackground(new Color(52, 152, 219));
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+    }
 // Botón Moderno
-private void styleButton(JButton button) {
-    button.setAlignmentX(Component.CENTER_ALIGNMENT);
-    button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-    button.setBackground(new Color(52, 152, 219));
-    button.setForeground(Color.WHITE);
-    button.setFocusPainted(false);
-    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-}
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -174,33 +163,42 @@ private void styleButton(JButton button) {
         }
     }
 
-  
     private void showCustomerSubMenu() {
-    String[] options = {"Add Client", "Delete Client", "View List", "Cancel"};
-   
-    int selection = JOptionPane.showOptionDialog(
-        this, 
-        "Select a parking management option:", 
-        "CUSTOMER MANAGEMENT",
-        JOptionPane.DEFAULT_OPTION, 
-        JOptionPane.PLAIN_MESSAGE,
-        null, 
-        options, 
-        options[0]
-    );
+        String[] options = {"Add Client", "Delete Client", "View List", "Cancel"};
 
-    if (selection == 0) insertCustomer();
-    if (selection == 1) removeCostumerAndVehicle();
-    if (selection == 2) showAllCustomer();
-}
+        int selection = JOptionPane.showOptionDialog(
+                this,
+                "Select a parking management option:",
+                "CUSTOMER MANAGEMENT",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (selection == 0) {
+            insertCustomer();
+        }
+        if (selection == 1) {
+            removeCostumerAndVehicle();
+        }
+        if (selection == 2) {
+            showAllCustomer();
+        }
+    }
 
     private void showVehicleSubMenu() {
         String[] options = {"Register Entry", "View Vehicles", "Back"};
         int selection = JOptionPane.showOptionDialog(this, "Select an action", "Vehicle Management",
                 0, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        if (selection == 0) insertVehicle();
-        if (selection == 1) showAllVehicles();
+        if (selection == 0) {
+            insertVehicle();
+        }
+        if (selection == 1) {
+            showAllVehicles();
+        }
     }
 
     // --- Estilos y métodos de soporte ---
@@ -211,8 +209,6 @@ private void styleButton(JButton button) {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
     }
-    
-  
 
     //====================CLIENTE===========================  
     public static void showAllCustomer() {
@@ -223,10 +219,10 @@ private void styleButton(JButton button) {
         int id = Integer.parseInt(JOptionPane.showInputDialog("Type the customer ID number"));
 
         String name = JOptionPane.showInputDialog("Type yhe customer´s name");
-        
+
         int hasDisability = JOptionPane.showConfirmDialog(null, "¿The customer has a disability?", "Information", JOptionPane.YES_NO_OPTION);
         boolean disabilityPresented = (hasDisability == JOptionPane.YES_OPTION);
-      
+
         Customer customerToInsert = new Customer(id, name, disabilityPresented);
 
         JOptionPane.showMessageDialog(null, customerController.insertCustomer(customerToInsert));
@@ -235,25 +231,32 @@ private void styleButton(JButton button) {
     }
 
     private static void removeCostumerAndVehicle() {
-        int id = Integer.parseInt(JOptionPane.showInputDialog("Type the customer ID number to remove"));
-        String plate = JOptionPane.showInputDialog("Type the plate number of the customer to be remove");
+        try {
+            int id = Integer.parseInt(JOptionPane.showInputDialog("Type the customer ID number to remove"));
+            String plate = JOptionPane.showInputDialog("Type the plate number");
 
-        Customer customerToRemove = customerController.findCustomerById(id);
-        Vehicle vehicleToRemove = vehicleController.findVehicleByPlate(plate);
+            Customer customerToRemove = customerController.findCustomerById(id);
+            Vehicle vehicleToRemove = vehicleController.findVehicleByPlate(plate);
 
-        for (Customer customerToFind : vehicleToRemove.getCustomer()) {
-            if (customerToFind != customerToRemove) {
-                JOptionPane.showMessageDialog(null, "Customer wasn´t found with that ID");
-                break;
-            } else {
+            // VALIDACIÓN ANTI-CRASH (Punto clave para evitar Exit Value: 1)
+            if (vehicleToRemove == null || customerToRemove == null) {
+                JOptionPane.showMessageDialog(null, "Error: Vehicle or Customer not found.");
+                return;
+            }
+
+            // Si el cliente es el dueño, procedemos
+            if (vehicleToRemove.getCustomer().contains(customerToRemove)) {
                 customerController.removeCustomer(customerToRemove);
                 vehicleController.removeVehicle(vehicleToRemove);
-                JOptionPane.showMessageDialog(null, "The customer has been removed");
-                break;
+                JOptionPane.showMessageDialog(null, "Successfully removed.");
+            } else {
+                JOptionPane.showMessageDialog(null, "This customer is not registered to this vehicle.");
             }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Invalid data entered.");
         }
     }
-    
+
     // ====================VEHÍCULO===========================
     public static void showAllVehicles() {
         StringBuilder report = new StringBuilder("--- VEHICLES AND CUSTOMERS ---\n\n");
@@ -278,16 +281,15 @@ private void styleButton(JButton button) {
         }
         JOptionPane.showMessageDialog(null, report.toString());
     }
-    
 
     private static void insertVehicle() {
         String plate = JOptionPane.showInputDialog("Type the vehicle plate.");
         String color = JOptionPane.showInputDialog("Type the vehicle color.");
         String brand = JOptionPane.showInputDialog("Type the vehicle brand.");
         String model = JOptionPane.showInputDialog("Type the vehicle model.");
-        
+
         VehicleType vehicleType = selectVehicleType();
-        
+
         ArrayList<Customer> responsibleList = vehicleResponsibles();
 
         ParkingLot parkingLot = selectParkingLot();
@@ -297,28 +299,28 @@ private void styleButton(JButton button) {
         int spaceAssigned = parkingLotController.registerVehicleInParkingLot(vehicleToInsert, parkingLot);
         Space space = new Space(spaceAssigned);
         vehicleToInsert.setSpace(space);
-        
+
         if (spaceAssigned != -1) {
-            vehicleController.insertVehicle(vehicleToInsert); 
+            vehicleController.insertVehicle(vehicleToInsert);
             JOptionPane.showMessageDialog(null, "Vehicle successfully entered.\n Allocated space: " + vehicleToInsert.getSpace());
         } else {
             JOptionPane.showMessageDialog(null, "ERROR: There aren´t spaces for this type of vehicle.");
         }
-        
+
         JOptionPane.showMessageDialog(null, "Welcome to the parking lot: " + parkingLot.getName()
-                + ".\n Ticket: \n" 
-                +showTicketToCostumer(vehicleToInsert, vehicleType));
+                + ".\n Ticket: \n"
+                + showTicketToCostumer(vehicleToInsert, vehicleType));
     }
 
-    private static ArrayList<Customer> vehicleResponsibles(){
-        
+    private static ArrayList<Customer> vehicleResponsibles() {
+
         ArrayList<Customer> responsibleList = new ArrayList<>();
         int op;
         do {
             responsibleList.add(insertCustomer());
             op = JOptionPane.showConfirmDialog(null, "¿Do you want to add other customer?", "Many owners", JOptionPane.YES_NO_OPTION);
         } while (op == JOptionPane.YES_OPTION);
-        
+
         return responsibleList;
     }
 
@@ -328,9 +330,9 @@ private void styleButton(JButton button) {
                 + "CUSTOMERS: " + vehicle.getCustomer() + "\n"
                 + "SPACE: " + vehicle.getSpace().getId() + "\n"
                 + "TYPE: " + vehicleType.getDescription() + "\n"
-                + "ENTRY: " + vehicle.getEntryTime() + "\n" ;
-                        
-         return ticket;   
+                + "ENTRY: " + vehicle.getEntryTime() + "\n";
+
+        return ticket;
     }
 
     private static VehicleType configureVehicleTypeOfSpaces(int position, boolean disabilityPresented) {
@@ -353,7 +355,7 @@ private void styleButton(JButton button) {
 
         return vehicleType;
     }
-    
+
     private static VehicleType selectVehicleType() {
         String[] types = {"1) Motorcycle", "2) Car", "3) Truck", "4) Bicycle", "5) other"};
         float[] fees = {500.0f, 1000.0f, 2500.0f, 300.0f, 1500.0f};
@@ -374,7 +376,7 @@ private void styleButton(JButton button) {
 
         return vehicleType;
     }
-    
+
     // ====================PARQUEO===========================
     private static void insertParkingLot() {
 
@@ -390,7 +392,7 @@ private void styleButton(JButton button) {
         parkingLot.setVehicles(new ArrayList<Vehicle>());
 
     }
-    
+
     private static ParkingLot selectParkingLot() {
 
         String parkingLotsInformation = "List to the parking lots in the system\n\n";
@@ -398,7 +400,7 @@ private void styleButton(JButton button) {
 
             parkingLotsInformation += "Number to parking lot: " + parkingLot.getId() + " Name to the parking lot: " + parkingLot.getName() + "\n";
         }
-        
+
         int option;
         ParkingLot parkingLot;
         do {
@@ -441,5 +443,18 @@ private void styleButton(JButton button) {
 
         return spaces;
     }
-    
+
+    private void styleActionCard(JButton button) {
+    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    button.setBackground(Color.WHITE);
+    button.setForeground(new Color(52, 73, 94));
+    button.setFocusPainted(false);
+    button.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(210, 214, 222), 1),
+        BorderFactory.createEmptyBorder(20, 20, 20, 20)
+    ));
+    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    // ¡Asegúrate de haber borrado la línea que decía "throw new UnsupportedOperationException"!
+}
+
 }
