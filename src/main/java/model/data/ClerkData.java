@@ -12,15 +12,21 @@ import model.entities.Clerk;
  * @author 50687
  */
 public class ClerkData {
-     ArrayList<Clerk> clerks = new ArrayList<>();
+
+    private ArrayList<Clerk> clerks = new ArrayList<>();
     
+    // Método para insertar
     public void insertClerk(Clerk clerk){
-        
-        clerks.add(clerk);
+        if (clerk != null) {
+            clerks.add(clerk);
+        }
     }
     
-    public ArrayList<Clerk> getAllClerks(){
-        
-        return clerks;
+    // Método para obtener todos
+    public ArrayList<Clerk> getAllClerks() {
+        if (this.clerks == null) {
+            this.clerks = new ArrayList<>();
+        }
+        return this.clerks;
     }
 }

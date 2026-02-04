@@ -9,7 +9,9 @@ import controller.ParkingLotController;
 import controller.VehicleController;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -22,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import model.entities.Administrator;
 import model.entities.Clerk;
@@ -74,37 +77,88 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     }
 }
 
-    private void initComponents() {
-        setTitle("Parking System");
-        setSize(500, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+private void initComponents() {
+    setLayout(new BorderLayout());
+    getContentPane().setBackground(new Color(245, 246, 250)); // Gris muy claro
 
-        headerPanel = new JPanel();
-        lblTitle = new JLabel();
-        lblTitle.setForeground(Color.WHITE);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
-        headerPanel.add(lblTitle);
+    // --- HEADER (Barra Superior) ---
+    headerPanel = new JPanel(new BorderLayout());
+    headerPanel.setPreferredSize(new Dimension(800, 70));
+    headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
+    
+    lblTitle = new JLabel("PARKING MANAGEMENT SYSTEM");
+    lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+    lblTitle.setForeground(Color.WHITE);
+    headerPanel.add(lblTitle, BorderLayout.WEST);
 
-        JPanel menuPanel = new JPanel(new GridLayout(4, 1, 15, 15));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+    btnLogout = new JButton("LOG OUT");
+    styleMenuButton(btnLogout);
+    btnLogout.setForeground(Color.WHITE);
+    btnLogout.setBackground(new Color(0, 0, 0, 40)); // Fondo sutil
+    btnLogout.addActionListener(this);
+    headerPanel.add(btnLogout, BorderLayout.EAST);
 
-        btnCustomers = new JButton("Manage Customers");
-        btnVehicles = new JButton("Manage Vehicles");
-        btnParking = new JButton("Parking Lot Settings");
-        btnLogout = new JButton("Logout");
+    // --- PANEL CENTRAL DE ACCIONES ---
+    JPanel contentPanel = new JPanel(new GridLayout(1, 3, 25, 0));
+    contentPanel.setBackground(new Color(245, 246, 250));
+    contentPanel.setBorder(BorderFactory.createEmptyBorder(60, 40, 60, 40));
 
-        JButton[] buttons = {btnCustomers, btnVehicles, btnParking, btnLogout};
-        for (JButton btn : buttons) {
-            styleMenuButton(btn);
-            btn.addActionListener(this);
-            menuPanel.add(btn);
-        }
+    btnCustomers = new JButton("CUSTOMER MANAGEMENT");
+    btnVehicles = new JButton("VEHICLE REGISTRATION");
+    btnParking = new JButton("SYSTEM CONFIGURATION");
 
-        add(headerPanel, BorderLayout.NORTH);
-        add(menuPanel, BorderLayout.CENTER);
-    }
+    // Aplicar estilo de tarjeta técnica
+    styleActionCard(btnCustomers);
+    styleActionCard(btnVehicles);
+    styleActionCard(btnParking);
+
+    btnCustomers.addActionListener(this);
+    btnVehicles.addActionListener(this);
+    btnParking.addActionListener(this);
+
+    contentPanel.add(btnCustomers);
+    contentPanel.add(btnVehicles);
+    contentPanel.add(btnParking);
+
+    add(headerPanel, BorderLayout.NORTH);
+    add(contentPanel, BorderLayout.CENTER);
+
+    setSize(950, 450);
+    setLocationRelativeTo(null);
+}
+
+// Estilo para botones de acción principal (Cards)
+private void styleActionCard(JButton button) {
+    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    button.setBackground(Color.WHITE);
+    button.setForeground(new Color(52, 73, 94));
+    button.setFocusPainted(false);
+    // Borde lateral para dar un aspecto de pestaña técnica
+    button.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(210, 214, 222), 1),
+        BorderFactory.createEmptyBorder(20, 20, 20, 20)
+    ));
+    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+}
+
+// Método auxiliar para que los inputs se vean modernos
+private void styleTextField(JTextField field) {
+    field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+    field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(189, 195, 199)));
+    field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+}
+
+// Botón Moderno
+private void styleButton(JButton button) {
+    button.setAlignmentX(Component.CENTER_ALIGNMENT);
+    button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+    button.setBackground(new Color(52, 152, 219));
+    button.setForeground(Color.WHITE);
+    button.setFocusPainted(false);
+    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+}
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -120,16 +174,25 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         }
     }
 
-    // Usamos OptionDialog en lugar de bucles While para menús secundarios
+  
     private void showCustomerSubMenu() {
-        String[] options = {"Add Customer", "Remove Customer", "View List", "Cancel"};
-        int selection = JOptionPane.showOptionDialog(this, "Customer Management", "Select Action",
-                0, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+    String[] options = {"Add Client", "Delete Client", "View List", "Cancel"};
+   
+    int selection = JOptionPane.showOptionDialog(
+        this, 
+        "Select a parking management option:", 
+        "CUSTOMER MANAGEMENT",
+        JOptionPane.DEFAULT_OPTION, 
+        JOptionPane.PLAIN_MESSAGE,
+        null, 
+        options, 
+        options[0]
+    );
 
-        if (selection == 0) insertCustomer();
-        if (selection == 1) removeCostumerAndVehicle();
-        if (selection == 2) showAllCustomer();
-    }
+    if (selection == 0) insertCustomer();
+    if (selection == 1) removeCostumerAndVehicle();
+    if (selection == 2) showAllCustomer();
+}
 
     private void showVehicleSubMenu() {
         String[] options = {"Register Entry", "View Vehicles", "Back"};

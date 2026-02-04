@@ -61,5 +61,24 @@ public class ClerkController implements UserOperations{
     public ArrayList<User> sortUsers(String identification, User[] allUsers) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+public User searchUser(String username, String password) {
+  
+    ArrayList<Clerk> clerks = clerkData.getAllClerks();
+    
+
+    if (clerks == null) return null;
+
+
+    for (Clerk clerk : clerks) {
+      
+        if (clerk.getUsername().equalsIgnoreCase(username) && 
+            clerk.getPassword().equals(password)) {
+            return clerk; 
+        }
+    }
+    
+    return null; 
+}
     
 }

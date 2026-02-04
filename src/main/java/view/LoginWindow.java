@@ -22,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import model.entities.Administrator;
 import model.entities.Clerk;
 import model.entities.User;
 
@@ -37,16 +39,30 @@ public class LoginWindow extends JFrame implements ActionListener {
 
     ClerkController clerkController = new ClerkController();
 
-    public static void main(String[] args) {
-        new LoginWindow().setVisible(true);
+   public static void main(String[] args) {
+    try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        
+        // Personalización técnica de componentes
+        UIManager.put("Button.font", new Font("Segoe UI", Font.PLAIN, 13));
+        UIManager.put("Label.font", new Font("Segoe UI", Font.PLAIN, 13));
+        UIManager.put("Panel.background", new Color(245, 246, 250));
+        UIManager.put("OptionPane.background", Color.WHITE);
+        UIManager.put("OptionPane.messageForeground", new Color(44, 62, 80));
+        
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+    new LoginWindow().setVisible(true);
+}
 
     public LoginWindow() {
-
-        setTitle("Login"); //Settea el título al frame
-        setSize(380, 250); //Settea el tamaño
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Si cierra el frame se cierra todo el programa
-        setLocationRelativeTo(null); //Hace que el frame se posicione en un lugar relativo
+        setTitle("Login");
+        setSize(380, 250);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        
+        insertUsersTest();
 
         initComponents();
     }
@@ -93,55 +109,56 @@ public class LoginWindow extends JFrame implements ActionListener {
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        add(mainPanel);//Esta clase es un frame, por eso puede acceder directamente a todos los elementos
+        add(mainPanel);
 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnSignIn) { //Es para hacer accionar el boton
-
+        if (e.getSource() == btnSignIn) {
             String username = txtUsername.getText();
-            String password = new String(txtPassword.getPassword());//El getPassword devuelve un arreglo de char
+            String password = new String(txtPassword.getPassword());
 
-            if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Username and password are required",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+ 
+            User userAuthenticated = clerkController.searchUser(username, password);
+
+            if (userAuthenticated != null) {
+                JOptionPane.showMessageDialog(this, "Welcome " + userAuthenticated.getName());
+                this.dispose();
+
+           
+                new RegistrationWindow(userAuthenticated).setVisible(true);
             } else {
-
-                insertClerk();
-                User userAuthenticated = clerkController.searchUser(new Clerk(123, "Random", 43, null, "123456", "Fulano", username, password)); //Como clerk es un user, está bien que se 
-                if (userAuthenticated == null) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Username does not exist",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Welcome " + username, "Login successful", JOptionPane.INFORMATION_MESSAGE);
-
-                    // Abrir la ventana de registro y cerrar el login
-                   new RegistrationWindow().setVisible(true);
-                    this.dispose();
-                }
+                JOptionPane.showMessageDialog(this, "Invalid user", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-
     private void styleButton(JButton button) {
         button.setFocusPainted(false);
-        button.setBackground(new Color(70, 130, 180)); // Azul acero
+        button.setBackground(new Color(70, 130, 180)); 
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Arial", Font.BOLD, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(70, 130, 180)),
                 BorderFactory.createEmptyBorder(10, 25, 10, 25)
+        ));
+    }
+
+    public void insertUsersTest() {
+
+        clerkController.insertClerk(new Clerk(1, "7am-3pm", 25, null, "1-111", "Pablo Operador", "pablo", "123"));
+
+        clerkController.insertClerk(new Administrator(
+                99,
+                "Full Time",
+                30,
+                null,
+                "0-000",
+                "Admin Supreme",
+                "admin", // username (String)
+                "admin123" // password (String)
         ));
     }
 
