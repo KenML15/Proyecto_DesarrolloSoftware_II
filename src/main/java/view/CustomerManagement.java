@@ -32,7 +32,8 @@ public class CustomerManagement extends JInternalFrame{
     DefaultTableModel modelDataTable;
     
     //Constantes
-    final String[] headings = {"Id", "Nombre", "Correo", "Dirección", "Telefóno"};
+    final String[] headings = {"Id", "Nombre", "Discapacidad", "Correo", "Dirección", "Telefóno"};
+    public static final String FILECUSTOMER = "Customers.txt";
 
     //Instancia de clases
     CustomerDataFile customerDataFile;
@@ -51,15 +52,15 @@ public class CustomerManagement extends JInternalFrame{
         panelCustomers.setVisible(true);
         this.add(panelCustomers);//adhiere al panel
 
-        customerDataFile = new CustomerDataFile("Customers");
+        customerDataFile = new CustomerDataFile(FILECUSTOMER);
         customerWindow = new CustomerWindow();
         
 
         //Creación de la tabla que contiene la lista de clientes.
         tableCustomers = new JTable();
-        tableCustomers.setSize(400, 1000);
-        tableCustomers.setLocation(95, 300);
-        panelCustomers.add(tableCustomers);
+//        tableCustomers.setSize(400, 1000);
+//        tableCustomers.setLocation(95, 300);
+//        panelCustomers.add(tableCustomers);
         JScrollPane scrollBar = new JScrollPane(tableCustomers);
         scrollBar.setBounds(25, 75, 600, 249);
         panelCustomers.add(scrollBar);
@@ -83,10 +84,8 @@ public class CustomerManagement extends JInternalFrame{
                     createTable();//crea de nuevo la tabla
 
                     JOptionPane.showMessageDialog(null, "Cliente borrado con éxito");
-
-                }//Fin del if de borrar
-
-            }//FIN DEL ACTIONPERFORMED
+                }
+            }
         });
 
         buttonEdit = new JButton("Editar");// crea el boton insertar
@@ -98,44 +97,42 @@ public class CustomerManagement extends JInternalFrame{
             public void actionPerformed(ActionEvent e) {
 
                 customerWindow.dataFromCustomer=fillCustomerFormToModify();
-                
-             
-            }// FIN DEL METODO ACTION PERFORMED
+                  
+            }
         });
-
-    }//Fin de constructor
+    }
 
     public String[] fillCustomerFormToModify() {
     
         JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
-        this.dispose();//cierra la ventana actual para que se vea la de modificar 
-        customerWindow.setTitle("Modificar Cliente");
-        customerWindow.setVisible(true);
         
+        
+        customerWindow.setTitle("Modificar Cliente");
+        customerWindow.setVisible(true); 
+        this.dispose();//cierra la ventana actual para que se vea la de modificar
         desktopPane.add(customerWindow);
 
         String[] dataFromCustomerToModify = getValueFromTable();
 
         customerWindow.textFieldNumber.setText(dataFromCustomerToModify[0]);
         customerWindow.textFieldName.setText(dataFromCustomerToModify[1]);
-        customerWindow.textFieldEmail.setText(dataFromCustomerToModify[2]);
-        customerWindow.textFieldAddress.setText(dataFromCustomerToModify[3]);
-        customerWindow.textFieldPhone.setText(dataFromCustomerToModify[4]);
+        customerWindow.textFieldDisability.setText(dataFromCustomerToModify[2]);
+        customerWindow.textFieldEmail.setText(dataFromCustomerToModify[3]);
+        customerWindow.textFieldAddress.setText(dataFromCustomerToModify[4]);
+        customerWindow.textFieldPhone.setText(dataFromCustomerToModify[5]);
         
         customerWindow.buttonInsert.setText("Modificar");
+        
         
         return dataFromCustomerToModify;
     }
 
     public void createTable() {
-        ArrayList<Customer> customers
-                = customerDataFile.getAllCustomers();
+        ArrayList<Customer> customers = customerDataFile.getAllCustomers();
 
-        String[][] customersToShow
-                = customerDataFile.createCustomerMatrix(customers);
+        String[][] customersToShow = customerDataFile.createCustomerMatrix(customers);
 
-        modelDataTable
-                = new DefaultTableModel(customersToShow, headings);
+        modelDataTable = new DefaultTableModel(customersToShow, headings);
 
         tableCustomers.setModel(modelDataTable);
     }
@@ -161,32 +158,36 @@ public class CustomerManagement extends JInternalFrame{
         String name
                 = tableCustomers.getModel().
                 getValueAt(getCustomerSelected(), 1).toString();
-
-        String email
+        
+        String disability
                 = tableCustomers.getModel().
                 getValueAt(getCustomerSelected(), 2).toString();
 
-        String address
+        String email
                 = tableCustomers.getModel().
                 getValueAt(getCustomerSelected(), 3).toString();
-
-        String phone
+        
+        String address
                 = tableCustomers.getModel().
                 getValueAt(getCustomerSelected(), 4).toString();
 
-        String valuesToReturn[] = new String[5];
+        String phone
+                = tableCustomers.getModel().
+                getValueAt(getCustomerSelected(), 5).toString();
+
+        String valuesToReturn[] = new String[6];
         valuesToReturn[0] = "" + id;
         valuesToReturn[1] = name;
-        valuesToReturn[2] = email;
-        valuesToReturn[3] = address;
-        valuesToReturn[4] = phone;
+        valuesToReturn[2] = disability;
+        valuesToReturn[3] = email;  
+        valuesToReturn[4] = address;
+        valuesToReturn[5] = phone;
 
         return valuesToReturn;
     }
 
     public void removeCustomer() {
-
-        //customerDataFile.deleteCustomerFromFile(customerDataFile.getCustomerFromFile(getValueFromTable()[1], getValueFromTable()[2]));
-
+        Customer customer = customerDataFile.getCustomerFromFile(Integer.parseInt(getValueFromTable()[0]));
+        //customerDataFile.deleteCustomerFromFile(customer);
     }
 }

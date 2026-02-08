@@ -30,16 +30,16 @@ public class Customer {
     }
 
     //Constructor para los archivos
-    public Customer(int id, String name, String email, String address, String phoneNumber) {
+
+    public Customer(int id, String name, boolean disabilityPresented, String email, String address, String phoneNumber) {
         this.id = id;
         this.name = name;
+        this.disabilityPresented = disabilityPresented;
         this.email = email;
         this.address = address;
         this.phoneNumber = phoneNumber;
     }
     
-    
-
     public int getId() {
         return id;
     }

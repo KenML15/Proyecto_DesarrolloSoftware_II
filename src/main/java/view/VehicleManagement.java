@@ -141,28 +141,28 @@ public class VehicleManagement extends JInternalFrame{
     }
     
     public void fillTable(ArrayList<Vehicle> vehicleList) {
-        // 1. Crear el modelo con los encabezados
+        //Crear el modelo con los encabezados
         DefaultTableModel model = new DefaultTableModel(null, headings);
 
-        // 2. Recorrer la lista y añadir filas una por una
-        for (Vehicle v : vehicleList) {
+        //Recorrer la lista y añadir filas una por una
+        for (Vehicle vehicle : vehicleList) {
             Object[] row = new Object[9];
-            row[0] = v.getId();
-            row[1] = v.getPlate();
-            row[2] = v.getColor();
-            row[3] = v.getBrand();
-            row[4] = v.getModel();
+            row[0] = vehicle.getId();
+            row[1] = vehicle.getPlate();
+            row[2] = vehicle.getColor();
+            row[3] = vehicle.getBrand();
+            row[4] = vehicle.getModel();
 
-            // Para evitar errores si el objeto es nulo, usamos un "si-no" rápido
-            row[5] = (v.getCustomer() != null) ? "Cliente Registrado" : "N/A";
-            row[6] = "Tipo"; // O el valor que corresponda
+            //Para evitar errores si el objeto es nulo, usamos un "si-no" rápido
+            row[5] = (vehicle.getCustomer() != null) ? "Cliente Registrado" : "N/A";
+            row[6] = "Tipo"; //O el valor que corresponda
             row[7] = "Espacio";
-            row[8] = v.getEntryTime(); // Suponiendo que ya es String
+            row[8] = vehicle.getEntryTime(); //Suponiendo que ya es String
 
             model.addRow(row);
         }
 
-        // 3. Setear el modelo a la tabla
+        //Setear el modelo a la tabla
         tableVehicle.setModel(model);
     }
 

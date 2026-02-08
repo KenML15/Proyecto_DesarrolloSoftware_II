@@ -125,7 +125,7 @@ public class LoginWindow extends JFrame implements ActionListener {
                     JOptionPane.showMessageDialog(this, "Welcome " + username, "Login successful", JOptionPane.INFORMATION_MESSAGE);
 
                     // Abrir la ventana de registro y cerrar el login
-                   new RegistrationWindow().setVisible(true);
+                   //new RegistrationWindow().setVisible(true);
                     this.dispose();
                 }
             }
@@ -149,7 +149,7 @@ public class LoginWindow extends JFrame implements ActionListener {
         Clerk clerkPrueba = new Clerk(1, null, 19, null, "123", "Pablo Solano", "Pablo", "Pablo123");
         Clerk clerkPrueba2 = new Clerk(2, null, 19, null, "123", "Kenneth Miranda", "Kenneth", "Kenneth123");
         Clerk clerkPrueba3 = new Clerk(3, null, 19, null, "123", "Eilyn Rivera", "Eilyn", "Eilyn123");
-        
+
         clerkController.insertClerk(clerkPrueba);
         clerkController.insertClerk(clerkPrueba2);
         clerkController.insertClerk(clerkPrueba3);

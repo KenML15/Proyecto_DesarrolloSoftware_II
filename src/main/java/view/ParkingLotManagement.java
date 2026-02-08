@@ -119,7 +119,7 @@ public class ParkingLotManagement extends JInternalFrame{
         customerWindow.textFieldNumber.setText(dataFromCustomerToModify[0]);
         customerWindow.textFieldName.setText(dataFromCustomerToModify[1]);
         customerWindow.textFieldEmail.setText(dataFromCustomerToModify[2]);
-        customerWindow.textFieldAddress.setText(dataFromCustomerToModify[3]);
+        //customerWindow.textFieldAddress.setText(dataFromCustomerToModify[3]);
         customerWindow.textFieldPhone.setText(dataFromCustomerToModify[4]);
         
         customerWindow.buttonInsert.setText("Modificar");

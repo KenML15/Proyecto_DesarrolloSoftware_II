@@ -20,8 +20,9 @@ import javax.swing.WindowConstants;
 public class Menu extends JFrame{
     public Menu() {
 
-        super("Nombre del programa");
+        super("Sistema de Gestión de Parqueos");
         
+        //Confguración del Desktop
         final HomeDesktop desktop = new HomeDesktop();// Obtiene la clase HomeDesktop.
         this.add(desktop);// Pega el HomeDesktop.
         this.setSize(1000, 700);// Tamaño.
@@ -43,7 +44,10 @@ public class Menu extends JFrame{
         insertCustomerMenuOption.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                desktop.add(new CustomerWindow());
+                CustomerWindow customerWindow = new CustomerWindow();
+                desktop.add(customerWindow);
+                customerWindow.setVisible(true);
+                customerWindow.toFront();
 
             }// Fin del actionPerformed
         });// Fin del addActionListener
@@ -55,7 +59,11 @@ public class Menu extends JFrame{
         viewCustomerMenuOption.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                desktop.add(new CustomerManagement());
+                CustomerManagement customerManagement = new CustomerManagement();
+                desktop.add(customerManagement);
+                customerManagement.setVisible(true);
+                customerManagement.toFront();
+                desktop.repaint();
 
             }// Fin del actionPerformed
         });// Fin del addActionListener
@@ -69,9 +77,10 @@ public class Menu extends JFrame{
         insertVehicle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                VehicleWindow vWin = new VehicleWindow();
-                desktop.add(vWin);
-                vWin.toFront();
+                VehicleWindow vehicleWindow = new VehicleWindow();
+                desktop.add(vehicleWindow);
+                vehicleWindow.setVisible(true);
+                vehicleWindow.toFront();
             }
         });
         
@@ -80,9 +89,11 @@ public class Menu extends JFrame{
         manageVehicle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                VehicleManagement vManage = new VehicleManagement();
-                desktop.add(vManage);
-                vManage.toFront();
+                VehicleManagement vehicleManagement = new VehicleManagement();
+                desktop.add(vehicleManagement);
+                vehicleManagement.setVisible(true);
+                vehicleManagement.toFront();
+                desktop.repaint();
             }
         });
         

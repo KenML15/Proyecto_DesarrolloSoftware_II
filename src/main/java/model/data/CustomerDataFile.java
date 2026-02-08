@@ -27,7 +27,8 @@ public class CustomerDataFile {
 
     public int exception = 0;
     String fileName;
-    final int ID = 0, NAME = 1, EMAIL = 2, ADDRESS = 3, PHONE = 4;
+    final int ID = 0, NAME = 1, DISABILITY = 2, EMAIL = 3, ADDRESS = 4, PHONE = 5;
+    public static final String FILECUSTOMER = "Customers.txt";
 
     public CustomerDataFile(String fileName) {
 
@@ -56,6 +57,7 @@ public class CustomerDataFile {
 
                 printStream.println(customer.getId() + ";"
                         + customer.getName() + ";"
+                        + customer.isDisabilityPresented() + ";"
                         + customer.getEmail() + ";"
                         + customer.getAddress() + ";"
                         + customer.getPhoneNumber());
@@ -90,7 +92,7 @@ public class CustomerDataFile {
 
             File file = new File(fileName);
 
-            File tempFile = new File("CustomersTemp");
+            File tempFile = new File(FILECUSTOMER);
 
             BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
             PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
@@ -142,6 +144,7 @@ public class CustomerDataFile {
                 address = "";
 
         int id = 0;
+        boolean customerDisability = false;
         int counter = 0;
 
         Customer customer = null;
@@ -174,6 +177,10 @@ public class CustomerDataFile {
 
                         customerName = stringTokenizer.nextToken();
 
+                    } else if (counter == DISABILITY) {
+
+                        customerDisability = Boolean.parseBoolean(stringTokenizer.nextToken());
+
                     } else if (counter == EMAIL) {
 
                         customerEmail = stringTokenizer.nextToken();
@@ -195,7 +202,7 @@ public class CustomerDataFile {
                 }
 
                 if (customerId == id) {
-                    customer = new Customer(id, customerName, customerEmail, address, phone);
+                    customer = new Customer(id, customerName, customerDisability, customerEmail, address, phone);
                     break;
                 }
 
@@ -256,6 +263,7 @@ public class CustomerDataFile {
                 address = "";
 
         int id = 0;
+        boolean customerDisability = false;
         int counter = 0;
 
         try {
@@ -286,6 +294,11 @@ public class CustomerDataFile {
                     if (counter == NAME) {
 
                         customerName = stringTokenizer.nextToken();
+
+                    }
+                    if (counter == DISABILITY) {
+
+                        customerDisability = Boolean.parseBoolean(stringTokenizer.nextToken());
 
                     }
                     if (counter == EMAIL) {
@@ -403,6 +416,7 @@ public class CustomerDataFile {
                 address = "";
 
         int id = 0;
+        boolean disability = false;
         int counter = 0;
 
         try {
@@ -435,6 +449,11 @@ public class CustomerDataFile {
                         name = stringTokenizer.nextToken();
 
                     }
+                    if (counter == DISABILITY) {
+
+                        disability = Boolean.parseBoolean(stringTokenizer.nextToken());
+
+                    }
                     if (counter == EMAIL) {
 
                         email = stringTokenizer.nextToken();
@@ -453,7 +472,7 @@ public class CustomerDataFile {
                     counter++;
                 }
 
-                Customer customer = new Customer(id, name, phone, address, email);
+                Customer customer = new Customer(id, name, disability, email, address, phone);
                 allCustomers.add(customer);
                 currentTuple = bufferedReader.readLine();
 
@@ -483,10 +502,10 @@ public class CustomerDataFile {
 
             matrixClientsFromFile[i][ID] = "" + customer.getId();
             matrixClientsFromFile[i][NAME] = customer.getName();
+            matrixClientsFromFile[i][DISABILITY] = "" + customer.isDisabilityPresented();
             matrixClientsFromFile[i][EMAIL] = customer.getEmail();
             matrixClientsFromFile[i][ADDRESS] = customer.getAddress();
             matrixClientsFromFile[i][PHONE] = customer.getPhoneNumber();
-
         }
 
         return matrixClientsFromFile;

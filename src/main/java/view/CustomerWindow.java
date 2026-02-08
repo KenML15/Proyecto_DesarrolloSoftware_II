@@ -24,21 +24,22 @@ import model.entities.Customer;
 public class CustomerWindow extends JInternalFrame implements ActionListener{
     
     JPanel panelOfInsertCustomerWindow;
-    JLabel labelNumber, labelName, labelPhone, labelAddress, labelEmail;
-    public JTextField textFieldNumber, textFieldName, textFieldPhone, textFieldAddress, textFieldEmail;
+    JLabel labelNumber, labelName, labelDisability, labelEmail, labelAddress, labelPhone;
+    public JTextField textFieldNumber, textFieldName, textFieldDisability, textFieldEmail, textFieldAddress, textFieldPhone;
     JButton buttonInsert, buttonCancel;
     CustomerDataFile customerDataFile;
     public String[] dataFromCustomer = new String[5];
+    public static final String FILECUSTOMER = "Customers.txt";
 
     public CustomerWindow() {
 
         super("Insertar Cliente", false, true, false, true);
         this.setVisible(true);//permite que sea visible
-        this.setSize(420, 450);
+        this.setSize(450, 500);
         this.setLocation(215, 50);
         this.setResizable(false);
 
-        customerDataFile = new CustomerDataFile("Customers");//instanciamos la clase CustomerData
+        customerDataFile = new CustomerDataFile(FILECUSTOMER);//instanciamos la clase CustomerData
 
         panelOfInsertCustomerWindow = new JPanel();// Crea el panel
         panelOfInsertCustomerWindow.setLayout(null);//Ubicación
@@ -46,12 +47,12 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
         this.add(panelOfInsertCustomerWindow);//adhiere al panel
 
         labelNumber = new JLabel("Número: ");// crea la etiqueta número
-        labelNumber.setBounds(50, 10, 75, 50);//le da tamaño y ubicación
+        labelNumber.setBounds(50, 10, 100, 50);//le da tamaño y ubicación
         labelNumber.setForeground(Color.BLUE);// da color
         panelOfInsertCustomerWindow.add(labelNumber);//adhiere la etiqueta
 
         textFieldNumber = new JTextField(75);// crea el textfield para número
-        textFieldNumber.setBounds(125, 25, 200, 25);//le da tamaño y ubicación
+        textFieldNumber.setBounds(150, 25, 200, 25);//le da tamaño y ubicación
         textFieldNumber.setEditable(false);//lo coloca en estado ineditable
 
         //establece el próximo id del cliente en el textfield
@@ -60,49 +61,58 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
         panelOfInsertCustomerWindow.add(textFieldNumber);//adhiere el textfield
 
         labelName = new JLabel("Nombre: ");//crea la etiqueta nombre
-        labelName.setBounds(50, 70, 75, 50);//le da tamaño y ubicación
+        labelName.setBounds(50, 70, 100, 50);//le da tamaño y ubicación
         labelName.setForeground(Color.BLUE);// da color 
         panelOfInsertCustomerWindow.add(labelName);//adhiere la etiqueta
 
         textFieldName = new JTextField(75);// crea el textfield para nombre
-        textFieldName.setBounds(125, 85, 200, 25);//le da tamaño y ubicación
+        textFieldName.setBounds(150, 85, 200, 25);//le da tamaño y ubicación
         panelOfInsertCustomerWindow.add(textFieldName);//adhiere el textfield
+        
+        labelDisability = new JLabel("Discapacidad: ");//crea la etiqueta nombre
+        labelDisability.setBounds(50, 130, 100, 50);//le da tamaño y ubicación
+        labelDisability.setForeground(Color.BLUE);// da color 
+        panelOfInsertCustomerWindow.add(labelDisability);//adhiere la etiqueta
 
-        labelPhone = new JLabel("Teléfono: ");//crea la etiqueta teléfono
-        labelPhone.setBounds(50, 140, 75, 50);//le da tamaño y ubicación
-        labelPhone.setForeground(Color.BLUE);// da color
-        panelOfInsertCustomerWindow.add(labelPhone);//adhiere la etiqueta
-
-        textFieldPhone = new JTextField(75);//crea el textfield para teléfono
-        textFieldPhone.setBounds(125, 155, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldPhone);//adhiere el textfield
-
-        labelAddress = new JLabel("Dirección: ");//crea la etiqueta dirección
-        labelAddress.setBounds(50, 210, 75, 50);//le da tamaño y ubicación
-        labelAddress.setForeground(Color.BLUE);// da color
-        panelOfInsertCustomerWindow.add(labelAddress);//adhiere la etiqueta
-
-        textFieldAddress = new JTextField(75);// crea el textfield para dirección
-        textFieldAddress.setBounds(125, 225, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldAddress);//adhiere el textfield
-
+        textFieldDisability = new JTextField(75);// crea el textfield para nombre
+        textFieldDisability.setBounds(150, 145, 200, 25);//le da tamaño y ubicación
+        panelOfInsertCustomerWindow.add(textFieldDisability);//adhiere el textfield      
+                 
         labelEmail = new JLabel("Email: ");//crea la etiqueta email
-        labelEmail.setBounds(50, 280, 75, 50);//le da tamaño y ubicación
+        labelEmail.setBounds(50, 310, 100, 50);//le da tamaño y ubicación
         labelEmail.setForeground(Color.BLUE);// da color
         panelOfInsertCustomerWindow.add(labelEmail);//adhiere la etiqueta
 
         textFieldEmail = new JTextField(75);//crea el text para email
-        textFieldEmail.setBounds(125, 295, 200, 25);//le da tamaño y ubicación
+        textFieldEmail.setBounds(150, 325, 200, 25);//le da tamaño y ubicación
         panelOfInsertCustomerWindow.add(textFieldEmail);//adhiere el textfield
+        
+        labelAddress = new JLabel("Dirección: ");//crea la etiqueta teléfono
+        labelAddress.setBounds(50, 190, 100, 50);//le da tamaño y ubicación
+        labelAddress.setForeground(Color.BLUE);// da color
+        panelOfInsertCustomerWindow.add(labelAddress);//adhiere la etiqueta
 
+        textFieldAddress = new JTextField(75);//crea el textfield para teléfono
+        textFieldAddress.setBounds(150, 205, 200, 25);//le da tamaño y ubicación
+        panelOfInsertCustomerWindow.add(textFieldAddress);//adhiere el textfield
+        
+        labelPhone = new JLabel("Teléfono: ");//crea la etiqueta teléfono
+        labelPhone.setBounds(50, 250, 100, 50);//le da tamaño y ubicación
+        labelPhone.setForeground(Color.BLUE);// da color
+        panelOfInsertCustomerWindow.add(labelPhone);//adhiere la etiqueta
+
+        textFieldPhone = new JTextField(75);//crea el textfield para teléfono
+        textFieldPhone.setBounds(150, 265, 200, 25);//le da tamaño y ubicación
+        panelOfInsertCustomerWindow.add(textFieldPhone);//adhiere el textfield
+        
         buttonInsert = new JButton("Insertar");// crea el boton insertar
-        buttonInsert.setBounds(90, 375, 100, 25);//le da tamaño y ubicación
-        buttonInsert.setToolTipText("Presione para insertar el cliente");
+        buttonInsert.setBounds(110, 390, 100, 30);//le da tamaño y ubicación
         buttonInsert.addActionListener(this);
+        buttonInsert.setToolTipText("Presione para insertar el cliente");
         panelOfInsertCustomerWindow.add(buttonInsert);//adhiere el boton
 
         buttonCancel = new JButton("Cancelar");// crea el boton insertar
-        buttonCancel.setBounds(220, 375, 100, 25);//le da tamaño y ubicación
+        buttonCancel.setBounds(220, 390, 100, 30);//le da tamaño y ubicación
         buttonCancel.addActionListener(this);//método de escucha del boton
         buttonCancel.setToolTipText("Presione para cancelar");
         panelOfInsertCustomerWindow.add(buttonCancel);//adhiere el boton
@@ -117,13 +127,8 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
             }// Fin del actionPerformed  
         });// Fin del addActionListener
 
-    } // Fin del construtor CustomerWindow
-
-    /**
-     * El método del actionPerformed
-     *
-     * @param event
-     */
+    }
+    
     @Override
     public void actionPerformed(ActionEvent event) {
 
@@ -135,7 +140,7 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
             //controlamos si alguno de los campos está vacío.
             if (textFieldName.getText().equals("")
                     || textFieldEmail.getText().equals("")
-                    || textFieldAddress.getText().equals("")
+                    || textFieldDisability.getText().equals("")
                     || textFieldPhone.getText().equals("")) {
 
                 JOptionPane.showMessageDialog(null, "Por favor, llene todos los campos del cliente.");
@@ -143,9 +148,9 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
             } else {
                 customer.setId(Integer.parseInt(textFieldNumber.getText()));
                 customer.setName(textFieldName.getText());
+                customer.setDisabilityPresented(Boolean.parseBoolean(textFieldDisability.getText()));
                 customer.setEmail(textFieldEmail.getText());
-                customer.setAddress(textFieldAddress.getText());
-                //customer.setPhone(textFieldPhone.getText());
+                customer.setPhoneNumber(textFieldPhone.getText());
 
                 int result = customerDataFile.insert(customer);
 
@@ -157,10 +162,9 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
                     textFieldNumber.setText("" + (customerDataFile.findLastIdNumberOfCustomer() + 1));
 
                     //limpiamos los campos de inserción.
-                    textFieldAddress.setText("");
                     textFieldName.setText("");
-                    textFieldEmail.setText("");
-                    textFieldAddress.setText("");
+                    textFieldDisability.setText("");
+                    textFieldEmail.setText("");      
                     textFieldPhone.setText("");
 
                 } else {
@@ -182,9 +186,7 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
 
                         JOptionPane.showMessageDialog(null,
                                 "El cliente ya existe. Intente de nuevo.");
-
                     }
-
                 }
             }
 
@@ -194,7 +196,7 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
             //controlamos si alguno de los campos está vacío.
             if (textFieldName.getText().equals("")
                     || textFieldEmail.getText().equals("")
-                    || textFieldAddress.getText().equals("")
+                    || textFieldDisability.getText().equals("")
                     || textFieldPhone.getText().equals("")) {
 
                 JOptionPane.showMessageDialog(null, "Por favor, llene todos los campos del cliente.");
@@ -205,16 +207,16 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
 
                 customer.setId(Integer.parseInt(textFieldNumber.getText()));
                 customer.setName(textFieldName.getText());
+                customer.setDisabilityPresented(Boolean.parseBoolean(textFieldDisability.getText()));
                 customer.setEmail(textFieldEmail.getText());
-                customer.setAddress(textFieldAddress.getText());
-                //customer.setPhone(textFieldPhone.getText());
+                customer.setPhoneNumber(textFieldPhone.getText());
 
                 String newCustomer = "";
                 newCustomer += customer.getId() + ";";
                 newCustomer += customer.getName() + ";";
+                newCustomer += customer.isDisabilityPresented()+ ";";
                 newCustomer += customer.getEmail() + ";";
-                newCustomer += customer.getAddress()+ ";";
-                //newCustomer += customer.getPhone();
+                newCustomer += customer.getPhoneNumber() + ";";
 
                 //customerDataFile.modifyCustomerFromFile(customerDataFile.getCustomerFromFile(dataFromCustomer[1]/*, dataFromCustomer[2]*/), newCustomer);
 
@@ -226,9 +228,7 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
                 JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
                 desktopPane.add(customerManagement);
             }
-
         }
-
     }//Fin del actionPerformed
     
 }
