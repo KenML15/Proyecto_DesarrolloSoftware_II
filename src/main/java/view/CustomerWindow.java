@@ -4,17 +4,17 @@
  */
 package view;
 
+import controller.CustomerFileController;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
+import javax.swing.JCheckBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import model.data.CustomerDataFile;
 import model.entities.Customer;
 
 /**
@@ -23,212 +23,325 @@ import model.entities.Customer;
  */
 public class CustomerWindow extends JInternalFrame implements ActionListener{
     
+    //Componentes para la interfaz
     JPanel panelOfInsertCustomerWindow;
     JLabel labelNumber, labelName, labelDisability, labelEmail, labelAddress, labelPhone;
-    public JTextField textFieldNumber, textFieldName, textFieldDisability, textFieldEmail, textFieldAddress, textFieldPhone;
-    JButton buttonInsert, buttonCancel;
-    CustomerDataFile customerDataFile;
-    public String[] dataFromCustomer = new String[5];
+    public JTextField textFieldNumber, textFieldName, textFieldEmail, textFieldAddress, textFieldPhone;
+    public JCheckBox chkDisability;
+    JButton buttonInsert, buttonModify, buttonCancel;
+    
+    //Controlador y datos para customer
+    CustomerFileController customerController;
+    Customer customerToEdit;
     public static final String FILECUSTOMER = "Customers.txt";
 
+    //Constructor para insertar al cliente
     public CustomerWindow() {
-
         super("Insertar Cliente", false, true, false, true);
-        this.setVisible(true);//permite que sea visible
+        initController();
+        initUI();
+        setupWindow();
+        
+        this.setVisible(true);     
+        buttonModify.setVisible(false);
+        setNextId();
+    }
+
+    //Constructor para modificar al cliente
+    public CustomerWindow(Customer customer){
+        super("Modificar Cliente", false, true, false, true);
+        this.customerToEdit = customer;
+        initController();
+        initUI();
+        setupWindow();
+         
+        //En modo modificar, ocultamos insertar y mostramos modificar
+        buttonInsert.setVisible(false);
+        buttonModify.setVisible(true);
+        loadCustomerData();
+    }
+    
+    //Establece el tamaño de la ventana
+    private void setupWindow(){
         this.setSize(450, 500);
         this.setLocation(215, 50);
         this.setResizable(false);
-
-        customerDataFile = new CustomerDataFile(FILECUSTOMER);//instanciamos la clase CustomerData
-
-        panelOfInsertCustomerWindow = new JPanel();// Crea el panel
-        panelOfInsertCustomerWindow.setLayout(null);//Ubicación
-        panelOfInsertCustomerWindow.setBackground(Color.WHITE);//color al panel
-        this.add(panelOfInsertCustomerWindow);//adhiere al panel
-
-        labelNumber = new JLabel("Número: ");// crea la etiqueta número
-        labelNumber.setBounds(50, 10, 100, 50);//le da tamaño y ubicación
-        labelNumber.setForeground(Color.BLUE);// da color
-        panelOfInsertCustomerWindow.add(labelNumber);//adhiere la etiqueta
-
-        textFieldNumber = new JTextField(75);// crea el textfield para número
-        textFieldNumber.setBounds(150, 25, 200, 25);//le da tamaño y ubicación
-        textFieldNumber.setEditable(false);//lo coloca en estado ineditable
-
-        //establece el próximo id del cliente en el textfield
-        textFieldNumber.setText("" + (customerDataFile.findLastIdNumberOfCustomer() + 1));
-
-        panelOfInsertCustomerWindow.add(textFieldNumber);//adhiere el textfield
-
-        labelName = new JLabel("Nombre: ");//crea la etiqueta nombre
-        labelName.setBounds(50, 70, 100, 50);//le da tamaño y ubicación
-        labelName.setForeground(Color.BLUE);// da color 
-        panelOfInsertCustomerWindow.add(labelName);//adhiere la etiqueta
-
-        textFieldName = new JTextField(75);// crea el textfield para nombre
-        textFieldName.setBounds(150, 85, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldName);//adhiere el textfield
-        
-        labelDisability = new JLabel("Discapacidad: ");//crea la etiqueta nombre
-        labelDisability.setBounds(50, 130, 100, 50);//le da tamaño y ubicación
-        labelDisability.setForeground(Color.BLUE);// da color 
-        panelOfInsertCustomerWindow.add(labelDisability);//adhiere la etiqueta
-
-        textFieldDisability = new JTextField(75);// crea el textfield para nombre
-        textFieldDisability.setBounds(150, 145, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldDisability);//adhiere el textfield      
-                 
-        labelEmail = new JLabel("Email: ");//crea la etiqueta email
-        labelEmail.setBounds(50, 310, 100, 50);//le da tamaño y ubicación
-        labelEmail.setForeground(Color.BLUE);// da color
-        panelOfInsertCustomerWindow.add(labelEmail);//adhiere la etiqueta
-
-        textFieldEmail = new JTextField(75);//crea el text para email
-        textFieldEmail.setBounds(150, 325, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldEmail);//adhiere el textfield
-        
-        labelAddress = new JLabel("Dirección: ");//crea la etiqueta teléfono
-        labelAddress.setBounds(50, 190, 100, 50);//le da tamaño y ubicación
-        labelAddress.setForeground(Color.BLUE);// da color
-        panelOfInsertCustomerWindow.add(labelAddress);//adhiere la etiqueta
-
-        textFieldAddress = new JTextField(75);//crea el textfield para teléfono
-        textFieldAddress.setBounds(150, 205, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldAddress);//adhiere el textfield
-        
-        labelPhone = new JLabel("Teléfono: ");//crea la etiqueta teléfono
-        labelPhone.setBounds(50, 250, 100, 50);//le da tamaño y ubicación
-        labelPhone.setForeground(Color.BLUE);// da color
-        panelOfInsertCustomerWindow.add(labelPhone);//adhiere la etiqueta
-
-        textFieldPhone = new JTextField(75);//crea el textfield para teléfono
-        textFieldPhone.setBounds(150, 265, 200, 25);//le da tamaño y ubicación
-        panelOfInsertCustomerWindow.add(textFieldPhone);//adhiere el textfield
-        
-        buttonInsert = new JButton("Insertar");// crea el boton insertar
-        buttonInsert.setBounds(110, 390, 100, 30);//le da tamaño y ubicación
-        buttonInsert.addActionListener(this);
-        buttonInsert.setToolTipText("Presione para insertar el cliente");
-        panelOfInsertCustomerWindow.add(buttonInsert);//adhiere el boton
-
-        buttonCancel = new JButton("Cancelar");// crea el boton insertar
-        buttonCancel.setBounds(220, 390, 100, 30);//le da tamaño y ubicación
-        buttonCancel.addActionListener(this);//método de escucha del boton
-        buttonCancel.setToolTipText("Presione para cancelar");
-        panelOfInsertCustomerWindow.add(buttonCancel);//adhiere el boton
-
-        buttonCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int numberChosen = JOptionPane.showConfirmDialog(null, "¿Está seguro que desea \n cerrar la ventana?", "Confirmar", JOptionPane.YES_NO_OPTION);
-                if (numberChosen == 0) {
-                    setVisible(false);
-                }
-            }// Fin del actionPerformed  
-        });// Fin del addActionListener
-
     }
     
-    @Override
-    public void actionPerformed(ActionEvent event) {
+    //Carga el controlador que gestiona el archivo de texto
+    private void initController() {
+        try {
+            customerController = new CustomerFileController(FILECUSTOMER);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al inicializar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-        //forma de saber si el botón fue presionado
-        if (event.getActionCommand().equalsIgnoreCase("Insertar")) {
+    //Crea el panel y coloca todos los elementos usuando coordenadas fijas
+    //Modify e Insert tienen las mismas coordenadas para que el constructor
+    //decidacuál mostrar
+    private void initUI() {
+        panelOfInsertCustomerWindow = new JPanel();
+        panelOfInsertCustomerWindow.setLayout(null);
+        panelOfInsertCustomerWindow.setBackground(Color.WHITE);
+        this.add(panelOfInsertCustomerWindow);
 
-            Customer customer = new Customer();
+        //ID
+        createID();
 
-            //controlamos si alguno de los campos está vacío.
-            if (textFieldName.getText().equals("")
-                    || textFieldEmail.getText().equals("")
-                    || textFieldDisability.getText().equals("")
-                    || textFieldPhone.getText().equals("")) {
+        //Nombre
+        createName();
+        
+        //Discapacidad
+        createDisability();     
+         
+        //Email
+        createEmail();
+        
+        //Dirección
+        createAddress();
+        
+        //Teléfono
+        createPhone();
+        
+        //Botones
+        createButtons();
+        
+        this.setVisible(true);
+    }
+    
+    private void createID() {
+        labelNumber = new JLabel("Número: ");
+        labelNumber.setBounds(50, 10, 100, 50);
+        labelNumber.setForeground(Color.BLUE);
+        panelOfInsertCustomerWindow.add(labelNumber);
 
-                JOptionPane.showMessageDialog(null, "Por favor, llene todos los campos del cliente.");
+        textFieldNumber = new JTextField(75);
+        textFieldNumber.setBounds(150, 25, 200, 25);
+        textFieldNumber.setEditable(false);
+        panelOfInsertCustomerWindow.add(textFieldNumber);
+    }
+    
+    private void createName() {
+        labelName = new JLabel("Nombre: ");
+        labelName.setBounds(50, 70, 100, 50);
+        labelName.setForeground(Color.BLUE);
+        panelOfInsertCustomerWindow.add(labelName);
 
-            } else {
-                customer.setId(Integer.parseInt(textFieldNumber.getText()));
-                customer.setName(textFieldName.getText());
-                customer.setDisabilityPresented(Boolean.parseBoolean(textFieldDisability.getText()));
-                customer.setEmail(textFieldEmail.getText());
-                customer.setPhoneNumber(textFieldPhone.getText());
+        textFieldName = new JTextField(75);
+        textFieldName.setBounds(150, 85, 200, 25);
+        panelOfInsertCustomerWindow.add(textFieldName);
+    }
+    
+    private void createDisability() {
+        labelDisability = new JLabel("Discapacidad: ");
+        labelDisability.setBounds(50, 130, 100, 50);
+        labelDisability.setForeground(Color.BLUE);
+        panelOfInsertCustomerWindow.add(labelDisability);
 
-                int result = customerDataFile.insert(customer);
+        chkDisability = new JCheckBox();
+        chkDisability.setBounds(150, 145, 250, 25);
+        chkDisability.setBackground(Color.WHITE);
+        panelOfInsertCustomerWindow.add(chkDisability);
+    }
+    
+    private void createEmail() {
+        labelEmail = new JLabel("Email: ");
+        labelEmail.setBounds(50, 190, 100, 50);
+        labelEmail.setForeground(Color.BLUE);
+        panelOfInsertCustomerWindow.add(labelEmail);
 
-                if (result == 0) {
+        textFieldEmail = new JTextField(75);
+        textFieldEmail.setBounds(150, 205, 200, 25);
+        panelOfInsertCustomerWindow.add(textFieldEmail);
+    }
+    
+    private void createAddress() {
+        labelAddress = new JLabel("Dirección: ");
+        labelAddress.setBounds(50, 250, 100, 50);
+        labelAddress.setForeground(Color.BLUE);
+        panelOfInsertCustomerWindow.add(labelAddress);
 
-                    JOptionPane.showMessageDialog(null, "Cliente insertado exitosamente");
+        textFieldAddress = new JTextField(75);
+        textFieldAddress.setBounds(150, 265, 200, 25);
+        panelOfInsertCustomerWindow.add(textFieldAddress);
+    }
+    
+    private void createPhone() {
+        labelPhone = new JLabel("Teléfono: ");
+        labelPhone.setBounds(50, 310, 100, 50);
+        labelPhone.setForeground(Color.BLUE);
+        panelOfInsertCustomerWindow.add(labelPhone);
 
-                    //ponemos el id del siguiente cliente por ser insertado:
-                    textFieldNumber.setText("" + (customerDataFile.findLastIdNumberOfCustomer() + 1));
-
-                    //limpiamos los campos de inserción.
-                    textFieldName.setText("");
-                    textFieldDisability.setText("");
-                    textFieldEmail.setText("");      
-                    textFieldPhone.setText("");
-
-                } else {
-
-                    int exception = customerDataFile.exception;
-
-                    if (exception == 1) {
-
-                        JOptionPane.showMessageDialog(null, "Error al abrir "
-                                + "o "
-                                + "encontrar el archivo de clientes.");
-
-                    } else if (exception == 2) {
-
-                        JOptionPane.showMessageDialog(null,
-                                "Error al leer datos del archivo de clientes.");
-
-                    } else if (exception == 3) {
-
-                        JOptionPane.showMessageDialog(null,
-                                "El cliente ya existe. Intente de nuevo.");
-                    }
+        textFieldPhone = new JTextField(75);
+        textFieldPhone.setBounds(150, 325, 200, 25);
+        panelOfInsertCustomerWindow.add(textFieldPhone);
+    }
+    
+    private void createButtons(){
+        buttonInsert = new JButton("Insertar");
+        buttonInsert.setBounds(110, 390, 100, 30);
+        buttonInsert.addActionListener(this);
+        buttonInsert.setToolTipText("Presione para insertar el cliente");
+        panelOfInsertCustomerWindow.add(buttonInsert);
+        
+        buttonModify = new JButton("Modificar");
+        buttonModify.setBounds(110, 390, 100, 30); //Misma posición que insertar
+        buttonModify.addActionListener(this);
+        buttonModify.setToolTipText("Presione para modificar la información del cliente");
+        panelOfInsertCustomerWindow.add(buttonModify);
+        
+        buttonCancel = new JButton("Cancelar");
+        buttonCancel.setBounds(220, 390, 100, 30);
+        buttonCancel.addActionListener(this);
+        buttonCancel.setToolTipText("Presione para cancelar");
+        panelOfInsertCustomerWindow.add(buttonCancel);
+    }
+        
+    private void loadCustomerData(){
+        textFieldNumber.setText(String.valueOf(customerToEdit.getId()));
+        textFieldName.setText(customerToEdit.getName());
+        chkDisability.setSelected(customerToEdit.isDisabilityPresented());
+        textFieldEmail.setText(customerToEdit.getEmail());
+        textFieldAddress.setText(customerToEdit.getAddress());
+        textFieldPhone.setText(customerToEdit.getPhoneNumber());
+    }
+    
+//    Este método establece el ID en el campo
+    private void setNextId(){
+        try{
+            int nextId = getNextAvailableId();
+            textFieldNumber.setText(String.valueOf(nextId));
+        }catch (Exception e){
+            textFieldNumber.setText("1"); //Este es un valor por defecto
+        }
+    }
+    
+//    //Este método obtiene el ID
+    private int getNextAvailableId(){
+        try {
+            int maxId = 0;
+            for(Customer customer : customerController.getAllCustomers()){
+                if (customer.getId() > maxId) {
+                    maxId = customer.getId();
                 }
             }
-
-        }//fin del action del boton insertar
-        else if (event.getActionCommand().equalsIgnoreCase("Modificar")) {
-
-            //controlamos si alguno de los campos está vacío.
-            if (textFieldName.getText().equals("")
-                    || textFieldEmail.getText().equals("")
-                    || textFieldDisability.getText().equals("")
-                    || textFieldPhone.getText().equals("")) {
-
-                JOptionPane.showMessageDialog(null, "Por favor, llene todos los campos del cliente.");
-
-            } else {
-
-                Customer customer = new Customer();
-
-                customer.setId(Integer.parseInt(textFieldNumber.getText()));
-                customer.setName(textFieldName.getText());
-                customer.setDisabilityPresented(Boolean.parseBoolean(textFieldDisability.getText()));
-                customer.setEmail(textFieldEmail.getText());
-                customer.setPhoneNumber(textFieldPhone.getText());
-
-                String newCustomer = "";
-                newCustomer += customer.getId() + ";";
-                newCustomer += customer.getName() + ";";
-                newCustomer += customer.isDisabilityPresented()+ ";";
-                newCustomer += customer.getEmail() + ";";
-                newCustomer += customer.getPhoneNumber() + ";";
-
-                //customerDataFile.modifyCustomerFromFile(customerDataFile.getCustomerFromFile(dataFromCustomer[1]/*, dataFromCustomer[2]*/), newCustomer);
-
-                JOptionPane.showMessageDialog(null, "Cliente modificado con éxito.");
-                setVisible(false);
-                
-                CustomerManagement customerManagement= new CustomerManagement();
-                customerManagement.setVisible(true);
-                JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
-                desktopPane.add(customerManagement);
-            }
+            return maxId + 1;
+        }catch (Exception e){
+            return 1;
         }
-    }//Fin del actionPerformed
+    }
     
+    //Al hacer clic en un botón, este método identifica cuál fué y realiza
+    //la acción correspondiente
+    @Override
+    public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == buttonInsert) {
+            insertCustomer();
+        } else if (event.getSource() == buttonModify) {
+            modifyCustomer();
+        } else if (event.getSource() == buttonCancel) {
+            handleCancel();
+        }
+    }
+
+    //Acción de insertar customer
+    private void insertCustomer() {
+        if (!validateFields()) return;
+        
+        try {
+            Customer customer = createCustomerFromFields();
+            customerController.createCustomer(customer);
+            
+            JOptionPane.showMessageDialog(this, "Cliente insertado exitosamente");
+            clearFields();
+//            setNextId();
+            
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Error de validación: " + e.getMessage());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,"Error al insertar cliente: " + e.getMessage());
+        }
+    }
+
+    //Acción de modificar customer
+    private void modifyCustomer() {
+        if (!validateFields()) return;
+        
+        try {
+            Customer customer = createCustomerFromFields();
+            customerController.updateCustomer(customer);
+            
+            JOptionPane.showMessageDialog(this, "Cliente modificado con éxito");
+            this.dispose();
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Error de validación: " + e.getMessage());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al modificar cliente: " + e.getMessage());
+        }
+    }
+
+    //Impide que se guarden clientes con datos vacíos
+    private boolean validateFields() {
+        if (textFieldName.getText().trim().isEmpty()) {
+            showValidationError("El nombre es requerido");
+            return false;
+        }
+        if (textFieldEmail.getText().trim().isEmpty()) {
+            showValidationError("El email es requerido");
+            return false;
+        }
+        if (textFieldPhone.getText().trim().isEmpty()) {
+            showValidationError("El teléfono es requerido");
+            return false;
+        }
+        return true;
+    }
+
+    private void showValidationError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Validación", JOptionPane.WARNING_MESSAGE);
+    }
+
+    //Convierte los datos ingresados en las cajitas de texto en un objeto
+    //Customer.
+    private Customer createCustomerFromFields() throws IllegalArgumentException {
+        Customer customer = new Customer();
+
+        String idText = textFieldNumber.getText().trim();
+        if (!idText.isEmpty()) {
+            try {
+
+                customer.setId(Integer.parseInt(idText));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Número de cliente inválido");
+            }
+        } else {
+            throw new IllegalArgumentException("Número de cliente no generado");
+        }
+
+        customer.setName(textFieldName.getText().trim());
+        customer.setEmail(textFieldEmail.getText().trim());
+        customer.setDisabilityPresented(chkDisability.isSelected());
+        customer.setAddress(textFieldAddress.getText().trim());
+        customer.setPhoneNumber(textFieldPhone.getText().trim());
+
+        return customer;
+    }
+
+    //Limpia el formulario
+    private void clearFields() {
+        textFieldName.setText("");
+        chkDisability.setSelected(false);
+        textFieldEmail.setText("");      
+        textFieldPhone.setText("");
+        textFieldAddress.setText("");
+    }
+
+    //Gestiona el cierre de la ventana
+    private void handleCancel() {
+        int option = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea cerrar la ventana?","Confirmar", JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION) {
+            setVisible(false);
+        }
+    }
 }

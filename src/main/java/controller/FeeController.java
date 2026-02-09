@@ -4,27 +4,74 @@
  */
 package controller;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import model.data.FeeData;
 import model.entities.Fee;
-import model.entities.Vehicle;
-import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
  * @author 50687
  */
 public class FeeController {
+
+    private FeeData feeData;
     
-    FeeData feeData = new FeeData();
-    
-    public boolean configureFeePrices(Fee newFee){
-        return feeData.configureFeePrices(newFee);
+    public FeeController() throws IOException, JDOMException {
+        this.feeData = new FeeData();
     }
     
-    public Fee searchFee(String vehicleType, ArrayList<VehicleType> allVehicleTypes) {
-        return feeData.searchFee(vehicleType, allVehicleTypes);
-    }   
+    public void insertFee(Fee fee) throws IOException {
+        validateFee(fee);
+        feeData.insertFee(fee);
+    }
+    
+    public ArrayList<Fee> getAllFees() throws IOException {
+        return feeData.getAllFees();
+    }
+    
+    public Fee getFeeByVehicleType(String vehicleType) throws IOException {
+        return feeData.getFeeByVehicleType(vehicleType);
+    }
+    
+    public void deleteFee(String vehicleType) throws IOException {
+        feeData.deleteFee(vehicleType);
+    }
+    
+    //InsertFee ungresa y actualiza de forma automática
+    public void updateFee(Fee fee) throws IOException {
+        validateFee(fee);
+        feeData.insertFee(fee);
+    }
+    
+    //Calculos para cobrar las tarifas
+    public double calculateEstimatedFee(String vehicleType, LocalDateTime entryTime, LocalDateTime exitTime) throws IOException {
+        
+        if (entryTime == null || exitTime == null){
+            throw new IllegalArgumentException("Fechas inválidas");
+        }
+
+        Fee fee = feeData.getFeeByVehicleType(vehicleType);
+        if (fee == null) {
+            throw new IllegalArgumentException("No hay tarifa configurada para: " + vehicleType);
+        }
+        
+        Duration duration = Duration.between(entryTime, exitTime);
+        long minutes = duration.toMinutes();
+        
+        return fee.calculateFeeForDuration(minutes);
+    }
+    
+    //Validación
+    private void validateFee(Fee fee){
+        if(fee == null){
+            throw new IllegalArgumentException("Tarifa requerida");
+        }
+        if (fee.getVehicleType() == null || fee.getVehicleType().isBlank()){
+            throw new IllegalArgumentException("Tipo de vehículo requerido");
+        }
+    }
 }

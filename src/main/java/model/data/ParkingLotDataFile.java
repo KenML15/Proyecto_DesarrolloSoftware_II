@@ -6,19 +6,11 @@ package model.data;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
-import model.entities.Customer;
 import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.Vehicle;
@@ -28,393 +20,221 @@ import model.entities.Vehicle;
  * @author 50687
  */
 public class ParkingLotDataFile {
-    
-    public int exception = 0;
-    String fileName;
-    final int ID = 0, NAME = 1, NUMBERSPACES = 2, VEHICLES = 3, SPACES = 4;
-    
-    SpaceDataFile spaceDataFile;
-    VehicleDataFile vehicleDataFile;
 
-    public ParkingLotDataFile(String fileName) {
+    private static final String PARKINGLOT_FILE = "ParkingLots.txt";
+    private static final String FIELD_DELIMITER = ";";
+    private static final String ITEM_DELIMITER = ",";
 
-        this.fileName = fileName;
+    private SpaceDataFile spaceData = new SpaceDataFile();
+    private VehicleDataFile vehicleData;
+
+    public ParkingLotDataFile() throws IOException {
+        spaceData = new SpaceDataFile();
+        vehicleData = new VehicleDataFile();
+        ensureFileExists();
     }
 
-    public ParkingLotDataFile() {
-    }
-
-    public ParkingLotDataFile(SpaceDataFile spaceDataFile, VehicleDataFile vehicleDataFile){
-        this.spaceDataFile = spaceDataFile;
-        this.vehicleDataFile = vehicleDataFile;
-    }
-    
-    public int insertParkingLot(ParkingLot parkingLot){
-        int result = -1;
-        exception = 0; 
-        
-        try{
-            File parkingLotFile = new File(fileName);
- 
-            FileOutputStream fileOutputStream = new FileOutputStream(parkingLotFile, true);
-
-            PrintStream printStream = new PrintStream(fileOutputStream);
-
-            boolean parkingLotExists = findParkingLotById(parkingLot.getId());
-            
-            
-            String vehicleIdsText = "";
-
-            ArrayList<Vehicle> vehicles = parkingLot.getVehicles();
-
-            if (vehicles != null) {
-                for (int i = 0; i < vehicles.size(); i++) {
-                    vehicleIdsText += vehicles.get(i).getId();
-                    if (i < vehicles.size() - 1) {
-                        vehicleIdsText += ",";
-                    }
-                }
+    private void ensureFileExists() {
+        File file = new File(PARKINGLOT_FILE);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                System.out.println("Error al crear el archivo del parqueo");
             }
-            
-            //Convertir los ids del espacio
-            String spaceIdsText = "";
-            Space[] spaces = parkingLot.getSpaces();
-            if(spaces != null){
-                for (int i = 0; i < spaces.length; i++) {
-                    spaceIdsText += spaces[i].getId();
-                    if (i < spaces.length - 1) {
-                        spaceIdsText += ",";
-                    }
-                }
+        }
+    }
+    
+    //Verifica si el nombre del parqueo ya existe
+    public boolean existsByName(String name) {
+        for (ParkingLot p : getAllParkingLots()) {
+            if (p.getName().equalsIgnoreCase(name.trim())) {
+                return true;
             }
+        }
+        return false;
+    }
 
-            if (!parkingLotExists){
-                printStream.println(parkingLot.getId() + ";"
-                        + parkingLot.getName() + ";"
-                        + parkingLot.getNumberOfSpaces() + ";"
-                        + vehicleIdsText + ";"
-                        + spaceIdsText + ";");
-
-                result = 0;
-            } else {
-                exception = 3;
-            } 
-            
-            fileOutputStream.close();
-            printStream.close();
-        } catch (FileNotFoundException fileException) {
-            exception = 1;  
-        }catch(IOException e){
-            exception = 2;
+    public void insertParkingLot(ParkingLot parkingLot) throws IOException {
+        if(getParkingLotById(parkingLot.getId()) != null){
+            return;
+        }
+        //Se hace la validación antes de insertar
+        if (existsByName(parkingLot.getName())) {
+            throw new IOException("El parqueo con el nombre '" + parkingLot.getName() + "' ya existe en el archivo.");
         }
         
-        return result;
+        try (PrintWriter writer = new PrintWriter(new FileWriter(PARKINGLOT_FILE, true))) {
+            writer.println(formatParkingLot(parkingLot));
+        }
     }
-    
-    public boolean findParkingLotById(int parkingLotId) {
 
-        exception = 0;
-        boolean parkingLotExists = false;
-        String parkingLotName = "",
-                parkingLotVehicles = "",
-                parkingLotSpaces = "";
-        
-        int id = 0;
-        int numberOfSpaces = 0;
+    public void updateParkingLot(ParkingLot parkingLot) throws IOException {
+        ArrayList<ParkingLot> parkingLots = getAllParkingLots();
 
-        int counter = 0;
-
-        try {
-
-            File parkingLotFile = new File(fileName);
-
-            FileInputStream fileInputStream
-                    = new FileInputStream(parkingLotFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null && !parkingLotExists) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-                    if (counter == ID) {
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-                    if (counter == NAME) {
-                        parkingLotName = stringTokenizer.nextToken();
-                    }
-                    if (counter == NUMBERSPACES) {
-                        numberOfSpaces = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-                    if (counter == VEHICLES) {
-                        parkingLotVehicles = stringTokenizer.nextToken();
-                    }
-                    if (counter == SPACES) {
-                        parkingLotSpaces = stringTokenizer.nextToken();
-                    }
-                    
-                    counter++;
-                }
-
-                if (parkingLotId == id) {
-                    
-                    parkingLotExists = true;
+        try (PrintWriter writer = new PrintWriter(new FileWriter(PARKINGLOT_FILE))) {
+            for (ParkingLot p : parkingLots) {
+                if (p.getId() == parkingLot.getId()) {
+                    writer.println(formatParkingLot(parkingLot));
                 } else {
-
-                    currentTuple = bufferedReader.readLine();
+                    writer.println(formatParkingLot(p));
                 }
-
-                counter = 0;
             }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-            exception = 1;
-        } catch (IOException ioException) {
-            exception = 2;
         }
+    }
 
-        return parkingLotExists;
+    public void deleteParkingLot(int id) throws IOException {
+        ArrayList<ParkingLot> parkingLots = getAllParkingLots();
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(PARKINGLOT_FILE))) {
+            for (ParkingLot p : parkingLots) {
+                if (p.getId() != id) {
+                    writer.println(formatParkingLot(p));
+                }
+            }
+        }
+    }
+
+    public ParkingLot getParkingLotById(int id) throws IOException {
+        for (ParkingLot parkingLot : getAllParkingLots()) {
+            if (parkingLot.getId() == id) {
+                return parkingLot;
+            }
+        }
+        return null;
     }
     
-    public ParkingLot getParkingLotFromFile(int parkingLotId) {
+    public int getNextId() throws IOException {
+        int maxId = 0;
 
-        exception = 0;
-
-        String parkingLotName = "",
-              parkingLotVehiclesPlate = "";
-        
-        int id = 0;
-        int numberOfSpaces = 0;
-        int parkingLotSpacesId = 0;
-        
-        int counter = 0;
-
-        ParkingLot parkingLotToReturn = null;
-        String currentTuple = "";
-
-        try {
-
-            File parkingLotFile = new File(fileName);
-
-            FileInputStream fileInputStream = new FileInputStream(parkingLotFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == ID) {
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-                    } else if (counter == NAME) {
-                        parkingLotName = stringTokenizer.nextToken();
-                    }else if (counter == NUMBERSPACES) {
-                        numberOfSpaces = Integer.parseInt(stringTokenizer.nextToken());
-                    }else if (counter == VEHICLES) {
-                        parkingLotVehiclesPlate = stringTokenizer.nextToken();
-                    }else if (counter == SPACES) {
-                        parkingLotSpacesId = Integer.parseInt(stringTokenizer.nextToken());
-                    } else {
-                        stringTokenizer.nextToken();
-                    }
-
-                    counter++;
-                }
-
-                if (parkingLotId == id) {
-                    ArrayList <Vehicle> vehicleList = new ArrayList<>();
-                    vehicleList.add(vehicleDataFile.getVehicleFromFile(parkingLotVehiclesPlate));
-
-                    Space [] spaceArray = new Space[1];
-                    spaceArray[0] = spaceDataFile.getSpaceFromFile(parkingLotSpacesId);
-                    
-                    parkingLotToReturn = new ParkingLot(id, parkingLotName, numberOfSpaces, vehicleList,
-                            spaceArray);
-                    break;
-
-                }
-
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-
+        for (ParkingLot parkingLot : getAllParkingLots()) {
+            if (parkingLot.getId() > maxId) {
+                maxId = parkingLot.getId();
             }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-            exception = 1;
-        } catch (IOException ioException) {
-            exception = 2;
         }
 
-        return parkingLotToReturn;
+        return maxId + 1;
     }
     
+    private String formatParkingLot(ParkingLot parkingLot) {
+
+        String vehicles = formatVehicles(parkingLot.getVehicles());
+        String spaces = formatSpaces(parkingLot.getSpaces());
+
+        return parkingLot.getId() + FIELD_DELIMITER
+                + parkingLot.getName() + FIELD_DELIMITER
+                + parkingLot.getNumberOfSpaces() + FIELD_DELIMITER
+                + vehicles + FIELD_DELIMITER
+                + spaces;
+    }
+    
+    private String formatVehicles(ArrayList<Vehicle> vehicles) {
+        if (vehicles == null || vehicles.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Vehicle v : vehicles) {
+            sb.append(v.getPlate()).append(ITEM_DELIMITER);
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
+    private String formatSpaces(Space[] spaces) {
+        if (spaces == null || spaces.length == 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Space s : spaces) {
+            if (s != null) {
+                sb.append(s.getId()).append(ITEM_DELIMITER);
+            }
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
     public ArrayList<ParkingLot> getAllParkingLots() {
+        ArrayList<ParkingLot> parkingLots = new ArrayList<>();
 
-        exception = 0;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PARKINGLOT_FILE))) {
+            String line;
 
-        ArrayList<ParkingLot> allParkingLots = new ArrayList<>();
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] parts = line.split(FIELD_DELIMITER);
 
-        String name = "",
-                vehicles = "";
-
-        int id = 0;
-        int numberOfSpaces = 0;
-        int spaces = 0;
-
-        int counter = 0;
-
-        try {
-
-            File parkingLotFile = new File(fileName);
- 
-            FileInputStream fileInputStream = new FileInputStream(parkingLotFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == ID) {
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-                    if (counter == NAME) {
-                        name = stringTokenizer.nextToken();
-                    }
-                    if (counter == NUMBERSPACES) {
-                        numberOfSpaces = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-                    if (counter == VEHICLES) {
-                        vehicles = stringTokenizer.nextToken();
-                    }
-                    if (counter == SPACES) {
-                        spaces = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-
-                    counter++;
+                if (parts.length < 5) {
+                    continue;
                 }
 
-                ArrayList<Vehicle> vehiclesInParkingLot = new ArrayList<>();
-                if (!vehicles.isEmpty()) {
-                    String[] vehiclesSplit = vehicles.split(",");
-                    for (String vehiclePlate : vehiclesSplit) {
-                        Vehicle vehicle = vehicleDataFile.getVehicleFromFile(vehiclePlate);
+                int id = Integer.parseInt(parts[0]);
+                String name = parts[1];
+                int numberOfSpaces = Integer.parseInt(parts[2]);
 
-                        if (vehicle != null) {
-                            vehiclesInParkingLot.add(vehicle);
-                        }
-                    }
-                }
-                
-                Space [] spaceArray = new Space[1];
-                    spaceArray[0] = spaceDataFile.getSpaceFromFile(spaces);
+                ArrayList<Vehicle> vehicles = parseVehicles(parts[3]);
+                Space[] spaces = parseSpaces(parts[4], numberOfSpaces);
 
-                ParkingLot parkingLot = new ParkingLot(id, name, numberOfSpaces, vehiclesInParkingLot, spaceArray);
-                allParkingLots.add(parkingLot);
-                currentTuple = bufferedReader.readLine();
+                ParkingLot parkingLot = new ParkingLot(id, name, numberOfSpaces, vehicles, spaces);
 
-                counter = 0;
-
+                parkingLots.add(parkingLot);
             }
 
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo del parqueo");
         }
-        catch (IOException ioE) {
-            exception = 2;
 
-        }
-        return allParkingLots;
+        return parkingLots;
     }
-    
-    public String[][] createParkingLotMatrix(ArrayList<ParkingLot> parkingLots) {
 
-        String[][] matrixParkingLotFromFile
-                = new String[parkingLots.size()][9];
+    private Space[] parseSpaces(String spaceIds, int numberOfSpaces) throws IOException {
+        Space[] spaces = new Space[numberOfSpaces];
 
-        for (int i = 0; i < parkingLots.size(); i++) {
-
-            ParkingLot parkingLot = parkingLots.get(i);
-
-            matrixParkingLotFromFile[i][ID] = "" + parkingLot.getId();
-            matrixParkingLotFromFile[i][NAME] = parkingLot.getName();
-            matrixParkingLotFromFile[i][NUMBERSPACES] = "" + parkingLot.getNumberOfSpaces();
-            matrixParkingLotFromFile[i][VEHICLES] = "" + parkingLot.getVehicles();
-            matrixParkingLotFromFile[i][SPACES] = "" + parkingLot.getSpaces();
+        if (spaceIds == null || spaceIds.isEmpty()) {
+            return spaces;
         }
-        
-        return matrixParkingLotFromFile;   
-    }
-        
-    public void deleteParkingLotFromFile(String lineToRemove) {
 
-        exception = 0;
+        String[] ids = spaceIds.split(ITEM_DELIMITER);
+        int index = 0;
 
-        try {
-
-            File file = new File(fileName);
-
-            File tempFile = new File("ParkingLotTemp");
-
-            BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
-            PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
-
-            String line = null;
-
-            while ((line = bufferReader.readLine()) != null) {
-
-                if (!line.trim().equals(lineToRemove)) {
-
-                    printWriter.println(line);
-                    printWriter.flush();
-                }
+        for (String idStr : ids) {
+            if (index >= numberOfSpaces) {
+                break;
             }
 
-            bufferReader.close();
-            printWriter.close();
-
-            if (!file.delete()) {
-                exception = 4;
+            int id = Integer.parseInt(idStr.trim());
+            Space space = spaceData.getSpaceFromFile(id);
+            if (space != null) {
+                spaces[index] = space;
+                index++;
+            } else {
+                //Para probar
+                Space placeholder = new Space();
+                placeholder.setId(id);
+                placeholder.setSpaceTaken(false);
+                spaces[index] = placeholder;
             }
-
-            if (!tempFile.renameTo(file)) {
-                exception = 5;
-            }
-
-        } catch (FileNotFoundException ex) {
-            exception = 1;
-        } catch (IOException ex) {
-            exception = 2;
         }
+
+        return spaces;
     }
-    
+
+    private ArrayList<Vehicle> parseVehicles(String vehiclePlates) throws IOException {
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+
+        if (vehiclePlates == null || vehiclePlates.isEmpty()) {
+            return vehicles;
+        }
+
+        String[] plates = vehiclePlates.split(ITEM_DELIMITER);
+
+        for (String plate : plates) {
+            String plateToFound = plate.trim();
+            Vehicle vehicle = vehicleData.getVehicleByPlate(plateToFound);
+            if (vehicle != null) {
+                vehicles.add(vehicle);
+            }
+        }
+
+        return vehicles;
+    }
 }

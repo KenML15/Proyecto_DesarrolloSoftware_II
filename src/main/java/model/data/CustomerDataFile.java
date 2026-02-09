@@ -6,18 +6,12 @@ package model.data;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import model.entities.Customer;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 /**
  *
@@ -25,536 +19,190 @@ import java.util.StringTokenizer;
  */
 public class CustomerDataFile {
 
-    public int exception = 0;
-    String fileName;
-    final int ID = 0, NAME = 1, DISABILITY = 2, EMAIL = 3, ADDRESS = 4, PHONE = 5;
-    public static final String FILECUSTOMER = "Customers.txt";
+    private final String fileName;
+    private static final String DELIMITER = ";";
 
-    public CustomerDataFile(String fileName) {
-
+    public CustomerDataFile(String fileName) throws IOException {
         this.fileName = fileName;
+        ensureFileExists();
     }
 
-    public CustomerDataFile() {
+    public CustomerDataFile() throws IOException {
+        this("Customers.txt");
     }
 
-    public int insert(Customer customer) {
-
-        int result = -1;
-        exception = 0;
-
-        try {
-
-            File customerFile = new File(fileName);
-
-            FileOutputStream fileOutputStream = new FileOutputStream(customerFile, true);
-
-            PrintStream printStream = new PrintStream(fileOutputStream);
-
-            boolean customerExists = find(customer.getName(), customer.getEmail());
-
-            if (!customerExists) {
-
-                printStream.println(customer.getId() + ";"
-                        + customer.getName() + ";"
-                        + customer.isDisabilityPresented() + ";"
-                        + customer.getEmail() + ";"
-                        + customer.getAddress() + ";"
-                        + customer.getPhoneNumber());
-
-                result = 0;
-
-            } else {
-
-                exception = 3;
-            }
-
-            fileOutputStream.close();
-            printStream.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ex) {
-
-            exception = 2;
+    private void ensureFileExists() throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            file.createNewFile();
         }
-
-        return result;
     }
 
-    public void modifyCustomerFromFile(String lineToModify, String newList) {
+    public void insertCustomer(Customer customer) throws IOException {
+        validateCustomer(customer);
+        checkDuplicate(customer);
+        appendToFile(customer);
+    }
 
-        exception = 0;
+    private void validateCustomer(Customer customer) {
+        if (isNullOrEmpty(customer.getName())) {
+            throw new IllegalArgumentException("Nombre requerido");
+        }
+        if (!isValidEmail(customer.getEmail())) {
+            throw new IllegalArgumentException("Email inválido");
+        }
+    }
 
-        try {
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
 
-            File file = new File(fileName);
+    private boolean isValidEmail(String email) {
+        return email != null && email.contains("@");
+    }
 
-            File tempFile = new File(FILECUSTOMER);
+    private void checkDuplicate(Customer customer) throws IOException {
+        if (existsByEmail(customer.getEmail())) {
+            throw new IllegalArgumentException("Email ya existe");
+        }
+    }
 
-            BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
-            PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
+    private boolean existsByEmail(String email) throws IOException {
+        return getCustomerByEmail(email) != null;
+    }
 
-            String line = null;
+    private void appendToFile(Customer customer) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(fileName, true))) {
+            writer.println(formatCustomer(customer));
+        }
+    }
 
-            while ((line = bufferReader.readLine()) != null) {
+    private String formatCustomer(Customer customer) {
+        return String.join(DELIMITER,
+                String.valueOf(customer.getId()),
+                customer.getName(),
+                String.valueOf(customer.isDisabilityPresented()),
+                customer.getEmail(),
+                customer.getAddress(),
+                customer.getPhoneNumber()
+        );
+    }
 
-                if (!line.trim().equals(lineToModify)) {
+    public void updateCustomer(Customer customer) throws IOException {
+        validateCustomer(customer);
+        File file = new File(fileName);
+        File temp = new File("temp.txt");
+        replaceCustomerInFile(customer, file, temp);
+        replaceCustomerFile(file, temp);
+    }
 
-                    printWriter.println(line);
-                    printWriter.flush();
+    private void replaceCustomerInFile(Customer customer, File source, File target) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(source)); PrintWriter writer = new PrintWriter(new FileWriter(target))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (isSameCustomer(line, customer)) {
+                    writer.println(formatCustomer(customer));
                 } else {
-
-                    printWriter.println(newList);
+                    writer.println(line);
                 }
             }
-
-            bufferReader.close();
-            printWriter.close();
-
-            if (!file.delete()) {
-
-                exception = 4;
-            }
-
-            if (!tempFile.renameTo(file)) {
-
-                exception = 5;
-            }
-
-        } catch (FileNotFoundException ex) {
-
-            exception = 1;
-
-        } catch (IOException ex) {
-
-            exception = 2;
         }
     }
 
-    public Customer getCustomerFromFile(int customerId) {
-
-        exception = 0;
-
-        String customerName = "",
-                customerEmail = "",
-                phone = "",
-                address = "";
-
-        int id = 0;
-        boolean customerDisability = false;
-        int counter = 0;
-
-        Customer customer = null;
-        String currentTuple = "";
-
-        try {
-
-            File customerFile = new File(fileName);
-
-            FileInputStream fileInputStream = new FileInputStream(customerFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == ID) {
-
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-
-                    } else if (counter == NAME) {
-
-                        customerName = stringTokenizer.nextToken();
-
-                    } else if (counter == DISABILITY) {
-
-                        customerDisability = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    } else if (counter == EMAIL) {
-
-                        customerEmail = stringTokenizer.nextToken();
-
-                    } else if (counter == ADDRESS) {
-
-                        address = stringTokenizer.nextToken();
-
-                    } else if (counter == PHONE) {
-
-                        phone = stringTokenizer.nextToken();
-
-                    } else {
-
-                        stringTokenizer.nextToken();
-                    }
-                    
-                    counter++;
-                }
-
-                if (customerId == id) {
-                    customer = new Customer(id, customerName, customerDisability, customerEmail, address, phone);
-                    break;
-                }
-
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ioException) {
-
-            exception = 2;
-        }
-
-        return customer;
+    private boolean isSameCustomer(String line, Customer customer) {
+        return line.startsWith(customer.getId() + DELIMITER);
     }
-    
-    /*public Customer buildCustomerFromLine(String customerFromFile) {
-        if (customerFromFile == null || customerFromFile.trim().isEmpty()) {
+
+    private void replaceCustomerFile(File original, File temp) throws IOException {
+        if (!original.delete()) {
+            throw new IOException("No se pudo borrar archivo original");
+        }
+        if (!temp.renameTo(original)) {
+            throw new IOException("No se pudo renombrar archivo temporal");
+        }
+    }
+
+    public void deleteCustomer(int id) throws IOException {
+        File file = new File(fileName);
+        File temp = new File("temp.txt");
+        deleteCustomerFromFile(id, file, temp);
+        replaceCustomerFile(file, temp);
+    }
+
+    private void deleteCustomerFromFile(int id, File source, File target) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(source)); PrintWriter writer = new PrintWriter(new FileWriter(target))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.startsWith(id + DELIMITER)) {
+                    writer.println(line);
+                }
+            }
+        }
+    }
+
+    public ArrayList<Customer> getAllCustomers() throws IOException {
+        ArrayList<Customer> customers = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Customer customer = parseCustomer(line);
+                if (customer != null) {
+                    customers.add(customer);
+                }
+            }
+        }
+        return customers;
+    }
+
+    private Customer parseCustomer(String line) {
+        String[] parts = line.split(DELIMITER, -1);
+        if (parts.length != 6) {
             return null;
         }
 
-        StringTokenizer stringTokenizer = new StringTokenizer(customerFromFile, ";");
-
-        // Orden: ID=0, NAME=1, EMAIL=2, ADDRESS=3, PHONE=4
-        int id = Integer.parseInt(stringTokenizer.nextToken());
-        String name = stringTokenizer.nextToken();
-        boolean disability = Boolean.parseBoolean(stringTokenizer.nextToken());
-        String email = stringTokenizer.nextToken();
-        String address = stringTokenizer.nextToken();
-        String phone = stringTokenizer.nextToken();
-
-        Customer customer = new Customer();
-        customer.setId(id);
-        customer.setName(name);
-        customer.setDisabilityPresented(disability);
-        customer.setEmail(email);
-        customer.setAddress(address);
-        customer.setPhoneNumber(phone);
-
-        return customer;
-    }*/
-
-    public boolean find(String name, String email) {
-
-        exception = 0;
-        boolean customerExists = false;
-        String customerName = "",
-                customerEmail = "",
-                phone = "",
-                address = "";
-
-        int id = 0;
-        boolean customerDisability = false;
-        int counter = 0;
-
-        try {
-
-            File customerFile = new File(fileName);
- 
-            FileInputStream fileInputStream
-                    = new FileInputStream(customerFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null && !customerExists) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == ID) {
-
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-
-                    }
-                    if (counter == NAME) {
-
-                        customerName = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == DISABILITY) {
-
-                        customerDisability = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    }
-                    if (counter == EMAIL) {
-
-                        customerEmail = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == ADDRESS) {
-
-                        address = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == PHONE) {
-
-                        phone = stringTokenizer.nextToken();
-
-                    }
-                    counter++;
-                }
-
-                if (name.equalsIgnoreCase(customerName)
-                        && email.equalsIgnoreCase(customerEmail)) {
-
-                    customerExists = true;
-                } else {
-
-                    currentTuple = bufferedReader.readLine();
-                }
-                counter = 0;
-
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ioException) {
-
-            exception = 2;
-
-        }
-
-        return customerExists;
+        return new Customer(
+                Integer.parseInt(parts[0]),
+                parts[1],
+                Boolean.parseBoolean(parts[2]),
+                parts[3],
+                parts[4],
+                parts[5]
+        );
     }
 
-    public int findLastIdNumberOfCustomer() {
-
-        exception = 0;
-
-        int counter = 0;
-        int idCustomer = 0;
-
-        try {
-
-            File customerFile = new File(fileName);
- 
-            FileInputStream fileInputStream
-                    = new FileInputStream(customerFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == ID) {
-
-                        idCustomer = Integer.parseInt(stringTokenizer.nextToken());
-
-                        break;
-                    }
-
-                    counter++;
-                }
-
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ioException) {
-
-            exception = 2;
-        }
-
-        return idCustomer;
-    }
-
-    public ArrayList<Customer> getAllCustomers() {
-
-        exception = 0;
-        ArrayList<Customer> allCustomers = new ArrayList<>();
-        String name = "",
-                email = "",
-                phone = "",
-                address = "";
-
-        int id = 0;
-        boolean disability = false;
-        int counter = 0;
-
-        try {
-
-            File customerFile = new File(fileName);
- 
-            FileInputStream fileInputStream
-                    = new FileInputStream(customerFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == ID) {
-
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-
-                    }
-                    if (counter == NAME) {
-
-                        name = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == DISABILITY) {
-
-                        disability = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    }
-                    if (counter == EMAIL) {
-
-                        email = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == ADDRESS) {
-
-                        address = stringTokenizer.nextToken();
-
-                    }
-                    if (counter == PHONE) {
-
-                        phone = stringTokenizer.nextToken();
-
-                    }
-                    counter++;
-                }
-
-                Customer customer = new Customer(id, name, disability, email, address, phone);
-                allCustomers.add(customer);
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        }
-        catch (IOException ioE) {
-            exception = 2;
-        }
-
-        return allCustomers;
-    }
-
-    public String[][] createCustomerMatrix(ArrayList<Customer> customers) {
-
-        String[][] matrixClientsFromFile
-                = new String[customers.size()][5];
-
-        for (int i = 0; i < customers.size(); i++) {
-
-            Customer customer = customers.get(i);
-
-            matrixClientsFromFile[i][ID] = "" + customer.getId();
-            matrixClientsFromFile[i][NAME] = customer.getName();
-            matrixClientsFromFile[i][DISABILITY] = "" + customer.isDisabilityPresented();
-            matrixClientsFromFile[i][EMAIL] = customer.getEmail();
-            matrixClientsFromFile[i][ADDRESS] = customer.getAddress();
-            matrixClientsFromFile[i][PHONE] = customer.getPhoneNumber();
-        }
-
-        return matrixClientsFromFile;
-    }
-
-    public void deleteCustomerFromFile(String lineToRemove) {
-
-        exception = 0;
-
-        try {
-
-            File file = new File(fileName);
-
-            File tempFile = new File("CustomersTemp");
-
-            BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
-            PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
-
-            String line = null;
-
-            while ((line = bufferReader.readLine()) != null) {
-
-                if (!line.trim().equals(lineToRemove)) {
-
-                    printWriter.println(line);
-                    printWriter.flush();
+    public Customer getCustomerById(int id) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Customer customer = parseCustomer(line);
+                if (customer != null && customer.getId() == id) {
+                    return customer;
                 }
             }
-
-            bufferReader.close();
-            printWriter.close();
-
-            if (!file.delete()) {
-
-                exception = 4;
-            }
-
-            if (!tempFile.renameTo(file)) {
-
-                exception = 5;
-            }
-
-        } catch (FileNotFoundException ex) {
-
-            exception = 1;
-
-        } catch (IOException ex) {
-
-            exception = 2;
         }
+        return null;
+    }
+
+    public Customer getCustomerByEmail(String email) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Customer customer = parseCustomer(line);
+                if (customer != null && customer.getEmail().equalsIgnoreCase(email)) {
+                    return customer;
+                }
+            }
+        }
+        return null;
+    }
+
+    public int getCustomerNextId() throws IOException {
+        int maxId = 0;
+        for (Customer customer : getAllCustomers()) {
+            if (customer.getId() > maxId) {
+                maxId = customer.getId();
+            }
+        }
+        return maxId + 1;
     }
 }

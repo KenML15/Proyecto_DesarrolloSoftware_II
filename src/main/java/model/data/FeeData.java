@@ -4,71 +4,132 @@
  */
 package model.data;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.XMLOutputter;
 import model.entities.Fee;
-import model.entities.VehicleType;
+import org.jdom2.output.Format;
 
 /**
  *
  * @author 50687
  */
 public class FeeData {
-    private static final String FEE = "fee.txt";
-    private static final String CONFG = "config_fee_prices.txt";
+    
+    private static final String FEE_FILE = "Fees.xml";
+    private Element root;
+    private Document document;
 
-    public boolean configureFeePrices(Fee newFee){
-        boolean works = false;
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(CONFG, true))){
-            String line = newFee.getVehicleType() + ";"
-                    + newFee.getHalfHourRate() + ";"
-                    + newFee.getHourlyRate() + ";"
-                    + newFee.getDailyRate() + ";"
-                    + newFee.getWeeklyRate() + ";"
-                    + newFee.getMonthlyRate() + ";"
-                    + newFee.getAnnualRate() + ";";
-            
-            bufferedWriter.write(line);
-            bufferedWriter.newLine();
-            
-            works = true;
-        }catch(IOException e){
-            works = false;
-        }
-        return works;
+    public FeeData() throws IOException, JDOMException {
+        ensureFileExists();
     }
     
-    public Fee searchFee(String vehicleType, ArrayList<VehicleType> allVehicleTypes) {
-        Fee feeToReturn = null;
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(CONFG))) {
-
-            String line;
-            
-            while ((line = bufferedReader.readLine()) != null) {
-
-                String[] splitLines = line.split(",");
-                if (splitLines[0].equalsIgnoreCase(vehicleType)) {
-
-                    String foundType = null;
-                    for (VehicleType vehicleTypeToFound : allVehicleTypes) {
-                        if (vehicleTypeToFound.getDescription().equalsIgnoreCase(vehicleType)) {
-                            foundType = vehicleTypeToFound.getDescription();
-                            break;
-                        }
-                    }
-                    
-                    feeToReturn = new Fee(foundType, Float.parseFloat(splitLines[1]), Float.parseFloat(splitLines[2]), Float.parseFloat(splitLines[3]),
-                            Float.parseFloat(splitLines[4]), Float.parseFloat(splitLines[5]), Float.parseFloat(splitLines[6]));
-                }
-                
-            }
-        } catch (IOException e) {
-            feeToReturn = null;
+    private void ensureFileExists() throws IOException, JDOMException {
+        File file = new File(FEE_FILE);
+        if (!file.exists()) {
+            root = new Element("fees");
+            document = new Document(root);
+            saveToFile();
+        } else {
+            SAXBuilder builder = new SAXBuilder();
+            builder.setIgnoringElementContentWhitespace(true);
+            document = builder.build(file);
+            root = document.getRootElement();
         }
-        return feeToReturn;
-    }   
+    }
+    
+    private void saveToFile() throws IOException {
+        XMLOutputter xmlOutput = new XMLOutputter();
+        xmlOutput.setFormat(Format.getPrettyFormat()); // Para que el XML sea legible
+        try (FileWriter writer = new FileWriter(FEE_FILE)) {
+            xmlOutput.output(document, writer);
+        }
+    }
+    
+    //Este método sirve para insertar ymodificar todo lo del registro
+    public void insertFee(Fee fee) throws IOException {
+        deleteFee(fee.getVehicleType());
+        
+        Element feeXML = new Element("fee");
+        //feeXML.setAttribute("id", String.valueOf(fee.getId()));
+        Element feeVehicleType = new Element("vehicleType");
+        feeVehicleType.addContent(fee.getVehicleType());
+        Element feeHalfHour = new Element("halfHour");
+        feeHalfHour.setText(String.valueOf(fee.getHalfHourRate()));
+        Element feeHourly = new Element("hourly");
+        feeHourly.setText(String.valueOf(fee.getHourlyRate()));
+        Element feeDaily = new Element("daily");
+        feeDaily.setText(String.valueOf(fee.getDailyRate()));
+        Element feeWeekly = new Element("weekly");
+        feeWeekly.setText(String.valueOf(fee.getWeeklyRate()));
+        Element feeMonthly = new Element("monthly");
+        feeMonthly.setText(String.valueOf(fee.getMonthlyRate()));
+        Element feeAnnual = new Element("annual");
+        feeAnnual.setText(String.valueOf(fee.getAnnualRate()));
+
+        feeXML.addContent(feeVehicleType);
+        feeXML.addContent(feeHalfHour);
+        feeXML.addContent(feeHourly);
+        feeXML.addContent(feeDaily);
+        feeXML.addContent(feeWeekly);
+        feeXML.addContent(feeMonthly);
+        feeXML.addContent(feeAnnual);
+        
+
+        root.addContent(feeXML);
+        saveToFile();
+    }//insertarEquipo
+    
+    public ArrayList<Fee> getAllFees(){
+        ArrayList<Fee> fees = new ArrayList<>();
+        List<Element> feeList = root.getChildren("fee");
+        
+        for (Element element : feeList) {
+            fees.add(new Fee(
+                    element.getChildText("vehicleType"),
+                    Float.parseFloat(element.getChildText("halfHour")),
+                    Float.parseFloat(element.getChildText("hourly")),
+                    Float.parseFloat(element.getChildText("daily")),
+                    Float.parseFloat(element.getChildText("weekly")),
+                    Float.parseFloat(element.getChildText("monthly")),
+                    Float.parseFloat(element.getChildText("annual")))
+            );
+        }
+        
+        return fees;
+    }
+    
+    //Metodo para mostrar las tarifas de forma individual
+    public Fee getFeeByVehicleType(String vehicleType) {
+    for (Fee fee : getAllFees()) {
+        if (fee.getVehicleType().equalsIgnoreCase(vehicleType)) {
+            return fee;
+        }
+    }
+    return null; 
+}
+    
+    public void deleteFee(String vehicleType) throws IOException{
+        List<Element> feeList = root.getChildren("fee");
+        Element element = null;
+        
+        for (Element elementToFound : feeList) {
+            if(elementToFound.getChildText("vehicleType").equalsIgnoreCase(vehicleType)){
+                element = elementToFound;
+                break;
+            }  
+        }
+        
+        if (element != null){
+            root.removeContent(element);
+            saveToFile();
+        }
+    }
 }

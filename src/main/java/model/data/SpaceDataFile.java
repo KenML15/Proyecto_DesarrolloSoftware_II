@@ -6,505 +6,272 @@ package model.data;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
 import model.entities.Space;
+import model.entities.VehicleType;
 
 /**
  *
  * @author 50687
  */
-class SpaceDataFile {
-
-    public int exception = 0;
-    String fileName;
-    final int SPACEID = 0, ADAPT = 1, TAKEN = 2, VEHICLETYPE = 3;
-
-    public SpaceDataFile(String fileName) {
-
-        this.fileName = fileName;
-
-    }
-
-    public int insert(Space space) {
-
-        int result = -1;
-        exception = 0;
-
-        try {
-
-            File spaceFile = new File(fileName);
- 
-            FileOutputStream fileOutputStream
-                    = new FileOutputStream(spaceFile, true);
-
-            PrintStream printStream
-                    = new PrintStream(fileOutputStream);
-
-            boolean spaceExists = find(space.getId());
-
-            if (!spaceExists) {
-
-                printStream.println(space.getId() + ";"
-                        + space.isDisabilityAdaptation() + ";"
-                        + space.isSpaceTaken() + ";"
-                        + space.getVehicleTypeId() + ";");
-
-                result = 0;
-
-            } else {
-
-                exception = 3;
-            }
-
-            fileOutputStream.close();
-            printStream.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ex) {
-
-            exception = 2;
-        }
-
-        return result;
-    }
-
-    public void modifySpacesFromFile(String lineToModify, String newSpace) {
-
-        exception = 0;
-
-        try {
-
-            File file = new File(fileName);
-
-            File tempFile = new File("SpacesTemp");
-
-            BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
-            PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
-
-            String line = null;
-
-            while ((line = bufferReader.readLine()) != null) {
-
-                if (!line.trim().equals(lineToModify)) {
-
-                    printWriter.println(line);
-                    printWriter.flush();
-                } else {
-
-                    printWriter.println(newSpace);
-                }
-            }
-
-            bufferReader.close();
-            printWriter.close();
-
-            if (!file.delete()) {
-
-                exception = 4;
-            }
-
-            if (!tempFile.renameTo(file)) {
-
-                exception = 5;
-            }
-
-        } catch (FileNotFoundException ex) {
-
-            exception = 1;
-
-        } catch (IOException ex) {
-
-            exception = 2;
-        }
-    }
-
-    public Space getSpaceFromFile(int spaceId) {
-
-        exception = 0;
-
-        int counter = 0;
-        int spaceNumber = 0;
-        boolean disabilityAdaptation = false;
-        boolean spaceTaken = false;
-        int vehicleTypeId = 0;
-
-        Space space = null;
-        String currentTuple = "";
-
-        try {
-
-            File spaceFile = new File(fileName);
-
-            FileInputStream fileInputStream
-                    = new FileInputStream(spaceFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == SPACEID) {
-
-                        spaceNumber = Integer.parseInt(stringTokenizer.nextToken());
-                    }
-                    else if (counter == ADAPT) {
-
-                        disabilityAdaptation = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    }
-                    else if (counter == TAKEN) {
-
-                        spaceTaken = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    }
-                    else if (counter == VEHICLETYPE) {
-
-                        vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
-
-                    } else {
-
-                        stringTokenizer.nextToken();
-
-                    }
-
-                    counter++;
-                }
-
-                if (spaceId == spaceNumber) {
-                    space = new Space(spaceNumber, disabilityAdaptation, spaceTaken, vehicleTypeId);
-                    break;
-
-                }
-
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ioException) {
-
-            exception = 2;
-        }
- 
-        return space;
-
+public class SpaceDataFile {
+
+    private final String fileName;
+    private final VehicleTypeDataFile vehicleTypeData;
+    private static final String DELIMITER = ";";
+    private static final String DEFAULT_FILE = "Spaces.txt";
+    
+    public SpaceDataFile() throws IOException {
+        this(DEFAULT_FILE, new VehicleTypeDataFile());
     }
     
-    public Space buildSpaceFromLine(String spaceFromFile) {
-        if (spaceFromFile == null || spaceFromFile.trim().isEmpty()) {
+    public SpaceDataFile(String fileName, VehicleTypeDataFile vehicleTypeData) 
+            throws IOException {
+        this.fileName = fileName;
+        this.vehicleTypeData = vehicleTypeData;
+        ensureFileExists();
+    }
+    
+    private void ensureFileExists() throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+    }
+    
+    public void insertSpace(Space space) throws IOException {
+        validateSpace(space);
+        checkDuplicate(space.getId());
+        appendToFile(space);
+    }
+    
+    private void validateSpace(Space space) {
+        if (space.getId() < 0) {
+            throw new IllegalArgumentException("ID inválido");
+        }
+    }
+    
+    private void checkDuplicate(int id) throws IOException {
+        if (getSpaceFromFile(id) != null) {
+            throw new IllegalArgumentException("Espacio ya existe");
+        }
+    }
+    
+    private void appendToFile(Space space) throws IOException {
+        PrintWriter writer = new PrintWriter(new FileWriter(fileName, true));
+        writer.println(formatSpace(space));
+        writer.close();
+    }
+
+    
+    private String formatSpace(Space space) {
+        int typeId = getVehicleTypeId(space);
+        return String.join(DELIMITER,
+            String.valueOf(space.getId()),
+            String.valueOf(space.isDisabilityAdaptation()),
+            String.valueOf(space.isSpaceTaken()),
+            String.valueOf(typeId)
+        );
+    }
+    
+    private int getVehicleTypeId(Space space) {
+        if (space.getVehicleType() == null) {
+            return 0;
+        }
+        return space.getVehicleType().getId();
+    }
+    
+    public Space getSpaceFromFile(int id) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        Space result = findSpaceById(id, reader);
+        reader.close();
+        return result;
+    }
+    
+    private Space findSpaceById(int id, BufferedReader reader) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            Space space = parseSpace(line);
+            if (space != null && space.getId() == id) {
+                return space;
+            }
+        }
+        return null;
+    }
+    
+    private Space parseSpace(String line) throws IOException {
+        if (line == null || line.trim().isEmpty()) {
             return null;
         }
-
-        StringTokenizer stringTokenizer = new StringTokenizer(spaceFromFile, ";");
-
-        // El orden según tus constantes: ID=0, DESCRIPTION=1, TIRES=2, FEE=3
-        int id = Integer.parseInt(stringTokenizer.nextToken());
-        boolean adapt = Boolean.parseBoolean(stringTokenizer.nextToken());
-        boolean taken = Boolean.parseBoolean(stringTokenizer.nextToken());
-        int vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
-
+        
+        String[] parts = line.split(DELIMITER, -1);
+        if (parts.length != 4) {
+            return null;
+        }
+        
+        try {
+            return createSpaceFromParts(parts);
+        } catch (Exception e) {
+            throw new IOException("Error parseando espacio: " + e.getMessage());
+        }
+    }
+    
+    private Space createSpaceFromParts(String[] parts) throws IOException {
+        int id = Integer.parseInt(parts[0]);
+        boolean adapt = Boolean.parseBoolean(parts[1]);
+        boolean taken = Boolean.parseBoolean(parts[2]);
+        int typeId = Integer.parseInt(parts[3]);
+        
         Space space = new Space();
         space.setId(id);
         space.setDisabilityAdaptation(adapt);
         space.setSpaceTaken(taken);
-        //Nota: Guardas el ID del tipo, podrías luego cargar el objeto completo si fuera necesario
-        space.setVehicleTypeId(vehicleTypeId);
-
+        
+        if (typeId > 0) {
+            VehicleType type = vehicleTypeData.getVehicleTypeFromFile(typeId);
+            space.setVehicleType(type);
+        }
+        
         return space;
     }
+    
+    public Space[] getAllSpaces() throws IOException {
+        int totalSpaces = countLines(fileName);
+        Space[] spaces = new Space[totalSpaces];
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        addAllSpacesFromReader(spaces, reader);
+        reader.close();
+        return spaces;
+    }
+    
+    private int countLines(String fileName) throws IOException {
 
-    public boolean find(int spaceId) {
+        int count = 0;
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
 
-        exception = 0;
-        boolean spaceExists = false;
-
-        int id = 0;
-        int counter = 0;
-
-        try {
-
-            File spaceFile = new File(fileName);
-
-            FileInputStream fileInputStream
-                    = new FileInputStream(spaceFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null && !spaceExists) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == SPACEID) {
-
-                        id = Integer.parseInt(stringTokenizer.nextToken());
-
-                    }
-                    
-                    counter++;
-                }
-
-                if (spaceId == id) {
-
-                    spaceExists = true;
-                } else {
-
-                    currentTuple = bufferedReader.readLine();
-                }
-
-                counter = 0;
-
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ioException) {
-
-            exception = 2;
-
+        while (reader.readLine() != null) {
+            count++;
         }
 
-        return spaceExists;
+        reader.close();
+        return count;
     }
 
-    public int findLastIdNumberOfSpace() {
-
-        exception = 0;
-
-        int counter = 0;
-        int idSpace = 0;
-
-        try {
-
-            File spaceFile = new File(fileName);
-
-            FileInputStream fileInputStream
-                    = new FileInputStream(spaceFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == SPACEID) {
-
-                        idSpace = Integer.parseInt(stringTokenizer.nextToken());
-
-                        break;
-                    }
-
-                    counter++;
-                }
-
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-
+    
+    private void addAllSpacesFromReader(Space[] spaces, BufferedReader reader) throws IOException {
+        String line;
+        int index = 0;
+        while ((line = reader.readLine()) != null && index < spaces.length) {
+            
+            Space space = parseSpace(line);
+            if (space != null) {
+                spaces[index] = space;
+                index++;
             }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        } catch (FileNotFoundException fileException) {
-
-            exception = 1;
-
-        } catch (IOException ioException) {
-
-            exception = 2;
         }
-
-        return idSpace;
     }
-
-    public ArrayList<Space> getAllSpaces() {
-
-        exception = 0;
-        ArrayList<Space> allSpaces = new ArrayList<>();
-
-        int spaceNumber = 0;
-        boolean disabilityAdaptation = false;
-        boolean spaceTaken = false;
-        int vehicleTypeId = 0;
-        int counter = 0;
-
-        try {
-
-            File customerFile = new File(fileName);
- 
-            FileInputStream fileInputStream
-                    = new FileInputStream(customerFile);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String currentTuple = bufferedReader.readLine();
-
-            while (currentTuple != null) {
-
-                StringTokenizer stringTokenizer
-                        = new StringTokenizer(currentTuple, ";");
-
-                while (stringTokenizer.hasMoreTokens()) {
-
-                    if (counter == SPACEID) {
-
-                        spaceNumber = Integer.parseInt(stringTokenizer.nextToken());
-
-                    }else if (counter == ADAPT) {
-
-                        disabilityAdaptation = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    }else if (counter == TAKEN) {
-
-                        spaceTaken = Boolean.parseBoolean(stringTokenizer.nextToken());
-
-                    }else if (counter == VEHICLETYPE) {
-
-                        vehicleTypeId = Integer.parseInt(stringTokenizer.nextToken());
-
-                    }
-
-                    counter++;
-                }
-
-                Space space = new Space(spaceNumber, disabilityAdaptation, spaceTaken, vehicleTypeId);
-                allSpaces.add(space);
-                currentTuple = bufferedReader.readLine();
-
-                counter = 0;
-            }
-
-            bufferedReader.close();
-            fileInputStream.close();
-            inputStreamReader.close();
-
-        }
-        catch (IOException ioE) {
-            exception = 2;
-
-        }
-
-        return allSpaces;
-
+    
+    public void updateSpace(Space space) throws IOException {
+        validateSpace(space);
+        File file = new File(fileName);
+        File temp = new File("temp_spaces.txt");
+        replaceInFile(space, file, temp);
+        replaceFile(file, temp);
     }
-
-    public String[][] createSpaceMatrix(ArrayList<Space> spaces) {
-
-        String[][] matrixSpacesFromFile
-                = new String[spaces.size()][4];
-
-        for (int i = 0; i < spaces.size(); i++) {
-
-            Space space = spaces.get(i);
-
-            matrixSpacesFromFile[i][SPACEID] = "" + space.getId();
-            matrixSpacesFromFile[i][ADAPT] = "" + space.isDisabilityAdaptation();
-            matrixSpacesFromFile[i][TAKEN] = "" + space.isSpaceTaken();
-            matrixSpacesFromFile[i][VEHICLETYPE] = "" + space.getVehicleTypeId();
-
-        }
-
-        return matrixSpacesFromFile;
-
+    
+    private void replaceInFile(Space space, File source, File target) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(source));
+        PrintWriter writer = new PrintWriter(new FileWriter(target));
+        writeUpdatedFile(space, reader, writer);
+        reader.close();
+        writer.close();
     }
-
-    public void deleteSpaceFromFile(String lineToRemove) {
-
-        exception = 0;
-
-        try {
-
-            File file = new File(fileName);
-
-            File tempFile = new File("SpacesTemp");
-
-            BufferedReader bufferReader = new BufferedReader(new FileReader(fileName));
-            PrintWriter printWriter = new PrintWriter(new FileWriter(tempFile));
-
-            String line = null;
-
-            while ((line = bufferReader.readLine()) != null) {
-
-                if (!line.trim().equals(lineToRemove)) {
-
-                    printWriter.println(line);
-                    printWriter.flush();
-                }
+    
+    private void writeUpdatedFile(Space space, BufferedReader reader, PrintWriter writer) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (isSameSpace(line, space)) {
+                writer.println(formatSpace(space));
+            } else {
+                writer.println(line);
             }
-
-            bufferReader.close();
-            printWriter.close();
-
-            if (!file.delete()) {
-
-                exception = 4;
-            }
-
-            if (!tempFile.renameTo(file)) {
-
-                exception = 5;
-            }
-
-        } catch (FileNotFoundException ex) {
-
-            exception = 1;
-
-        } catch (IOException ex) {
-
-            exception = 2;
         }
+    }
+    
+    private boolean isSameSpace(String line, Space space) {
+        String[] parts = line.split(DELIMITER);
+        return parts.length > 0 && Integer.parseInt(parts[0]) == space.getId();
+    }
+    
+    private void replaceFile(File original, File temp) throws IOException {
+        if (!original.delete()) {
+            throw new IOException("Error borrando archivo");
+        }
+        if (!temp.renameTo(original)) {
+            throw new IOException("Error renombrando archivo");
+        }
+    }
+    
+    public void deleteSpace(int id) throws IOException {
+        File file = new File(fileName);
+        File temp = new File("temp_spaces.txt");
+        deleteFromFile(id, file, temp);
+        replaceFile(file, temp);
+    }
+    
+    private void deleteFromFile(int id, File source, File target) 
+            throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(source));
+        PrintWriter writer = new PrintWriter(new FileWriter(target));
+        writeFileWithoutId(id, reader, writer);
+        reader.close();
+        writer.close();
+    }
+    
+    private void writeFileWithoutId(int id, BufferedReader reader, 
+                                   PrintWriter writer) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            Space space = parseSpace(line);
+            if (space == null || space.getId() != id) {
+                writer.println(line);
+            }
+        }
+    }
+    
+    public int getNextId() throws IOException, NullPointerException {
+        int maxId = 0;
+        for (Space space : getAllSpaces()) {
+            if (space != null && space.getId() > maxId) {
+                maxId = space.getId();
+            }
+        }
+        return maxId + 1;
+    }
+    
+    public Space[] getAvailableSpaces() throws IOException {
+        Space[] allSpaces = getAllSpaces();
+        
+        int countAvailableSpaces = 0;
+        for (Space space : allSpaces) {
+            if (space != null && !space.isSpaceTaken()) {
+                countAvailableSpaces++;
+            }
+        }
+        
+        Space[] availableSpaces = new Space[countAvailableSpaces];
+        
+        int index = 0;
+        for (Space space : allSpaces) {
+            if(space != null && !space.isSpaceTaken()){
+                availableSpaces[index] = space;
+                index++;
+            }
+        }
+        
+        return availableSpaces;
     }
 }

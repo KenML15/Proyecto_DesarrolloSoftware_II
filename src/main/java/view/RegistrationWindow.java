@@ -9,7 +9,9 @@ import controller.ParkingLotController;
 import controller.VehicleController;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -22,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import model.entities.Administrator;
 import model.entities.Clerk;
@@ -56,23 +59,21 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     }
 
     private void applyPermissions() {
-    
-    if (currentUser instanceof Administrator) {
 
-        headerPanel.setBackground(new Color(192, 57, 43)); 
-        lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
-        btnParking.setVisible(true); // El admin ve la configuración
-        btnParking.setText("System Configuration");
-    } 
-    else if (currentUser instanceof Clerk) {
-  
-        headerPanel.setBackground(new Color(39, 174, 96));
-        lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
-        
-     
-        btnParking.setVisible(false); 
+        if (currentUser instanceof Administrator) {
+
+            headerPanel.setBackground(new Color(192, 57, 43));
+            lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
+            btnParking.setVisible(true); // El admin ve la configuración
+            btnParking.setText("System Configuration");
+        } else if (currentUser instanceof Clerk) {
+
+            headerPanel.setBackground(new Color(39, 174, 96));
+            lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
+
+            btnParking.setVisible(false);
+        }
     }
-}
 
     private void initComponents() {
         setTitle("Parking System");
@@ -87,23 +88,31 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
         headerPanel.add(lblTitle);
 
-        JPanel menuPanel = new JPanel(new GridLayout(4, 1, 15, 15));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        initComponents();        // 2. CREAMOS los botones, etiquetas y paneles (Esto DEBE ir aquí)
 
         btnCustomers = new JButton("Manage Customers");
         btnVehicles = new JButton("Manage Vehicles");
         btnParking = new JButton("Parking Lot Settings");
         btnLogout = new JButton("Logout");
 
-        JButton[] buttons = {btnCustomers, btnVehicles, btnParking, btnLogout};
-        for (JButton btn : buttons) {
-            styleMenuButton(btn);
-            btn.addActionListener(this);
-            menuPanel.add(btn);
+    
+
+    private void applyPermissionss() {
+        // Verificamos que los componentes existan antes de tocarlos
+        if (lblTitle == null || headerPanel == null || btnParking == null) {
+            System.err.println("Error: Los componentes no se han inicializado aún.");
+            return;
         }
 
-        add(headerPanel, BorderLayout.NORTH);
-        add(menuPanel, BorderLayout.CENTER);
+        if (currentUser instanceof Administrator) {
+            headerPanel.setBackground(new Color(192, 57, 43));
+            lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
+            btnParking.setVisible(true);
+        } else {
+            headerPanel.setBackground(new Color(39, 174, 96));
+            lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
+            btnParking.setVisible(false);
+        }
     }
 
     @Override
@@ -126,9 +135,15 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         int selection = JOptionPane.showOptionDialog(this, "Customer Management", "Select Action",
                 0, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        if (selection == 0) insertCustomer();
-        if (selection == 1) removeCostumerAndVehicle();
-        if (selection == 2) showAllCustomer();
+        if (selection == 0) {
+            insertCustomer();
+        }
+        if (selection == 1) {
+            removeCostumerAndVehicle();
+        }
+        if (selection == 2) {
+            showAllCustomer();
+        }
     }
 
     private void showVehicleSubMenu() {
@@ -136,8 +151,12 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         int selection = JOptionPane.showOptionDialog(this, "Select an action", "Vehicle Management",
                 0, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        if (selection == 0) insertVehicle();
-        if (selection == 1) showAllVehicles();
+        if (selection == 0) {
+            insertVehicle();
+        }
+        if (selection == 1) {
+            showAllVehicles();
+        }
     }
 
     // --- Estilos y métodos de soporte ---
@@ -148,8 +167,6 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
     }
-    
-  
 
     //====================CLIENTE===========================  
     public static void showAllCustomer() {
@@ -160,10 +177,10 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         int id = Integer.parseInt(JOptionPane.showInputDialog("Type the customer ID number"));
 
         String name = JOptionPane.showInputDialog("Type yhe customer´s name");
-        
+
         int hasDisability = JOptionPane.showConfirmDialog(null, "¿The customer has a disability?", "Information", JOptionPane.YES_NO_OPTION);
         boolean disabilityPresented = (hasDisability == JOptionPane.YES_OPTION);
-      
+
         Customer customerToInsert = new Customer(id, name, disabilityPresented);
 
         JOptionPane.showMessageDialog(null, customerController.insertCustomer(customerToInsert));
@@ -172,25 +189,32 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     }
 
     private static void removeCostumerAndVehicle() {
-        int id = Integer.parseInt(JOptionPane.showInputDialog("Type the customer ID number to remove"));
-        String plate = JOptionPane.showInputDialog("Type the plate number of the customer to be remove");
+        try {
+            int id = Integer.parseInt(JOptionPane.showInputDialog("Type the customer ID number to remove"));
+            String plate = JOptionPane.showInputDialog("Type the plate number");
 
-        Customer customerToRemove = customerController.findCustomerById(id);
-        Vehicle vehicleToRemove = vehicleController.findVehicleByPlate(plate);
+            Customer customerToRemove = customerController.findCustomerById(id);
+            Vehicle vehicleToRemove = vehicleController.findVehicleByPlate(plate);
 
-        for (Customer customerToFind : vehicleToRemove.getCustomer()) {
-            if (customerToFind != customerToRemove) {
-                JOptionPane.showMessageDialog(null, "Customer wasn´t found with that ID");
-                break;
-            } else {
+            // VALIDACIÓN ANTI-CRASH (Punto clave para evitar Exit Value: 1)
+            if (vehicleToRemove == null || customerToRemove == null) {
+                JOptionPane.showMessageDialog(null, "Error: Vehicle or Customer not found.");
+                return;
+            }
+
+            // Si el cliente es el dueño, procedemos
+            if (vehicleToRemove.getCustomer().contains(customerToRemove)) {
                 customerController.removeCustomer(customerToRemove);
                 vehicleController.removeVehicle(vehicleToRemove);
-                JOptionPane.showMessageDialog(null, "The customer has been removed");
-                break;
+                JOptionPane.showMessageDialog(null, "Successfully removed.");
+            } else {
+                JOptionPane.showMessageDialog(null, "This customer is not registered to this vehicle.");
             }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Invalid data entered.");
         }
     }
-    
+
     // ====================VEHÍCULO===========================
     public static void showAllVehicles() {
         StringBuilder report = new StringBuilder("--- VEHICLES AND CUSTOMERS ---\n\n");
@@ -215,16 +239,15 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         }
         JOptionPane.showMessageDialog(null, report.toString());
     }
-    
 
     private static void insertVehicle() {
         String plate = JOptionPane.showInputDialog("Type the vehicle plate.");
         String color = JOptionPane.showInputDialog("Type the vehicle color.");
         String brand = JOptionPane.showInputDialog("Type the vehicle brand.");
         String model = JOptionPane.showInputDialog("Type the vehicle model.");
-        
+
         VehicleType vehicleType = selectVehicleType();
-        
+
         ArrayList<Customer> responsibleList = vehicleResponsibles();
 
         ParkingLot parkingLot = selectParkingLot();
@@ -234,28 +257,28 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         int spaceAssigned = parkingLotController.registerVehicleInParkingLot(vehicleToInsert, parkingLot);
         Space space = new Space(spaceAssigned);
         vehicleToInsert.setSpace(space);
-        
+
         if (spaceAssigned != -1) {
-            vehicleController.insertVehicle(vehicleToInsert); 
+            vehicleController.insertVehicle(vehicleToInsert);
             JOptionPane.showMessageDialog(null, "Vehicle successfully entered.\n Allocated space: " + vehicleToInsert.getSpace());
         } else {
             JOptionPane.showMessageDialog(null, "ERROR: There aren´t spaces for this type of vehicle.");
         }
-        
+
         JOptionPane.showMessageDialog(null, "Welcome to the parking lot: " + parkingLot.getName()
-                + ".\n Ticket: \n" 
-                +showTicketToCostumer(vehicleToInsert, vehicleType));
+                + ".\n Ticket: \n"
+                + showTicketToCostumer(vehicleToInsert, vehicleType));
     }
 
-    private static ArrayList<Customer> vehicleResponsibles(){
-        
+    private static ArrayList<Customer> vehicleResponsibles() {
+
         ArrayList<Customer> responsibleList = new ArrayList<>();
         int op;
         do {
             responsibleList.add(insertCustomer());
             op = JOptionPane.showConfirmDialog(null, "¿Do you want to add other customer?", "Many owners", JOptionPane.YES_NO_OPTION);
         } while (op == JOptionPane.YES_OPTION);
-        
+
         return responsibleList;
     }
 
@@ -265,9 +288,9 @@ public class RegistrationWindow extends JFrame implements ActionListener {
                 + "CUSTOMERS: " + vehicle.getCustomer() + "\n"
                 + "SPACE: " + vehicle.getSpace().getId() + "\n"
                 + "TYPE: " + vehicleType.getDescription() + "\n"
-                + "ENTRY: " + vehicle.getEntryTime() + "\n" ;
-                        
-         return ticket;   
+                + "ENTRY: " + vehicle.getEntryTime() + "\n";
+
+        return ticket;
     }
 
     private static VehicleType configureVehicleTypeOfSpaces(int position, boolean disabilityPresented) {
@@ -290,7 +313,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
 
         return vehicleType;
     }
-    
+
     private static VehicleType selectVehicleType() {
         String[] types = {"1) Motorcycle", "2) Car", "3) Truck", "4) Bicycle", "5) other"};
         float[] fees = {500.0f, 1000.0f, 2500.0f, 300.0f, 1500.0f};
@@ -306,12 +329,12 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         VehicleType vehicleType = new VehicleType();
         vehicleType.setId(option + 1);
         vehicleType.setDescription(types[option]);
-        vehicleType.setFee(fees[option]);
+        //vehicleType.setFee(fees[option]);
         vehicleType.setNumberOfTires(tires[option]);
 
         return vehicleType;
     }
-    
+
     // ====================PARQUEO===========================
     private static void insertParkingLot() {
 
@@ -327,7 +350,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         parkingLot.setVehicles(new ArrayList<Vehicle>());
 
     }
-    
+
     private static ParkingLot selectParkingLot() {
 
         String parkingLotsInformation = "List to the parking lots in the system\n\n";
@@ -335,7 +358,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
 
             parkingLotsInformation += "Number to parking lot: " + parkingLot.getId() + " Name to the parking lot: " + parkingLot.getName() + "\n";
         }
-        
+
         int option;
         ParkingLot parkingLot;
         do {
@@ -378,5 +401,18 @@ public class RegistrationWindow extends JFrame implements ActionListener {
 
         return spaces;
     }
-    
+
+    private void styleActionCard(JButton button) {
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(52, 73, 94));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(210, 214, 222), 1),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        // ¡Asegúrate de haber borrado la línea que decía "throw new UnsupportedOperationException"!
+    }
+
 }

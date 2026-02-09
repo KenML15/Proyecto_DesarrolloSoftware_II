@@ -11,17 +11,17 @@ package model.entities;
 public class Fee {
     private String vehicleType;
     
-    private double halfHourRate;
-    private double hourlyRate;
-    private double dailyRate;
-    private double weeklyRate;
-    private double monthlyRate;
-    private double annualRate;
+    private float halfHourRate;
+    private float hourlyRate;
+    private float dailyRate;
+    private float weeklyRate;
+    private float monthlyRate;
+    private float annualRate;
 
     public Fee() {
     }
 
-    public Fee(String vehicleType, double halfHourRate, double hourlyRate, double dailyRate, double weeklyRate, double monthlyRate, double annualRate) {
+    public Fee(String vehicleType, float halfHourRate, float hourlyRate, float dailyRate, float weeklyRate, float monthlyRate, float annualRate) {
         this.vehicleType = vehicleType;
         this.halfHourRate = halfHourRate;
         this.hourlyRate = hourlyRate;
@@ -43,7 +43,7 @@ public class Fee {
         return halfHourRate;
     }
 
-    public void setHalfHourRate(double halfHourRate) {
+    public void setHalfHourRate(float halfHourRate) {
         this.halfHourRate = halfHourRate;
     }
 
@@ -51,7 +51,7 @@ public class Fee {
         return hourlyRate;
     }
 
-    public void setHourlyRate(double hourlyRate) {
+    public void setHourlyRate(float hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 
@@ -59,7 +59,7 @@ public class Fee {
         return dailyRate;
     }
 
-    public void setDailyRate(double dailyRate) {
+    public void setDailyRate(float dailyRate) {
         this.dailyRate = dailyRate;
     }
 
@@ -67,7 +67,7 @@ public class Fee {
         return weeklyRate;
     }
 
-    public void setWeeklyRate(double weeklyRate) {
+    public void setWeeklyRate(float weeklyRate) {
         this.weeklyRate = weeklyRate;
     }
 
@@ -75,7 +75,7 @@ public class Fee {
         return monthlyRate;
     }
 
-    public void setMonthlyRate(double monthlyRate) {
+    public void setMonthlyRate(float monthlyRate) {
         this.monthlyRate = monthlyRate;
     }
 
@@ -83,8 +83,24 @@ public class Fee {
         return annualRate;
     }
 
-    public void setAnnualRate(double annualRate) {
+    public void setAnnualRate(float annualRate) {
         this.annualRate = annualRate;
+    }
+    
+    public float calculateFeeForDuration(long minutes) {
+        if (minutes <= 30) {
+            return halfHourRate;
+        } else if (minutes <= 60) {
+            return hourlyRate;
+        } else if (minutes <= 24 * 60) {
+            return dailyRate;
+        } else if (minutes <= 7 * 24 * 60) {
+            return weeklyRate;
+        } else if (minutes <= 30 * 24 * 60) {
+            return monthlyRate;
+        } else {
+            return annualRate;
+        }
     }
 
     @Override

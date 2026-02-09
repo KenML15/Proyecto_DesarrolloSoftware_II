@@ -4,190 +4,275 @@
  */
 package view;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
+import controller.CustomerFileController;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
-import model.data.CustomerDataFile;
 import model.entities.Customer;
 
 /**
  *
  * @author 50687
  */
-public class CustomerManagement extends JInternalFrame{
-    
-    //Atributos necesarios
-    JButton buttonDelete, buttonEdit;
-    JPanel panelCustomers;
-    JTable tableCustomers;
-    DefaultTableModel modelDataTable;
-    
-    //Constantes
-    final String[] headings = {"Id", "Nombre", "Discapacidad", "Correo", "Dirección", "Telefóno"};
-    public static final String FILECUSTOMER = "Customers.txt";
+public class CustomerManagement extends JInternalFrame {
 
-    //Instancia de clases
-    CustomerDataFile customerDataFile;
-    CustomerWindow customerWindow;
+    private CustomerFileController controller;
+    private JTable customerTable;
+    private DefaultTableModel tableModel;
+    private JTextField searchField;
 
+    private final String[] COLUMNS = {"ID", "Nombre", "Discapacidad", "Email", "Dirección", "Teléfono"};
+    
     public CustomerManagement() {
-        super("Gestión de Clientes", false, true, false, true);
-        this.setVisible(true);//permite que sea visible
-        this.setSize(650, 500);
-        this.setLocation(230, 50);
-        this.setResizable(false);
-
-        panelCustomers = new JPanel();// Crea el panel
-        panelCustomers.setLayout(null);//Ubicación
-        panelCustomers.setBackground(Color.WHITE);//color al panel
-        panelCustomers.setVisible(true);
-        this.add(panelCustomers);//adhiere al panel
-
-        customerDataFile = new CustomerDataFile(FILECUSTOMER);
-        customerWindow = new CustomerWindow();
-        
-
-        //Creación de la tabla que contiene la lista de clientes.
-        tableCustomers = new JTable();
-//        tableCustomers.setSize(400, 1000);
-//        tableCustomers.setLocation(95, 300);
-//        panelCustomers.add(tableCustomers);
-        JScrollPane scrollBar = new JScrollPane(tableCustomers);
-        scrollBar.setBounds(25, 75, 600, 249);
-        panelCustomers.add(scrollBar);
-
-        createTable();
-
-        buttonDelete = new JButton("Borrar");
-        buttonDelete.setBounds(140, 375, 100, 25);//le da tamaño y ubicación
-        buttonDelete.setToolTipText("Presione para borrar un cliente");
-        panelCustomers.add(buttonDelete);
-        buttonDelete.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int borrar = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea borrar el cliente?\n", "Borrar Cliente", JOptionPane.YES_NO_OPTION);
-
-                if (borrar == 0) { //este if se para confirmar de que el usario desea borrar
-
-                    removeCustomer();//remueve el cliente
-                    cleanTable();//limpia la tabla
-
-                    createTable();//crea de nuevo la tabla
-
-                    JOptionPane.showMessageDialog(null, "Cliente borrado con éxito");
-                }
-            }
-        });
-
-        buttonEdit = new JButton("Editar");// crea el boton insertar
-        buttonEdit.setBounds(360, 375, 100, 25);//le da tamaño y ubicación
-        buttonEdit.setToolTipText("Para modifiar dar doble Click en la Casilla e ingrese el numero o palabra correcta");
-        panelCustomers.add(buttonEdit);
-        buttonEdit.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-
-                customerWindow.dataFromCustomer=fillCustomerFormToModify();
-                  
-            }
-        });
+        super("Gestión de Clientes", true, true, true, true);
+        setupController();
+        createInterface();
+        loadAllCustomers();
     }
-
-    public String[] fillCustomerFormToModify() {
     
-        JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
+    //Setup de controller
+    private void setupController() {
+        try {
+            controller = new CustomerFileController("Customers.txt");
+        } catch (Exception e) {
+            showMessage("Error al iniciar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            this.dispose();
+        }
+    }
+    
+    //Crea la interfaz de usuario
+    private void createInterface() {
+        this.setSize(900, 550);
+        this.setLocation(50, 50);
         
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        customerWindow.setTitle("Modificar Cliente");
-        customerWindow.setVisible(true); 
-        this.dispose();//cierra la ventana actual para que se vea la de modificar
-        desktopPane.add(customerWindow);
-
-        String[] dataFromCustomerToModify = getValueFromTable();
-
-        customerWindow.textFieldNumber.setText(dataFromCustomerToModify[0]);
-        customerWindow.textFieldName.setText(dataFromCustomerToModify[1]);
-        customerWindow.textFieldDisability.setText(dataFromCustomerToModify[2]);
-        customerWindow.textFieldEmail.setText(dataFromCustomerToModify[3]);
-        customerWindow.textFieldAddress.setText(dataFromCustomerToModify[4]);
-        customerWindow.textFieldPhone.setText(dataFromCustomerToModify[5]);
+        //Panel de busqueda
+        mainPanel.add(createSearchPanel(), BorderLayout.NORTH);
         
-        customerWindow.buttonInsert.setText("Modificar");
+        //Tabla con los clientes
+        mainPanel.add(createTablePanel(), BorderLayout.CENTER);
         
+        //Botones de acción
+        mainPanel.add(createButtonsPanel(), BorderLayout.SOUTH);
         
-        return dataFromCustomerToModify;
+        this.setContentPane(mainPanel);
+    }
+    
+    //Crea un panel de busqueda con botones
+    private JPanel createSearchPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        JLabel label = new JLabel("Buscar:");
+        panel.add(label);
+        
+        searchField = new JTextField(20);
+        panel.add(searchField);
+        
+        JButton searchButton = new JButton("Buscar");
+        searchButton.addActionListener(e -> searchCustomers());
+        panel.add(searchButton);
+        
+        JButton showAllButton = new JButton("Mostrar Todos");
+        showAllButton.addActionListener(e -> loadAllCustomers());
+        panel.add(showAllButton);
+        
+        return panel;
+    }
+    
+    //Crea una tabla para mostrar a los clientes
+    private JScrollPane createTablePanel() {
+        tableModel = new DefaultTableModel(COLUMNS, 0);
+        customerTable = new JTable(tableModel);
+        
+        //Solo se puede seleccionar una fila a la vez
+        customerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        return new JScrollPane(customerTable);
+    }
+    
+    //Crea un panel con botones de acción
+    private JPanel createButtonsPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+        
+        panel.add(createButton("Agregar", e -> openAddWindow()));
+        panel.add(createButton("Editar", e -> openEditWindow()));
+        panel.add(createButton("Eliminar", e -> deleteCustomer()));
+        panel.add(createButton("Actualizar", e -> loadAllCustomers()));
+        
+        return panel;
+    }
+    
+    //Ayuda a crear botones (es para que haya más modularidad)
+    private JButton createButton(String text, ActionListener action) {
+        JButton button = new JButton(text);
+        button.addActionListener(action);
+        return button;
+    }
+    
+    //Carga o trae todos los clientes del controlador
+    private void loadAllCustomers() {
+        try {
+            ArrayList<Customer> customers = controller.getAllCustomers();
+            showCustomersInTable(customers);
+            searchField.setText("");
+        } catch (Exception e) {
+            showError("No se pudieron cargar los clientes: " + e.getMessage());
+        }
+    }
+    
+    //Muestra a los clientes en la tabla 
+    private void showCustomersInTable(ArrayList<Customer> customers) {
+        //limpia la tabla
+        tableModel.setRowCount(0);
+        
+        //Añade a cada cliente en una fila
+        for (Customer customer : customers) {
+            addCustomerToTable(customer);
+        }
+    }
+    
+    //Añade a un cliente en la tabla
+    private void addCustomerToTable(Customer customer) {
+        Object[] row = {
+            customer.getId(),
+            customer.getName(),
+            customer.isDisabilityPresented() ? "Sí" : "No",
+            customer.getEmail(),
+            customer.getAddress(),
+            customer.getPhoneNumber()
+        };
+        
+        tableModel.addRow(row);
+    }
+    
+    //Buscador de clientes
+    private void searchCustomers() {
+        String searchText = searchField.getText().trim();
+        
+        if (searchText.isEmpty()) {
+            loadAllCustomers();
+            return;
+        }
+        
+        try {
+            ArrayList<Customer> results = controller.searchCustomers(searchText);
+            showCustomersInTable(results);
+        } catch (Exception e) {
+            showError("Error en la búsqueda: " + e.getMessage());
+        }
+    }
+    
+    //Ventana para añadir a un nuevo cliente
+    private void openAddWindow() {
+        openCustomerWindow(null);
+    }
+    
+    //Ventana para editar al cliente seleccionado
+    private void openEditWindow() {
+        int selectedRow = customerTable.getSelectedRow();
+        
+        if (selectedRow < 0) {
+            showWarning("Seleccione un cliente de la tabla");
+            return;
+        }
+        
+        try {
+            int customerId = (int) tableModel.getValueAt(selectedRow, 0);
+            Customer customer = controller.getCustomerById(customerId);
+            
+            if (customer != null) {
+                openCustomerWindow(customer);
+            }
+        } catch (Exception e) {
+            showError("Error: " + e.getMessage());
+        }
+    }
+    
+    //Elimina al cliente seleccionado
+    private void deleteCustomer() {
+        int selectedRow = customerTable.getSelectedRow();
+        
+        if (selectedRow < 0) {
+            showWarning("Seleccione un cliente de la tabla");
+            return;
+        }
+        
+        int customerId = (int) tableModel.getValueAt(selectedRow, 0);
+        String customerName = (String) tableModel.getValueAt(selectedRow, 1);
+        
+        //Pregunta de confirmación
+        int answer = JOptionPane.showConfirmDialog(this,
+            "¿Está seguro de eliminar a " + customerName + "?",
+            "Confirmar eliminación",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (answer == JOptionPane.YES_OPTION) {
+            try {
+                controller.deleteCustomer(customerId);
+                showInfo("Cliente eliminado correctamente");
+                loadAllCustomers(); //Refresca la tablaº    
+            } catch (Exception e) {
+                showError("Error al eliminar: " + e.getMessage());
+            }
+        }
+    }
+    
+    //Ventana de clientes
+    private void openCustomerWindow(Customer customer) {
+        try {
+            CustomerWindow window;
+            
+            if (customer == null) {
+                window = new CustomerWindow();
+            } else {
+                window = new CustomerWindow(customer);
+            }
+            
+            //Añade la ventana al desktop
+            getDesktopPane().add(window);
+            window.toFront();
+            
+            //Cuando la ventana se cierra la tabla se refresca
+            window.addInternalFrameListener(new InternalFrameAdapter() {
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    loadAllCustomers();
+                }
+            });
+            
+        } catch (Exception e) {
+            showError("Error al abrir ventana: " + e.getMessage());
+        }
     }
 
-    public void createTable() {
-        ArrayList<Customer> customers = customerDataFile.getAllCustomers();
-
-        String[][] customersToShow = customerDataFile.createCustomerMatrix(customers);
-
-        modelDataTable = new DefaultTableModel(customersToShow, headings);
-
-        tableCustomers.setModel(modelDataTable);
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void cleanTable() {
-
-        DefaultTableModel newModel = (DefaultTableModel) tableCustomers.getModel();
-        newModel.setNumRows(0);
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 
-    public int getCustomerSelected() {
-
-        int rowSelected = tableCustomers.getSelectedRow();
-
-        return rowSelected;
+    private void showInfo(String message) {
+        JOptionPane.showMessageDialog(this, message, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public String[] getValueFromTable() {
-
-        int id = Integer.parseInt(tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 0).toString());
-
-        String name
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 1).toString();
-        
-        String disability
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 2).toString();
-
-        String email
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 3).toString();
-        
-        String address
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 4).toString();
-
-        String phone
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 5).toString();
-
-        String valuesToReturn[] = new String[6];
-        valuesToReturn[0] = "" + id;
-        valuesToReturn[1] = name;
-        valuesToReturn[2] = disability;
-        valuesToReturn[3] = email;  
-        valuesToReturn[4] = address;
-        valuesToReturn[5] = phone;
-
-        return valuesToReturn;
-    }
-
-    public void removeCustomer() {
-        Customer customer = customerDataFile.getCustomerFromFile(Integer.parseInt(getValueFromTable()[0]));
-        //customerDataFile.deleteCustomerFromFile(customer);
+    private void showMessage(String text, String title, int type) {
+        JOptionPane.showMessageDialog(this, text, title, type);
     }
 }

@@ -8,53 +8,14 @@ package model.entities;
  *
  * @author 50687
  */
-public class Administrator extends User implements Employee{
-    private int adminNumber;
-    private ParkingLot parkingLot;
+public class Administrator extends Clerk {
 
-    public Administrator() {
+    public Administrator(int employeeCode, String schedule, int age, ParkingLot parkingLot) {
+        super(employeeCode, schedule, age, parkingLot);
     }
 
-    public Administrator(int adminNumber, ParkingLot parkingLot) {
-        this.adminNumber = adminNumber;
-        this.parkingLot = parkingLot;
+    public Administrator(int employeeCode, String schedule, int age, ParkingLot parkingLot, String identification, String name, String username, String password) {
+        super(employeeCode, schedule, age, parkingLot, identification, name, username, password);
     }
 
-    public int getAdminNumber() {
-        return adminNumber;
-    }
-
-    public void setAdminNumber(int adminNumber) {
-        this.adminNumber = adminNumber;
-    }
-
-    public ParkingLot getParkingLot() {
-        return parkingLot;
-    }
-
-    public void setParkingLot(ParkingLot parkingLot) {
-        this.parkingLot = parkingLot;
-    }
-
-    @Override
-    public String toString() {
-        return "Administrator{" + "adminNumber=" + adminNumber + ", parkingLot=" + parkingLot + '}';
-    }
-
-    @Override
-    public boolean verifyUserLogin(String loginDetails) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public float calculateSalary(float dailySalary) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public ParkingLot assignWorkplace(int parkingLotId) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    
 }

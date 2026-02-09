@@ -4,19 +4,28 @@
  */
 package view;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
+import controller.CustomerFileController;
+import controller.VehicleFileController;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
-import model.data.VehicleDataFile;
+import model.entities.Customer;
 import model.entities.Vehicle;
 
 /**
@@ -24,218 +33,298 @@ import model.entities.Vehicle;
  * @author 50687
  */
 public class VehicleManagement extends JInternalFrame{
-    
-    //Atributos necesarios
-    JButton buttonDelete, buttonEdit;
-    JPanel panelVehicle;
-    JTable tableVehicle;
-    DefaultTableModel modelDataTable;
-    
-    //Constantes
-    final String[] headings = {"Id", "Placa", "Color", "Marca", "Modelo", "Clientes", "Tipo de vehículo", "Espacio", "Tiempo"};
 
-    //Instancia de clases
-    VehicleDataFile vehicleDataFile;
-    VehicleWindow vehicleWindow;
+    private VehicleFileController vehicleController;
+    private CustomerFileController customerController;
+    private JTable vehicleTable;
+    private DefaultTableModel tableModel;
+    private JTextField searchField;
+    
+    private final String[] COLUMNS = {"Placa", "Color", "Marca", "Modelo", "Tipo", "Clientes", "Espacio", "Entrada"};
 
     public VehicleManagement() {
-        super("Gestión de Vehiculos", false, true, false, true);
-        this.setVisible(true);//permite que sea visible
-        this.setSize(650, 500);
-        this.setLocation(230, 50);
-        this.setResizable(false);
-
-        panelVehicle = new JPanel();// Crea el panel
-        panelVehicle.setLayout(null);//Ubicación
-        panelVehicle.setBackground(Color.WHITE);//color al panel
-        panelVehicle.setVisible(true);
-        this.add(panelVehicle);//adhiere al panel
-
-        vehicleDataFile = new VehicleDataFile("VehiclesTemp");
-        vehicleWindow = new VehicleWindow();
+        super("Gestión de Vehículos", true, true, true, true);
+        initControllers();
+        createInterface();
+        loadAllVehicles();
+    }
+    
+    //Inicializar controladores
+    private void initControllers() {
+        try {
+            vehicleController = new VehicleFileController();
+            customerController = new CustomerFileController();
+        } catch (Exception e) {
+            showError("Error: " + e.getMessage());
+            dispose();
+        }
+    }
+    
+    //Crear interfaz
+    private void createInterface() {
+        setSize(1000, 500);
+        setLocation(50, 50);
         
-
-        //Creación de la tabla que contiene la lista de clientes.
-        tableVehicle = new JTable();
-        tableVehicle.setSize(400, 1000);
-        tableVehicle.setLocation(95, 300);
-        panelVehicle.add(tableVehicle);
-        JScrollPane scrollBar = new JScrollPane(tableVehicle);
-        scrollBar.setBounds(25, 75, 600, 249);
-        panelVehicle.add(scrollBar);
-
-        createTable();
-
-        buttonDelete = new JButton("Borrar");
-        buttonDelete.setBounds(140, 375, 100, 25);//le da tamaño y ubicación
-        buttonDelete.setToolTipText("Presione para borrar un cliente");
-        panelVehicle.add(buttonDelete);
-        buttonDelete.addActionListener(new ActionListener() {
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        mainPanel.add(createSearchPanel(), BorderLayout.NORTH);
+        mainPanel.add(createTablePanel(), BorderLayout.CENTER);
+        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
+        
+        setContentPane(mainPanel);
+    }
+    
+    //Panel de búsqueda
+    private JPanel createSearchPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        panel.add(new JLabel("Buscar:"));
+        
+        searchField = new JTextField(25);
+        panel.add(searchField);
+        
+        JButton searchButton = new JButton("Buscar");
+        searchButton.addActionListener(e -> searchVehicles());
+        panel.add(searchButton);
+        
+        JButton clearButton = new JButton("Mostrar Todos");
+        clearButton.addActionListener(e -> loadAllVehicles());
+        panel.add(clearButton);
+        
+        return panel;
+    }
+    
+    //Panel de tabla
+    private JScrollPane createTablePanel() {
+        tableModel = new DefaultTableModel(COLUMNS, 0) {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                int borrar = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea borrar el vehiculo?\n", "Borrar vehiculo", JOptionPane.YES_NO_OPTION);
-
-                if (borrar == 0) { //este if se para confirmar de que el usario desea borrar
-
-                    removeVehicle();//remueve el cliente
-                    cleanTable();//limpia la tabla
-
-                    createTable();//crea de nuevo la tabla
-
-                    JOptionPane.showMessageDialog(null, "Vehiculo borrado con éxito");
-
+            public boolean isCellEditable(int row, int column) {
+                return false; // Tabla no editable
+            }
+        };
+        
+        vehicleTable = new JTable(tableModel);
+        vehicleTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        return new JScrollPane(vehicleTable);
+    }
+    
+    //Panel de botones
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+        
+        panel.add(createButton("Nuevo Vehículo", e -> openNewVehicle()));
+        panel.add(createButton("Editar", e -> editSelectedVehicle()));
+        panel.add(createButton("Eliminar", e -> deleteSelectedVehicle()));
+        panel.add(createButton("Actualizar", e -> loadAllVehicles()));
+        
+        return panel;
+    }
+    
+    //Crear botón
+    private JButton createButton(String text, ActionListener action) {
+        JButton button = new JButton(text);
+        button.addActionListener(action);
+        return button;
+    }
+    
+    //Cargar todos los vehículos
+    private void loadAllVehicles() {
+        try {
+            ArrayList<Vehicle> vehicles = vehicleController.getAll();
+            showVehiclesInTable(vehicles);
+            searchField.setText("");
+        } catch (Exception e) {
+            showError("Error cargando: " + e.getMessage());
+        }
+    }
+    
+    //Mostrar vehículos en tabla
+    private void showVehiclesInTable(ArrayList<Vehicle> vehicles) {
+        tableModel.setRowCount(0);
+        for (Vehicle vehicle : vehicles) {
+            addVehicleToTable(vehicle);
+        }
+    }
+    
+    //Agregar vehículo a tabla
+    private void addVehicleToTable(Vehicle vehicle) {
+        String typeName = "No especificado";
+        if (vehicle.getVehicleType() != null) {
+            typeName = vehicle.getVehicleType().getDescription();
+        }
+        
+        Object[] row = {
+            vehicle.getPlate(),
+            vehicle.getColor(),
+            vehicle.getBrand(),
+            vehicle.getModel(),
+            typeName,
+            formatCustomerNames(vehicle.getCustomer()),
+            formatDateTime(vehicle.getEntryTime())
+        };
+        
+        tableModel.addRow(row);
+    }
+    
+    //Formatear nombres de clientes
+    private String formatCustomerNames(ArrayList<Customer> customers) {
+        if (customers == null || customers.isEmpty()) {
+            return "Sin clientes";
+        }
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < customers.size(); i++) {
+            stringBuilder.append(customers.get(i).getName());
+            if (i < customers.size() - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+        return stringBuilder.toString();
+    }
+    
+    //Formatear fecha/hora
+    private String formatDateTime(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return dateTime.format(formatter);
+    }
+    
+    //Buscar vehículos
+    private void searchVehicles() {
+        String term = searchField.getText().trim();
+        if (term.isEmpty()) {
+            loadAllVehicles();
+            return;
+        }
+        
+        try {
+            ArrayList<Vehicle> results = new ArrayList<>();
+            
+            for (Vehicle vehicle : vehicleController.getAll()) {
+                if (vehicleMatchesSearch(vehicle, term)) {
+                    results.add(vehicle);
                 }
-
             }
-        });
-
-        buttonEdit = new JButton("Editar");// crea el boton insertar
-        buttonEdit.setBounds(360, 375, 100, 25);//le da tamaño y ubicación
-        buttonEdit.setToolTipText("Para modifiar dar doble Click en la Casilla e ingrese el numero o palabra correcta");
-        panelVehicle.add(buttonEdit);
-        buttonEdit.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-
-                vehicleWindow.dataFromVehicle = fillVehicleFormToModify();
-                
-             
-            }// FIN DEL METODO ACTION PERFORMED
-        });
-
-    }
-
-    public String[] fillVehicleFormToModify() {
-    
-        JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
-        this.dispose();//cierra la ventana actual para que se vea la de modificar 
-        vehicleWindow.setTitle("Modificar Vehiculos");
-        vehicleWindow.setVisible(true);
-        
-        desktopPane.add(vehicleWindow);
-
-        String[] dataFromVehicleToModify = getValueFromTable();
-
-        vehicleWindow.textFieldId.setText(dataFromVehicleToModify[0]);
-        vehicleWindow.textFieldPlate.setText(dataFromVehicleToModify[1]);
-        vehicleWindow.textFieldModel.setText(dataFromVehicleToModify[2]);
-        vehicleWindow.textFieldBrand.setText(dataFromVehicleToModify[3]);
-        vehicleWindow.textFieldColor.setText(dataFromVehicleToModify[4]);
-        
-        vehicleWindow.buttonInsert.setText("Modificar");
-        
-        return dataFromVehicleToModify;
-    }
-
-    public void createTable() {
-        ArrayList<Vehicle> vehicles
-                = vehicleDataFile.getAllVehicles();
-
-        String[][] vehicleToShow
-                = vehicleDataFile.createVehicleMatrix(vehicles);
-
-        modelDataTable
-                = new DefaultTableModel(vehicleToShow, headings);
-
-        tableVehicle.setModel(modelDataTable);
+            
+            showVehiclesInTable(results);
+        } catch (Exception e) {
+            showError("Error buscando: " + e.getMessage());
+        }
     }
     
-    public void fillTable(ArrayList<Vehicle> vehicleList) {
-        //Crear el modelo con los encabezados
-        DefaultTableModel model = new DefaultTableModel(null, headings);
-
-        //Recorrer la lista y añadir filas una por una
-        for (Vehicle vehicle : vehicleList) {
-            Object[] row = new Object[9];
-            row[0] = vehicle.getId();
-            row[1] = vehicle.getPlate();
-            row[2] = vehicle.getColor();
-            row[3] = vehicle.getBrand();
-            row[4] = vehicle.getModel();
-
-            //Para evitar errores si el objeto es nulo, usamos un "si-no" rápido
-            row[5] = (vehicle.getCustomer() != null) ? "Cliente Registrado" : "N/A";
-            row[6] = "Tipo"; //O el valor que corresponda
-            row[7] = "Espacio";
-            row[8] = vehicle.getEntryTime(); //Suponiendo que ya es String
-
-            model.addRow(row);
+    //Verificar si vehículo coincide con búsqueda
+    private boolean vehicleMatchesSearch(Vehicle vehicle, String term) {
+        String searchTerm = term.toLowerCase();
+        
+        if (vehicle.getPlate().toLowerCase().contains(searchTerm)){
+            return true;
         }
-
-        //Setear el modelo a la tabla
-        tableVehicle.setModel(model);
-    }
-
-    private void cleanTable() {
-
-        DefaultTableModel newModel = (DefaultTableModel) tableVehicle.getModel();
-        newModel.setNumRows(0);
-    }
-
-    public int getVehicleSelected() {
-
-        int rowSelected = tableVehicle.getSelectedRow();
-
-        return rowSelected;
-    }
-
-    public String[] getValueFromTable() {
-        int row = tableVehicle.getSelectedRow();
-        String[] valuesToReturn = new String[9]; // 9 columnas
-        for (int i = 0; i < 9; i++) {
-            valuesToReturn[i] = tableVehicle.getValueAt(row, i).toString();
+        if (vehicle.getBrand().toLowerCase().contains(searchTerm)){
+            return true;
         }
-        return valuesToReturn;
-
-        /*int id = Integer.parseInt(tableVehicle.getModel().
-                getValueAt(getCustomerSelected(), 0).toString());
-
-        String name
-                = tableVehicle.getModel().
-                getValueAt(getCustomerSelected(), 1).toString();
-
-        String email
-                = tableVehicle.getModel().
-                getValueAt(getCustomerSelected(), 2).toString();
-
-        String address
-                = tableVehicle.getModel().
-                getValueAt(getCustomerSelected(), 3).toString();
-
-        String phone
-                = tableVehicle.getModel().
-                getValueAt(getCustomerSelected(), 4).toString();
-
-        String valuesToReturn[] = new String[5];
-        valuesToReturn[0] = "" + id;
-        valuesToReturn[1] = name;
-        valuesToReturn[2] = email;
-        valuesToReturn[3] = address;
-        valuesToReturn[4] = phone;
-
-        return valuesToReturn;*/
-    }
-
-    public void removeVehicle() {
-        // 1. Obtenemos los valores de la fila seleccionada en un arreglo de Strings
-        String[] selectedVehicleData = getValueFromTable();
-
-        // 2. Reconstruimos la "línea original" tal cual está en el archivo .txt
-        // Usamos el delimitador ";" para unir los 9 campos
-        String lineToRemove = "";
-        for (int i = 0; i < selectedVehicleData.length; i++) {
-            lineToRemove += selectedVehicleData[i];
-            if (i < selectedVehicleData.length - 1) {
-                lineToRemove += ";";
+        if (vehicle.getModel().toLowerCase().contains(searchTerm)){
+            return true;
+        }
+        
+        if (vehicle.getVehicleType() != null) {
+            if (vehicle.getVehicleType().getDescription().toLowerCase().contains(searchTerm)) {
+                return true;
             }
         }
         
-        // 3. Ahora sí, pasamos la STRING al método que la eliminará
-        vehicleDataFile.deleteVehicleFromFile(lineToRemove);
-
-        // 4. Refrescamos la tabla para que el vehículo desaparezca visualmente
-        fillTable(vehicleDataFile.getAllVehicles());
-
-        //vehicleDataFile.deleteVehicleFromFile(vehicleDataFile.getVehicleFromFile(getValueFromTable()[1]));
+        return false;
+    }
+    
+    //Abrir nuevo vehículo
+    private void openNewVehicle() {
+        openVehicleWindow(null);
+    }
+    
+    //Editar vehículo seleccionado
+    private void editSelectedVehicle() {
+        int row = vehicleTable.getSelectedRow();
+        if (row < 0) {
+            showWarning("Seleccione un vehículo");
+            return;
+        }
+        
+        String plate = (String) tableModel.getValueAt(row, 0);
+        try {
+            Vehicle vehicle = vehicleController.getByPlate(plate);
+            if (vehicle != null) {
+                openVehicleWindow(vehicle);
+            }
+        } catch (Exception e) {
+            showError("Error: " + e.getMessage());
+        }
+    }
+    
+    //Eliminar vehículo seleccionado
+    private void deleteSelectedVehicle() {
+        int row = vehicleTable.getSelectedRow();
+        if (row < 0) {
+            showWarning("Seleccione un vehículo");
+            return;
+        }
+        
+        String plate = (String) tableModel.getValueAt(row, 0);
+//        String brand = (String) tableModel.getValueAt(row, 2);
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "¿Eliminar vehículo " + plate + "?",
+            "Confirmar",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                vehicleController.delete(plate);
+                showInfo("Vehículo eliminado");
+                loadAllVehicles();
+            } catch (Exception e) {
+                showError("Error: " + e.getMessage());
+            }
+        }
+    }
+    
+    //Abrir ventana de vehículo
+    private void openVehicleWindow(Vehicle vehicle) {
+        try {
+            VehicleWindow window;
+            
+            if (vehicle == null) {
+                window = new VehicleWindow();
+            } else {
+                window = new VehicleWindow(vehicle);
+            }
+            
+            getDesktopPane().add(window);
+            window.toFront();
+            
+            //Cuando se cierre, actualizar tabla
+            window.addInternalFrameListener(new InternalFrameAdapter() {
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    loadAllVehicles();
+                }
+            });
+            
+        } catch (Exception e) {
+            showError("Error abriendo ventana: " + e.getMessage());
+        }
+    }
+    
+    //Mostrar error
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    //Mostrar advertencia
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
+    
+    //Mostrar información
+    private void showInfo(String message) {
+        JOptionPane.showMessageDialog(this, message, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 }

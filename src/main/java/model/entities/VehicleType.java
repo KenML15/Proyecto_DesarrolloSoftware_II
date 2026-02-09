@@ -12,16 +12,16 @@ public class VehicleType {
     private int id;
     private String description;
     private int numberOfTires;
-    private float fee;
+    private Fee fee;
 
     public VehicleType() {
     }
 
-    public VehicleType(int id, String description, int numberOfTires, float fee) {
+    public VehicleType(int id, String description, int numberOfTires) {
         this.id = id;
         this.description = description;
         this.numberOfTires = numberOfTires;
-        this.fee = fee;
+        this.fee = null;//Es nula porque el administrador es el que debe configurar los precios después
     }
 
     public int getId() {
@@ -48,20 +48,25 @@ public class VehicleType {
         this.numberOfTires = numberOfTires;
     }
 
-    public float getFee() {
+    public Fee getFee() {
         return fee;
     }
 
-    public void setFee(float fee) {
+    public void setFee(Fee fee) {
         this.fee = fee;
+    }
+    
+    public double calculateParkingFee(long minutes) {
+        if (fee == null) {
+            throw new IllegalStateException("No hay tarifa configurada para este tipo de vehículo");
+        }
+        return fee.calculateFeeForDuration(minutes);
     }
 
     @Override
     public String toString() {
-        return """
-           Vehicle Types
-           Id = """ + id + ", Description = " + description + 
-           ", Number of Tires = " + numberOfTires + ", Fee = " + fee + ".\n";
+        return "VehicleType{" + "id=" + id + ", description=" + description + 
+               ", numberOfTires=" + numberOfTires + ", fee=" + (fee != null ? "Configurada" : "No configurada") + '}';
     }
     
     

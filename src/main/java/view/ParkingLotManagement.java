@@ -4,189 +4,206 @@
  */
 package view;
 
+import controller.ParkingLotFileController;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import model.data.CustomerDataFile;
-import model.entities.Customer;
+import model.entities.ParkingLot;
+import model.entities.Space;
 
 /**
  *
  * @author 50687
  */
-public class ParkingLotManagement extends JInternalFrame{
-    
-    //Atributos necesarios
-    JButton buttonDelete, buttonEdit;
-    JPanel panelCustomers;
-    JTable tableCustomers;
-    DefaultTableModel modelDataTable;
-    
-    //Constantes
-    final String[] headings = {"Id", "Nombre", "Correo", "Dirección", "Telefóno"};
+public class ParkingLotManagement extends JInternalFrame {
 
-    //Instancia de clases
-    CustomerDataFile customerDataFile;
-    CustomerWindow customerWindow;
+    private JButton buttonDelete, buttonConfigure, buttonStatus;
+    private JPanel panelParkingLots;
+    private JTable tableParkingLots;
+    private DefaultTableModel modelDataTable;
+    
+    private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Espacios Ocupados"};
+
+    private ParkingLotFileController controller;
+    //private ParkingLotWindow parkingLotWindow;
 
     public ParkingLotManagement() {
-        super("Gestión de Clientes", false, true, false, true);
-        this.setVisible(true);//permite que sea visible
-        this.setSize(650, 500);
-        this.setLocation(230, 50);
-        this.setResizable(false);
+        super("Gestión de Parqueos", false, true, false, true);
+        initializeController();
+        initializeComponents();
+        loadParkingLots();
+    }
 
-        panelCustomers = new JPanel();// Crea el panel
-        panelCustomers.setLayout(null);//Ubicación
-        panelCustomers.setBackground(Color.WHITE);//color al panel
-        panelCustomers.setVisible(true);
-        this.add(panelCustomers);//adhiere al panel
+    private void initializeController() {
+        try {
+            this.controller = new ParkingLotFileController();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error inicializando controlador: " + e.getMessage());
+        }
+    }
 
-        customerDataFile = new CustomerDataFile("Customers");
-        customerWindow = new CustomerWindow();
-        
+    private void initializeComponents() {
+        setVisible(true);
+        setSize(650, 500);
+        setLocation(230, 50);
+        setResizable(false);
 
-        //Creación de la tabla que contiene la lista de clientes.
-        tableCustomers = new JTable();
-        tableCustomers.setSize(400, 1000);
-        tableCustomers.setLocation(95, 300);
-        panelCustomers.add(tableCustomers);
-        JScrollPane scrollBar = new JScrollPane(tableCustomers);
-        scrollBar.setBounds(25, 75, 600, 249);
-        panelCustomers.add(scrollBar);
+        panelParkingLots = new JPanel();
+        panelParkingLots.setLayout(null);
+        panelParkingLots.setBackground(Color.WHITE);
+        panelParkingLots.setVisible(true);
+        add(panelParkingLots);
 
         createTable();
+        createButtons();
+    }
 
-        buttonDelete = new JButton("Borrar");
-        buttonDelete.setBounds(140, 375, 100, 25);//le da tamaño y ubicación
-        buttonDelete.setToolTipText("Presione para borrar un cliente");
-        panelCustomers.add(buttonDelete);
-        buttonDelete.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int borrar = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea borrar el cliente?\n", "Borrar Cliente", JOptionPane.YES_NO_OPTION);
+    private void createTable() {
+        tableParkingLots = new JTable();
+        tableParkingLots.setSize(400, 1000);
+        tableParkingLots.setLocation(95, 300);
+        panelParkingLots.add(tableParkingLots);
 
-                if (borrar == 0) { //este if se para confirmar de que el usario desea borrar
+        JScrollPane scrollBar = new JScrollPane(tableParkingLots);
+        scrollBar.setBounds(25, 75, 600, 249);
+        panelParkingLots.add(scrollBar);
+    }
 
-                    removeCustomer();//remueve el cliente
-                    cleanTable();//limpia la tabla
+    private void createButtons() {
+        buttonDelete = createButton("Eliminar", 50);
+        buttonConfigure = createButton("Configurar", 200);
+        buttonStatus = createButton("Estado", 350);
 
-                    createTable();//crea de nuevo la tabla
+        buttonDelete.addActionListener(e -> deleteParkingLot());
+        buttonConfigure.addActionListener(e -> configureSpaces());
+        buttonStatus.addActionListener(e -> showParkingLotStatus());
 
-                    JOptionPane.showMessageDialog(null, "Cliente borrado con éxito");
-
-                }//Fin del if de borrar
-
-            }//FIN DEL ACTIONPERFORMED
-        });
-
-        buttonEdit = new JButton("Editar");// crea el boton insertar
-        buttonEdit.setBounds(360, 375, 100, 25);//le da tamaño y ubicación
-        buttonEdit.setToolTipText("Para modifiar dar doble Click en la Casilla e ingrese el numero o palabra correcta");
-        panelCustomers.add(buttonEdit);
-        buttonEdit.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-
-                customerWindow.dataFromCustomer=fillCustomerFormToModify();
-                
-             
-            }// FIN DEL METODO ACTION PERFORMED
-        });
-
-    }//Fin de constructor
-
-    public String[] fillCustomerFormToModify() {
+    }
     
-        JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
-        this.dispose();//cierra la ventana actual para que se vea la de modificar 
-        customerWindow.setTitle("Modificar Cliente");
-        customerWindow.setVisible(true);
-        
-        desktopPane.add(customerWindow);
-
-        String[] dataFromCustomerToModify = getValueFromTable();
-
-        customerWindow.textFieldNumber.setText(dataFromCustomerToModify[0]);
-        customerWindow.textFieldName.setText(dataFromCustomerToModify[1]);
-        customerWindow.textFieldEmail.setText(dataFromCustomerToModify[2]);
-        //customerWindow.textFieldAddress.setText(dataFromCustomerToModify[3]);
-        customerWindow.textFieldPhone.setText(dataFromCustomerToModify[4]);
-        
-        customerWindow.buttonInsert.setText("Modificar");
-        
-        return dataFromCustomerToModify;
+    private JButton createButton(String text, int x) {
+        JButton button = new JButton(text);
+        button.setBounds(x, 350, 120, 30);
+        panelParkingLots.add(button);
+        return button;
     }
 
-    public void createTable() {
-        ArrayList<Customer> customers
-                = customerDataFile.getAllCustomers();
+    private void loadParkingLots() {
+        try {
+            ArrayList<ParkingLot> parkingLots = controller.getAllParkingLots();
+            String[][] data = createDataMatrix(parkingLots);
+            modelDataTable = new DefaultTableModel(data, headings);
+            tableParkingLots.setModel(modelDataTable);
 
-        String[][] customersToShow
-                = customerDataFile.createCustomerMatrix(customers);
-
-        modelDataTable
-                = new DefaultTableModel(customersToShow, headings);
-
-        tableCustomers.setModel(modelDataTable);
+            for (ParkingLot parkingLot : parkingLots) {
+                modelDataTable.addRow(new Object[]{
+                    parkingLot.getId(),
+                    parkingLot.getName(),
+                    parkingLot.getNumberOfSpaces(),
+                    countOccupiedSpaces(parkingLot)
+                });
+            }
+        } catch (Exception e) {
+            showError("Error cargando parqueos: " + e.getMessage());
+        }
+    }
+    
+    private int countOccupiedSpaces(ParkingLot parkingLot) {
+        int count = 0;
+        for (Space space : parkingLot.getSpaces()) {
+            if (space.isSpaceTaken()) {
+                count++;
+            }
+        }
+        return count;
     }
 
-    private void cleanTable() {
+    private String[][] createDataMatrix(ArrayList<ParkingLot> parkingLots) {
+        String[][] data = new String[parkingLots.size()][4];
 
-        DefaultTableModel newModel = (DefaultTableModel) tableCustomers.getModel();
-        newModel.setNumRows(0);
+        for (int i = 0; i < parkingLots.size(); i++) {
+            ParkingLot pl = parkingLots.get(i);
+            data[i][0] = String.valueOf(pl.getId());
+            data[i][1] = pl.getName();
+            data[i][2] = String.valueOf(pl.getNumberOfSpaces());
+            data[i][3] = String.valueOf(pl.getVehicles().size());
+        }
+
+        return data;
     }
 
-    public int getCustomerSelected() {
+    private int getSelectedParkingLotId() {
+        int row = tableParkingLots.getSelectedRow();
+        if (row == -1) {
+            throw new IllegalStateException("Seleccione un parqueo");
+        }
+        return Integer.parseInt(modelDataTable.getValueAt(row, 0).toString());
+    }
+    
+    private void deleteParkingLot() {
+        try {
+            int id = getSelectedParkingLotId();
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "¿Eliminar el parqueo?", "Confirmar",
+                    JOptionPane.YES_NO_OPTION);
 
-        int rowSelected = tableCustomers.getSelectedRow();
+            if (confirm == JOptionPane.YES_OPTION) {
+                controller.removeParkingLot(id);
+                loadParkingLots();
+                showSuccess("Parqueo eliminado");
+            }
 
-        return rowSelected;
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
     }
 
-    public String[] getValueFromTable() {
+    private void configureSpaces() {
+        try {
+            int id = getSelectedParkingLotId();
+            ParkingLot parkingLot = controller.findParkingLotById(id);
 
-        int id = Integer.parseInt(tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 0).toString());
+            if (countOccupiedSpaces(parkingLot) > 0) {
+                showError("No se puede configurar con vehículos estacionados");
+                return;
+            }
+            
+            SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, controller);
+            getDesktopPane().add(window);
 
-        String name
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 1).toString();
-
-        String email
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 2).toString();
-
-        String address
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 3).toString();
-
-        String phone
-                = tableCustomers.getModel().
-                getValueAt(getCustomerSelected(), 4).toString();
-
-        String valuesToReturn[] = new String[5];
-        valuesToReturn[0] = "" + id;
-        valuesToReturn[1] = name;
-        valuesToReturn[2] = email;
-        valuesToReturn[3] = address;
-        valuesToReturn[4] = phone;
-
-        return valuesToReturn;
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
     }
 
-    public void removeCustomer() {
+    private void showParkingLotStatus() {
+        try {
+            int id = getSelectedParkingLotId();
+            String status = controller.getParkingLotStatusById(id);
+            JOptionPane.showMessageDialog(this, status, "Estado",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
+    }
 
-        //customerDataFile.deleteCustomerFromFile(customerDataFile.getCustomerFromFile(getValueFromTable()[1], getValueFromTable()[2]));
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
 
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message, "Éxito",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showInfo(String title, String message) {
+        JOptionPane.showMessageDialog(this, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
 }

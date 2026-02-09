@@ -4,308 +4,498 @@
  */
 package view;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import controller.CustomerFileController;
+import controller.ParkingLotFileController;
+import controller.VehicleFileController;
+import controller.VehicleTypeController;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import static java.time.format.DateTimeFormatter.ofPattern;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
+import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import model.data.CustomerDataFile;
-import model.data.VehicleDataFile;
 import model.entities.Customer;
+import model.entities.ParkingLot;
+import model.entities.Space;
 import model.entities.Vehicle;
+import model.entities.VehicleType;
 
 /**
  *
  * @author 50687
+ * @author user
  */
-public class VehicleWindow extends JInternalFrame implements ActionListener{
+public class VehicleWindow extends JInternalFrame {
+   
+    //Controladores
+    private VehicleFileController vehicleController;
+    private CustomerFileController customerController;
+    private ParkingLotFileController parkingLotController;
+    private VehicleTypeController vehicleTypeController;
     
-    JPanel panelOfInsertVehicleWindow;
-    JLabel labelId, labelPlate, labelColor, labelBrand, labelModel, labelCustomer, labelVehicleType, labelSpace;
-    public JTextField textFieldId, textFieldPlate, textFieldColor, textFieldBrand, textFieldModel, textFieldCustomer, textFieldVehicleType, textFieldSpace;
-    JButton buttonInsert, buttonCancel;
-    VehicleDataFile vehicleDataFile;
-    public String[] dataFromVehicle = new String[9];
-
+    //Componentes UI
+    private JTextField plateField, colorField, brandField, modelField;
+    private JComboBox<String> vehicleTypeCombo, parkingLotCombo, customerCombo;
+    private JList<String> customerList;
+    private DefaultListModel<String> customerListModel;
+    
+    //Datos
+    private ArrayList<Customer> allCustomers;
+    private ArrayList<ParkingLot> allParkingLots;
+    private ArrayList<VehicleType> allVehicleTypes;
+    private ArrayList<Customer> selectedCustomers;
+    
+    private Vehicle vehicleToEdit;
+    
+    //Constructor para nuevo vehículo
     public VehicleWindow() {
-
-        super("Insertar Cliente", false, true, false, true);
-        this.setVisible(true);//permite que sea visible
-        this.setSize(450, 650);
-        this.setLocation(215, 30);
-        this.setResizable(false);
-
-        vehicleDataFile = new VehicleDataFile("Vehicles");//instanciamos la clase CustomerData
-
-        panelOfInsertVehicleWindow = new JPanel();// Crea el panel
-        panelOfInsertVehicleWindow.setLayout(null);//Ubicación
-        panelOfInsertVehicleWindow.setBackground(Color.WHITE);//color al panel
-        this.add(panelOfInsertVehicleWindow);//adhiere al panel
-
-        labelId = new JLabel("ID: ");// crea la etiqueta número
-        labelId.setBounds(50, 20, 100, 30);//le da tamaño y ubicación
-        labelId.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelId);//adhiere la etiqueta
-
-        textFieldId = new JTextField(75);// crea el textfield para número
-        textFieldId.setBounds(180, 25, 200, 25);//le da tamaño y ubicación
-        textFieldId.setEditable(false);//lo coloca en estado ineditable
-
-        //establece el próximo id del cliente en el textfield
-        textFieldId.setText("" + (vehicleDataFile.findLastIdNumberOfVehicle() + 1));
-
-        panelOfInsertVehicleWindow.add(textFieldId);//adhiere el textfield
-
-        labelPlate = new JLabel("Placa: ");//crea la etiqueta nombre
-        labelPlate.setBounds(50, 70, 100, 30);//le da tamaño y ubicación
-        labelPlate.setForeground(Color.BLUE);// da color 
-        panelOfInsertVehicleWindow.add(labelPlate);//adhiere la etiqueta
-
-        textFieldPlate = new JTextField(75);// crea el textfield para nombre
-        textFieldPlate.setBounds(180, 75, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldPlate);//adhiere el textfield
-
-        labelColor = new JLabel("Color: ");//crea la etiqueta teléfono
-        labelColor.setBounds(50, 120, 100, 30);//le da tamaño y ubicación
-        labelColor.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelColor);//adhiere la etiqueta
-
-        textFieldColor = new JTextField(75);//crea el textfield para teléfono
-        textFieldColor.setBounds(180, 125, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldColor);//adhiere el textfield
-
-        labelBrand = new JLabel("Marca: ");//crea la etiqueta dirección
-        labelBrand.setBounds(50, 170, 100, 30);//le da tamaño y ubicación
-        labelBrand.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelBrand);//adhiere la etiqueta
-
-        textFieldBrand = new JTextField(75);// crea el textfield para dirección
-        textFieldBrand.setBounds(180, 175, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldBrand);//adhiere el textfield
-
-        labelModel = new JLabel("Modelo: ");//crea la etiqueta email
-        labelModel.setBounds(50, 220, 100, 30);//le da tamaño y ubicación
-        labelModel.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelModel);//adhiere la etiqueta
-
-        textFieldModel = new JTextField(75);//crea el text para email
-        textFieldModel.setBounds(180, 225, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldModel);//adhiere el textfield
-        
-        labelCustomer = new JLabel("ID Clientes: ");//crea la etiqueta email
-        labelCustomer.setBounds(50, 270, 100, 30);//le da tamaño y ubicación
-        labelCustomer.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelCustomer);//adhiere la etiqueta
-
-        textFieldCustomer = new JTextField(75);//crea el text para email
-        textFieldCustomer.setBounds(180, 275, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldCustomer);//adhiere el textfield
-        
-        labelVehicleType = new JLabel("ID Tipo de vehículo: ");//crea la etiqueta email
-        labelVehicleType.setBounds(50, 320, 120, 30);//le da tamaño y ubicación
-        labelVehicleType.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelVehicleType);//adhiere la etiqueta
-
-        textFieldVehicleType = new JTextField(75);//crea el text para email
-        textFieldVehicleType.setBounds(180, 325, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldVehicleType);//adhiere el textfield
-        
-        labelSpace = new JLabel("ID Espacio: ");//crea la etiqueta email
-        labelSpace.setBounds(50, 370, 100, 30);//le da tamaño y ubicación
-        labelSpace.setForeground(Color.BLUE);// da color
-        panelOfInsertVehicleWindow.add(labelSpace);//adhiere la etiqueta
-
-        textFieldSpace = new JTextField(75);//crea el text para email
-        textFieldSpace.setBounds(180, 375, 200, 25);//le da tamaño y ubicación
-        panelOfInsertVehicleWindow.add(textFieldSpace);//adhiere el textfield
-        
-        //Botones
-        buttonInsert = new JButton("Insertar");// crea el boton insertar
-        buttonInsert.setBounds(100, 450, 100, 30);//le da tamaño y ubicación
-        buttonInsert.setToolTipText("Presione para insertar el vehículo");
-        buttonInsert.addActionListener(this);
-        panelOfInsertVehicleWindow.add(buttonInsert);//adhiere el boton
-
-        buttonCancel = new JButton("Cancelar");// crea el boton insertar
-        buttonCancel.setBounds(230, 450, 100, 30);//le da tamaño y ubicación
-        buttonCancel.addActionListener(this);//método de escucha del boton
-        buttonCancel.setToolTipText("Presione para cancelar");
-        panelOfInsertVehicleWindow.add(buttonCancel);//adhiere el boton
-
-        buttonCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int numberChosen = JOptionPane.showConfirmDialog(null, "¿Está seguro que desea \n cerrar la ventana?", "Confirmar", JOptionPane.YES_NO_OPTION);
-                if (numberChosen == 0) {
-                    setVisible(false);
-                }
-            }
-        });
-
+        super("Registrar Vehículo", true, true, true, true);
+        this.vehicleToEdit = null;
+        initWindow();
     }
     
-    @Override
-    public void actionPerformed(ActionEvent event) {
+    //Constructor para editar vehículo
+    public VehicleWindow(Vehicle vehicle) {
+        super("Editar Vehículo", true, true, true, true);
+        this.vehicleToEdit = vehicle;
+        this.selectedCustomers = vehicle.getCustomer();
+        initWindow();
+    }
+    
+    //Inicializar ventana
+    private void initWindow() {
+        initControllers();
+        initData();
+        createUI();
+        loadData();
+        if (isEditMode()) {
+            loadVehicleData();
+        }
+    }
+    
+    //Inicializar controladores
+    private void initControllers() {
+        try {
+            vehicleController = new VehicleFileController();
+            customerController = new CustomerFileController();
+            parkingLotController = new ParkingLotFileController();
+            vehicleTypeController = new VehicleTypeController();
+        } catch (Exception e) {
+            showMessage("Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            dispose();
+        }
+    }
+    
+    //Inicializar datos
+    private void initData() {
+        allCustomers = new ArrayList<>();
+        allParkingLots = new ArrayList<>();
+        allVehicleTypes = new ArrayList<>();
+        if (selectedCustomers == null) {
+            selectedCustomers = new ArrayList<>();
+        }
+    }
+    
+    //Crear interfaz
+    private void createUI() {
+        setSize(550, 550);
+        setLocation(100, 50);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        mainPanel.add(createVehiclePanel(), BorderLayout.NORTH);
+        mainPanel.add(createCustomerPanel(), BorderLayout.CENTER);
+        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
+        
+        setContentPane(mainPanel);
+    }
+    
+    //Panel de datos del vehículo
+    private JPanel createVehiclePanel() {
+        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Datos del Vehículo"));
+        
+        panel.add(new JLabel("Placa*:"));
+        plateField = new JTextField();
+        panel.add(plateField);
+        
+        panel.add(new JLabel("Color:"));
+        colorField = new JTextField();
+        panel.add(colorField);
+        
+        panel.add(new JLabel("Marca:"));
+        brandField = new JTextField();
+        panel.add(brandField);
+        
+        panel.add(new JLabel("Modelo:"));
+        modelField = new JTextField();
+        panel.add(modelField);
+        
+        panel.add(new JLabel("Tipo*:"));
+        vehicleTypeCombo = new JComboBox<>();
+        panel.add(vehicleTypeCombo);
+        
+        panel.add(new JLabel("Parqueo*:"));
+        parkingLotCombo = new JComboBox<>();
+        panel.add(parkingLotCombo);
+        
+        return panel;
+    }
+    
+    //Panel de clientes
+    private JPanel createCustomerPanel() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Clientes a Bordo*"));
+        
+        //Panel superior para agregar clientes
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.add(new JLabel("Cliente:"));
+        customerCombo = new JComboBox<>();
+        customerCombo.setPreferredSize(new Dimension(250, 25));
+        topPanel.add(customerCombo);
+        
+        JButton addButton = new JButton("Agregar");
+        addButton.addActionListener(e -> addCustomer());
+        topPanel.add(addButton);
+        
+        //Lista de clientes seleccionados
+        customerListModel = new DefaultListModel<>();
+        customerList = new JList<>(customerListModel);
+        JScrollPane scrollPane = new JScrollPane(customerList);
+        scrollPane.setPreferredSize(new Dimension(400, 100));
+        
+        //Panel inferior para remover
+        JPanel bottomPanel = new JPanel(new FlowLayout());
+        JButton removeButton = new JButton("Remover");
+        removeButton.addActionListener(e -> removeCustomer());
+        bottomPanel.add(removeButton);
+        
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+        
+        return panel;
+    }
+    
+    //Panel de botones
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        
+        JButton saveButton = new JButton("Guardar");
+        saveButton.addActionListener(e -> saveVehicle());
+        
+        JButton cancelButton = new JButton("Cancelar");
+        cancelButton.addActionListener(e -> dispose());
+        
+        panel.add(saveButton);
+        panel.add(cancelButton);
+        
+        return panel;
+    }
+    
+    //Cargar datos
+    private void loadData() {
+        loadCustomers();
+        loadVehicleTypes();
+        loadParkingLots();
+        updateCustomerList();
+    }
+    
+    //Cargar clientes
+    private void loadCustomers() {
+        try {
+            allCustomers = customerController.getAllCustomers();
+            customerCombo.removeAllItems();
+            customerCombo.addItem("-- Seleccione --");
 
-        //forma de saber si el botón fue presionado
-        if (event.getActionCommand().equalsIgnoreCase("Insertar")) {
-
-            Vehicle vehicle = new Vehicle();
-
-            //controlamos si alguno de los campos está vacío.
-            if (textFieldPlate.getText().equals("")
-                    || textFieldModel.getText().equals("")
-                    || textFieldBrand.getText().equals("")
-                    || textFieldColor.getText().equals("")
-                    || textFieldCustomer.getText().equals("")
-                    || textFieldVehicleType.getText().equals("")) {
-
-                JOptionPane.showMessageDialog(null, "Por favor, llene todos los campos del vehiculo.");
-
-            } else {
-                vehicle.setId(Integer.parseInt(textFieldId.getText()));
-                vehicle.setPlate(textFieldPlate.getText());
-                vehicle.setModel(textFieldModel.getText());
-                vehicle.setBrand(textFieldBrand.getText());
-                vehicle.setColor(textFieldColor.getText());
-                
-                CustomerDataFile customerData = new CustomerDataFile("CustomersTemp");
-                int customerId = Integer.parseInt(textFieldCustomer.getText());
-                Customer customerFound = customerData.getCustomerFromFile(customerId);
-
-                if (customerFound != null) {
-                    // Como tu entidad pide un ArrayList<Customer>, creamos uno rápido
-                    ArrayList<Customer> customerList = new ArrayList<>();
-                    customerList.add(customerFound);
-                    vehicle.setCustomer(customerList);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error: El ID de cliente no existe.");
-                    return; // Detiene el proceso
-                }
-                
-                int result = vehicleDataFile.insertVehicle(vehicle);
-
-                if (result == 0) {
-
-                    JOptionPane.showMessageDialog(null, "Cliente insertado exitosamente");
-
-                    //ponemos el id del siguiente cliente por ser insertado:
-                    textFieldId.setText("" + (vehicleDataFile.findLastIdNumberOfVehicle() + 1));
-
-                    //limpiamos los campos de inserción.
-                    textFieldBrand.setText("");
-                    textFieldPlate.setText("");
-                    textFieldModel.setText("");
-                    textFieldBrand.setText("");
-                    textFieldColor.setText("");
-
-                } else {
-
-                    int exception = vehicleDataFile.exception;
-
-                    if (exception == 1) {
-
-                        JOptionPane.showMessageDialog(null, "Error al abrir "
-                                + "o "
-                                + "encontrar el archivo de vehiculos.");
-
-                    } else if (exception == 2) {
-
-                        JOptionPane.showMessageDialog(null,
-                                "Error al leer datos del archivo de vehiculos.");
-
-                    } else if (exception == 3) {
-
-                        JOptionPane.showMessageDialog(null,
-                                "El vehiculo ya existe. Intente de nuevo.");
-
-                    }
-
-                }
+            for (Customer c : allCustomers) {
+                customerCombo.addItem(c.getName() + " (" + c.getEmail() + ")");
             }
+        } catch (IOException e) {
+            showMessage("Error cargando clientes", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    //Cargar tipos de vehículo
+    private void loadVehicleTypes() {
+    try {
+        allVehicleTypes = vehicleTypeController.getAllVehicleTypes();
+        vehicleTypeCombo.removeAllItems();
+        vehicleTypeCombo.addItem("-- Seleccione --");
 
-        } else if (event.getActionCommand().equalsIgnoreCase("Modificar")) {
-
-            //controlamos si alguno de los campos está vacío.
-            if (textFieldPlate.getText().equals("")
-                    || textFieldModel.getText().equals("")
-                    || textFieldBrand.getText().equals("")
-                    || textFieldColor.getText().equals("")) {
-
-                JOptionPane.showMessageDialog(null, "Por favor, llene todos los campos del vehiculo.");
-
-            } else {
-
-                Vehicle vehicle = vehicleDataFile.getVehicleFromFile(dataFromVehicle[1]);
-                
-                String oldLine = "";
-                for (int i = 0; i < dataFromVehicle.length; i++) {
-                    oldLine += dataFromVehicle[i] + (i == dataFromVehicle.length - 1 ? "" : ";");
-                }
-
-                /*vehicle.setId(Integer.parseInt(textFieldId.getText()));
-                vehicle.setPlate(textFieldPlate.getText());
-                vehicle.setColor(textFieldColor.getText());
-                vehicle.setBrand(textFieldBrand.getText());
-                vehicle.setModel(textFieldModel.getText());
-                
-                CustomerDataFile customerData = new CustomerDataFile("CustomersTemp");
-                int customerId = Integer.parseInt(textFieldCustomer.getText());
-                Customer customerFound = customerData.getCustomerFromFile(customerId);
-
-                if (customerFound != null) {
-                    // Como tu entidad pide un ArrayList<Customer>, creamos uno rápido
-                    ArrayList<Customer> customerList = new ArrayList<>();
-                    customerList.add(customerFound);
-                    vehicle.setCustomer(customerList);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Error: El ID de cliente no existe.");
-                    return; // Detiene el proceso
-                }
-
-                String newVehicle = "";
-                newVehicle += vehicle.getId() + ";";
-                newVehicle += vehicle.getPlate() + ";";
-                newVehicle += vehicle.getColor() + ";";
-                newVehicle += vehicle.getBrand() + ";";
-                newVehicle += vehicle.getModel() + ";";
-                newVehicle += vehicle.getCustomer() + ";";
-                newVehicle += textFieldVehicleType.getText() + ";";
-                newVehicle += textFieldSpace.getText() + ";";
-                newVehicle += vehicle.getEntryTime() + ";";*/
-                
-                String newLine = textFieldId.getText() + ";"
-                + textFieldPlate.getText() + ";"
-                + textFieldColor.getText() + ";"
-                + textFieldBrand.getText() + ";"
-                + textFieldModel.getText() + ";"
-                + textFieldCustomer.getText() + ";"
-                + textFieldVehicleType.getText() + ";"
-                + textFieldSpace.getText() + ";"
-                + dataFromVehicle[8];
-                
-                
-                vehicleDataFile.modifyVehicleFromFile(oldLine, newLine);
-
-                //customerDataFile.modifyCustomerFromFile(customerDataFile.getCustomerFromFile(dataFromCustomer[1]/*, dataFromCustomer[2]*/), newCustomer);
-
-                JOptionPane.showMessageDialog(null, "Vehicle modificado con éxito.");
-                setVisible(false);
-                
-                VehicleManagement vehicleManagement= new VehicleManagement();
-                vehicleManagement.setVisible(true);
-                JDesktopPane desktopPane= this.getDesktopPane();//obtiene el JDesktopPane en el que se encuentran los JInternalFrames
-                desktopPane.add(vehicleManagement);
+        for (VehicleType type : allVehicleTypes) {
+            vehicleTypeCombo.addItem(type.getDescription());
+        }
+    } catch (Exception e) {
+        showMessage("Error cargando tipos", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+    
+    //Cargar parqueos
+    private void loadParkingLots() {
+        try {
+            allParkingLots = parkingLotController.getAllParkingLots();
+            parkingLotCombo.removeAllItems();
+            parkingLotCombo.addItem("-- Seleccione --");
+            
+            for (ParkingLot parkingLot : allParkingLots) {
+                parkingLotCombo.addItem(parkingLot.getName());
+            }
+        } catch (Exception e) {
+            showMessage("Error cargando parqueos", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    //Cargar datos para edición
+    private void loadVehicleData() {
+        
+        plateField.setText(vehicleToEdit.getPlate());
+        colorField.setText(vehicleToEdit.getColor());
+        brandField.setText(vehicleToEdit.getBrand());
+        modelField.setText(vehicleToEdit.getModel());
+        
+        for (int i = 0; i < allVehicleTypes.size(); i++) {
+            if (allVehicleTypes.get(i).getId() == vehicleToEdit.getVehicleType().getId()) {
+                vehicleTypeCombo.setSelectedIndex(i+1);
+                break;
             }
         }
-    }  
+    }
+    
+    //Agregar cliente
+    private void addCustomer() {
+        int index = customerCombo.getSelectedIndex();
+        if (index <= 0) {
+            showMessage("Seleccione un cliente", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        Customer customer = allCustomers.get(index - 1);
+        
+        if (isCustomerAdded(customer)) {
+            showMessage("Cliente ya agregado", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        selectedCustomers.add(customer);
+        updateCustomerList();
+        
+        askForMoreCustomers();
+    }
+    
+    //Verificar si cliente ya está agregado
+    private boolean isCustomerAdded(Customer customer) {
+        for (Customer c : selectedCustomers) {
+            if (c.getId() == customer.getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //Preguntar por más clientes
+    private void askForMoreCustomers() {
+        int answer = JOptionPane.showConfirmDialog(this,
+            "¿Agregar otro cliente?",
+            "Más clientes",
+            JOptionPane.YES_NO_OPTION);
+        
+        if (answer == JOptionPane.YES_OPTION) {
+            customerCombo.setSelectedIndex(0);
+        }
+    }
+    
+    //Remover cliente
+    private void removeCustomer() {
+        int index = customerList.getSelectedIndex();
+        if (index >= 0) {
+            selectedCustomers.remove(index);
+            updateCustomerList();
+        }
+    }
+    
+    //Actualizar lista de clientes
+    private void updateCustomerList() {
+        customerListModel.clear();
+        for (Customer customer : selectedCustomers) {
+            String text = customer.getName() + " (" + customer.getEmail() + ")";
+            customerListModel.addElement(text);
+        }
+    }
+    
+    //Guardar vehículo
+    private void saveVehicle() {
+        try {
+            validateFields();
+            Vehicle vehicle = createVehicle();
+            ParkingLot parkingLot = getSelectedParkingLot();
+            
+            saveToFile(vehicle);
+            parkVehicleInParkingLot(vehicle, parkingLot);
+            showAssignmentDetails(vehicle, parkingLot);
+            
+            showMessage("Vehículo guardado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+            
+        } catch (IllegalArgumentException e) {
+            showMessage(e.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE);
+        } catch (Exception e) {
+            showMessage("Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    
+    
+    //Crear objeto Vehicle
+    private Vehicle createVehicle() throws Exception {
+        Vehicle vehicle = new Vehicle();
+        
+        if (isEditMode()) {
+            vehicle.setId(vehicleToEdit.getId());
+            vehicle.setEntryTime(vehicleToEdit.getEntryTime());
+        }else{
+            vehicle.setEntryTime(LocalDateTime.now());
+        }
+        
+        vehicle.setPlate(plateField.getText().trim());
+        vehicle.setColor(colorField.getText().trim());
+        vehicle.setBrand(brandField.getText().trim());
+        vehicle.setModel(modelField.getText().trim());
+        vehicle.setCustomer(selectedCustomers);
+        
+        
+        ParkingLot parkingLot = getSelectedParkingLot();
+        VehicleType type = getSelectedVehicleType();
+        
+        Space availableSpace = parkingLotController.findAvailableSpace(vehicle, parkingLot);
+        if (availableSpace != null) {
+            vehicle.setVehicleType(type);
+        } else {
+            throw new Exception("No hay espacios disponibles para este tipo");
+        }
+
+        return vehicle;
+    }
+    
+    private VehicleType getSelectedVehicleType() {
+        int index = vehicleTypeCombo.getSelectedIndex() - 1;
+        return index >= 0 ? allVehicleTypes.get(index) : null;
+    }
+
+    //Obtener parqueo seleccionado
+    private ParkingLot getSelectedParkingLot() {
+        int index = parkingLotCombo.getSelectedIndex() - 1;
+        if (index >= 0 && index < allParkingLots.size()) {
+            return allParkingLots.get(index);
+        }
+        return null;
+    }
+
+    private void parkVehicleInParkingLot(Vehicle vehicle, ParkingLot parkingLot) throws Exception {
+        if (vehicle == null) {
+            throw new IllegalArgumentException("Vehículo no puede ser nulo");
+        }
+        if (parkingLot == null) {
+            throw new IllegalArgumentException("Seleccione un parqueo");
+        }
+
+        // Verificar si hay espacio disponible
+        int occupiedSpaces = parkingLot.getVehicles().size();
+        if (occupiedSpaces >= parkingLot.getNumberOfSpaces()) {
+            throw new IllegalStateException("No hay espacios disponibles en el parqueo");
+        }
+
+        // Agregar vehículo al parqueo
+        parkingLot.getVehicles().add(vehicle);
+
+        // Guardar cambios del parqueo (actualizar lista de vehículos)
+        parkingLotController.updateParkingLot(parkingLot);
+
+        // Mensaje de confirmación
+        JOptionPane.showMessageDialog(this,
+                "Vehículo parqueado en " + parkingLot.getName(),
+                "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    
+    //Validar campos
+    private void validateFields() {
+        if (plateField.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("Placa requerida");
+        }
+        if (vehicleTypeCombo.getSelectedIndex() <= 0) {
+            throw new IllegalArgumentException("Seleccione tipo de vehículo");
+        }
+        if (parkingLotCombo.getSelectedIndex() <= 0) {
+            throw new IllegalArgumentException("Seleccione parqueo");
+        }
+        if (selectedCustomers.isEmpty()) {
+            throw new IllegalArgumentException("Agregue al menos un cliente");
+        }
+    }
+    
+    //Mostrar detalles de asignación
+    private void showAssignmentDetails(Vehicle vehicle, ParkingLot parkingLot) {
+        if (parkingLot == null) return;
+        
+        StringBuilder clients = new StringBuilder();
+        for (int i = 0; i < selectedCustomers.size(); i++) {
+            clients.append(selectedCustomers.get(i).getName());
+            if (i < selectedCustomers.size() - 1) {
+                clients.append(", ");
+            }
+        }
+        
+        String message = "¡Vehículo registrado!\n\n" +
+                        "Placa: " + vehicle.getPlate() + "\n" +
+                        "Parqueo: " + parkingLot.getName() + "\n" +
+                        "Clientes: " + clients.toString() + "\n" +
+                        "Entrada: " + formatDateTime(vehicle.getEntryTime());
+        
+        JOptionPane.showMessageDialog(this, message, "Registro Exitoso", 
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    //Formatear fecha/hora
+    private String formatDateTime(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return dateTime.format(formatter);
+    }
+    
+    //Guardar en archivo
+    private void saveToFile(Vehicle vehicle) {
+        try {
+            if (isEditMode()) {
+                vehicleController.update(vehicle);
+            } else {
+                vehicleController.create(vehicle);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error guardando: " + e.getMessage());
+        }
+    }
+    
+    //Verificar modo edición
+    private boolean isEditMode() {
+        return vehicleToEdit != null;
+    }
+    
+    //Mostrar mensaje
+    private void showMessage(String text, String title, int type) {
+        JOptionPane.showMessageDialog(this, text, title, type);
+    } 
 }

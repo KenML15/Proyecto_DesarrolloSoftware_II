@@ -8,6 +8,7 @@ import controller.ClerkController;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,6 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import model.entities.Administrator;
 import model.entities.Clerk;
 import model.entities.User;
 
@@ -38,44 +41,64 @@ public class LoginWindow extends JFrame implements ActionListener {
     ClerkController clerkController = new ClerkController();
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+            // Personalización técnica de componentes
+            UIManager.put("Button.font", new Font("Segoe UI", Font.PLAIN, 13));
+            UIManager.put("Label.font", new Font("Segoe UI", Font.PLAIN, 13));
+            UIManager.put("Panel.background", new Color(245, 246, 250));
+            UIManager.put("OptionPane.background", Color.WHITE);
+            UIManager.put("OptionPane.messageForeground", new Color(44, 62, 80));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         new LoginWindow().setVisible(true);
     }
 
     public LoginWindow() {
+        setTitle("Login");
+        setSize(380, 250);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-        setTitle("Login"); //Settea el título al frame
-        setSize(380, 250); //Settea el tamaño
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Si cierra el frame se cierra todo el programa
-        setLocationRelativeTo(null); //Hace que el frame se posicione en un lugar relativo
+        insertUsersTest();
 
         initComponents();
     }
 
     private void initComponents() {
+        // 1. Inicializar componentes UNA SOLA VEZ
+        txtUsername = new JTextField(15);
+        styleTextField(txtUsername);
+
+        txtPassword = new JPasswordField(15);
+        styleTextField(txtPassword);
+
+        btnSignIn = new JButton("Sign In");
+        styleButton(btnSignIn);
+        btnSignIn.addActionListener(this);
+
+        // 2. Armar los paneles
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        //  Título
         JLabel lblTitle = new JLabel("Welcome", SwingConstants.LEFT);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 22));
         lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        //  Panel de formulario
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
 
         // Username row
         JPanel usernamePanel = new JPanel(new BorderLayout(10, 0));
-        JLabel lblUsername = new JLabel("Username:");
-        txtUsername = new JTextField(15);
-        usernamePanel.add(lblUsername, BorderLayout.WEST);
+        usernamePanel.add(new JLabel("Username:"), BorderLayout.WEST);
         usernamePanel.add(txtUsername, BorderLayout.CENTER);
 
         // Password row
         JPanel passwordPanel = new JPanel(new BorderLayout(10, 0));
-        JLabel lblPassword = new JLabel("Password:");
-        txtPassword = new JPasswordField(15);
-        passwordPanel.add(lblPassword, BorderLayout.WEST);
+        passwordPanel.add(new JLabel("Password:"), BorderLayout.WEST);
         passwordPanel.add(txtPassword, BorderLayout.CENTER);
 
         formPanel.add(usernamePanel);
@@ -83,38 +106,41 @@ public class LoginWindow extends JFrame implements ActionListener {
         formPanel.add(passwordPanel);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(25, 0, 0, 0));
-
-        btnSignIn = new JButton("Sign In");
-        btnSignIn.addActionListener(this);
         buttonPanel.add(btnSignIn);
 
         mainPanel.add(lblTitle, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        add(mainPanel);//Esta clase es un frame, por eso puede acceder directamente a todos los elementos
-
+        add(mainPanel);
     }
+
+private void styleTextField(JTextField field) {
+    field.setPreferredSize(new Dimension(200, 35));
+    // Línea azul inferior estilo moderno
+    field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(52, 152, 219)));
+    field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    field.setBackground(Color.WHITE);
+}
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnSignIn) { //Es para hacer accionar el boton
-
+        if (e.getSource() == btnSignIn) {
             String username = txtUsername.getText();
-            String password = new String(txtPassword.getPassword());//El getPassword devuelve un arreglo de char
+            String password = new String(txtPassword.getPassword());
 
-            if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Username and password are required",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+            User userAuthenticated = clerkController.searchUser(username, password);
+
+            if (userAuthenticated != null) {
+                JOptionPane.showMessageDialog(this, "Welcome " + userAuthenticated.getName());
+                this.dispose();
+
+                new RegistrationWindow(userAuthenticated).setVisible(true);
             } else {
+                JOptionPane.showMessageDialog(this, "Invalid user", "Error", JOptionPane.ERROR_MESSAGE);
 
                 insertClerk();
-                User userAuthenticated = clerkController.searchUser(new Clerk(2, null, 19, null, "123", "Kenneth Miranda", username, password)); //Como clerk es un user, está bien que se 
+                userAuthenticated = clerkController.searchUser(new Clerk(2, null, 19, null, "123", "Kenneth Miranda", username, password)); //Como clerk es un user, está bien que se 
                 if (userAuthenticated == null) {
                     JOptionPane.showMessageDialog(
                             this,
@@ -132,21 +158,33 @@ public class LoginWindow extends JFrame implements ActionListener {
         }
     }
 
-
     private void styleButton(JButton button) {
-        button.setFocusPainted(false);
-        button.setBackground(new Color(70, 130, 180)); // Azul acero
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("Arial", Font.BOLD, 14));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(70, 130, 180)),
-                BorderFactory.createEmptyBorder(10, 25, 10, 25)
+    button.setFocusPainted(false);
+    button.setBackground(new Color(52, 152, 219));
+    button.setForeground(Color.WHITE);
+    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    button.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+}
+
+    public void insertUsersTest() {
+
+        clerkController.insertClerk(new Clerk(1, "7am-3pm", 25, null, "1-111", "Pablo Operador", "pablo", "123"));
+
+        clerkController.insertClerk(new Administrator(
+                99,
+                "Full Time",
+                30,
+                null,
+                "0-000",
+                "Admin Supreme",
+                "admin", // username (String)
+                "admin123" // password (String)
         ));
     }
 
     void insertClerk() {
-        Clerk clerkPrueba = new Clerk(1, null, 19, null, "123", "Pablo Solano", "Pablo", "Pablo123");
+        Clerk clerkPrueba = new Clerk(1, null, 18, null, "123", "Pablo Solano", "Pablo", "Pablo123");
         Clerk clerkPrueba2 = new Clerk(2, null, 19, null, "123", "Kenneth Miranda", "Kenneth", "Kenneth123");
         Clerk clerkPrueba3 = new Clerk(3, null, 19, null, "123", "Eilyn Rivera", "Eilyn", "Eilyn123");
 
@@ -154,4 +192,6 @@ public class LoginWindow extends JFrame implements ActionListener {
         clerkController.insertClerk(clerkPrueba2);
         clerkController.insertClerk(clerkPrueba3);
     }
+
+   
 }

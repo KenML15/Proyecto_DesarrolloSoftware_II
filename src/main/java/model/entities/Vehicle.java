@@ -12,18 +12,20 @@ import java.util.ArrayList;
  * @author 50687
  */
 public class Vehicle {
+
     private int id;
     private String plate;
     private String color;
     private String brand;
     private String model;
-    private ArrayList <Customer> customer;
+    private ArrayList<Customer> customer;
     private VehicleType vehicleType;
     private Space space;
     private LocalDateTime entryTime;
+    private LocalDateTime exitTime;
+    private float feeToPay;
     //Atributos para los archivos
     private int customerId;
-    
 
     public Vehicle() {
     }
@@ -38,9 +40,11 @@ public class Vehicle {
         this.vehicleType = vehicleType;
         this.space = space;
         this.entryTime = entryTime;
+        this.exitTime = null;
+        this.feeToPay = 0.0f;
     }
 
-    public Vehicle(String plate, String color, String brand, String model, ArrayList <Customer> customer, VehicleType vehicleType, Space space, LocalDateTime entryTime) {
+    public Vehicle(String plate, String color, String brand, String model, ArrayList<Customer> customer, VehicleType vehicleType, Space space, LocalDateTime entryTime) {
         //this.entryTime = LocalDateTime.now();
         this.plate = plate;
         this.color = color;
@@ -92,11 +96,11 @@ public class Vehicle {
         this.model = model;
     }
 
-    public ArrayList <Customer> getCustomer() {
+    public ArrayList<Customer> getCustomer() {
         return customer;
     }
 
-    public void setCustomer(ArrayList <Customer> customer) {
+    public void setCustomer(ArrayList<Customer> customer) {
         this.customer = customer;
     }
 
@@ -115,7 +119,7 @@ public class Vehicle {
     public void setSpace(Space space) {
         this.space = space;
     }
-    
+
     public LocalDateTime getEntryTime() {
         return entryTime;
     }
@@ -124,13 +128,52 @@ public class Vehicle {
         this.entryTime = entryTime;
     }
 
+    //Métodos auxiliares para compatibilidad de ID's
+    public int getVehicleTypeId() {
+        return vehicleType != null ? vehicleType.getId() : 0;
+    }
+
+    public void setVehicleTypeId(int id) {
+        if (vehicleType == null) {
+            vehicleType = new VehicleType();
+        }
+        vehicleType.setId(id);
+    }
+
+    public int getSpaceId() {
+        return space != null ? space.getId() : 0;
+    }
+
+    public void setSpaceId(int id) {
+        if (space == null) {
+            space = new Space();
+        }
+        space.setId(id);
+    }
+
+    public LocalDateTime getExitTime() {
+        return exitTime;
+    }
+
+    public void setExitTime(LocalDateTime exitTime) {
+        this.exitTime = exitTime;
+    }
+
+    public float getFeeToPay() {
+        return feeToPay;
+    }
+
+    public void setFeeToPay(float feeToPay) {
+        this.feeToPay = feeToPay;
+    }
+
     @Override
     public String toString() {
         return """
            Vehicles
-           Plate = """ + plate + ", Color = " + color + ", Brand = " + brand + 
-           ", Model = " + model + ", Customer = " + customer + 
-           ", Vehicle Type = " + vehicleType + ", Space = " + space + 
-           ", Entry Time = " + entryTime + ".\n";
-    }   
+           Plate = """ + plate + ", Color = " + color + ", Brand = " + brand
+                + ", Model = " + model + ", Customer = " + customer
+                + ", Vehicle Type = " + vehicleType + ", Space = " + space
+                + ", Entry Time = " + entryTime + ".\n";
+    }
 }
