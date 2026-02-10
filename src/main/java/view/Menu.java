@@ -18,18 +18,31 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
+import model.entities.Administrator;
 import model.entities.Customer;
 import model.entities.ParkingLot;
+import model.entities.User;
 
 /**
  *
  * @author 50687
  */
 public class Menu extends JFrame {
+    private User currentUser; // Variable para guardar el usuario
 
-    public Menu() {
+    public Menu(User user) { // Recibe el usuario autenticado
         super("Sistema de Gestión de Parqueos");
+        this.currentUser = user;
         setupMainWindow();
+        applyPermissions(); // Método para ocultar menús
+    }
+
+    private void applyPermissions() {
+        if (!(currentUser instanceof Administrator)) {
+            // Por ejemplo, si el usuario no es admin, ocultamos el menú de Tarifas o Configuración
+            getJMenuBar().getMenu(2).setVisible(false); // Oculta 'Parqueos'
+            getJMenuBar().getMenu(3).setVisible(false); // Oculta 'Tarifas'
+        }
     }
     
     //Configurar ventana principal

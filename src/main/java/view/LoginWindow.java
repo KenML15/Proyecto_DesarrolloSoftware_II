@@ -123,40 +123,31 @@ private void styleTextField(JTextField field) {
     field.setBackground(Color.WHITE);
 }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnSignIn) {
-            String username = txtUsername.getText();
-            String password = new String(txtPassword.getPassword());
+ @Override
+public void actionPerformed(ActionEvent e) {
+    if (e.getSource() == btnSignIn) {
+        String username = txtUsername.getText();
+        String password = new String(txtPassword.getPassword());
 
-            User userAuthenticated = clerkController.searchUser(username, password);
+        // Intentar autenticar al usuario
+        User userAuthenticated = clerkController.searchUser(username, password);
 
-            if (userAuthenticated != null) {
-                JOptionPane.showMessageDialog(this, "Welcome " + userAuthenticated.getName());
-                this.dispose();
+        if (userAuthenticated != null) {
+            JOptionPane.showMessageDialog(this, "Welcome " + userAuthenticated.getName());
+            
+            // 1. Cerramos la ventana de Login
+            this.dispose();
 
-                new RegistrationWindow(userAuthenticated).setVisible(true);
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid user", "Error", JOptionPane.ERROR_MESSAGE);
-
-                insertClerk();
-                userAuthenticated = clerkController.searchUser(new Clerk(2, null, 19, null, "123", "Kenneth Miranda", username, password)); //Como clerk es un user, está bien que se 
-                if (userAuthenticated == null) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Username does not exist",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Welcome " + username, "Login successful", JOptionPane.INFORMATION_MESSAGE);
-
-                    // Abrir la ventana de registro y cerrar el login
-                   //new RegistrationWindow().setVisible(true);
-                    this.dispose();
-                }
-            }
+            // 2. Abrimos la clase Menu (El sistema principal con JMenuBar)
+            // Nota: Si tu clase Menu requiere el objeto usuario, deberías pasárselo por constructor
+            new Menu(userAuthenticated).setVisible(true);
+            
+        } else {
+            // Lógica de fallo de autenticación
+            JOptionPane.showMessageDialog(this, "Invalid user", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+}
 
     private void styleButton(JButton button) {
     button.setFocusPainted(false);

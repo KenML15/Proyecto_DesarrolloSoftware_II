@@ -58,62 +58,72 @@ public class RegistrationWindow extends JFrame implements ActionListener {
         applyPermissions(); // Ajustar qué se ve y qué no
     }
 
-    private void applyPermissions() {
+   private void initComponents() {
+    // 1. Configuración básica de la ventana
+    setTitle("Parking System Dashboard");
+    setSize(900, 500);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setLocationRelativeTo(null);
+    setLayout(new BorderLayout());
 
-        if (currentUser instanceof Administrator) {
+    // 2. INICIALIZACIÓN DE COMPONENTES (Evita el NullPointerException)
+    headerPanel = new JPanel(new BorderLayout());
+    headerPanel.setPreferredSize(new Dimension(900, 70));
+    headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
 
-            headerPanel.setBackground(new Color(192, 57, 43));
-            lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
-            btnParking.setVisible(true); // El admin ve la configuración
-            btnParking.setText("System Configuration");
-        } else if (currentUser instanceof Clerk) {
+    lblTitle = new JLabel("PARKING SYSTEM");
+    lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+    lblTitle.setForeground(Color.WHITE);
 
-            headerPanel.setBackground(new Color(39, 174, 96));
-            lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
+    btnLogout = new JButton("LOGOUT");
+    styleMenuButton(btnLogout);
+    btnLogout.addActionListener(this);
 
-            btnParking.setVisible(false);
-        }
+    // 3. Montar el Header
+    headerPanel.add(lblTitle, BorderLayout.WEST);
+    headerPanel.add(btnLogout, BorderLayout.EAST);
+
+    // 4. Panel Central de Botones (Cards)
+    JPanel contentPanel = new JPanel(new GridLayout(1, 3, 20, 0));
+    contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 40, 50, 40));
+
+    btnCustomers = new JButton("CUSTOMER MANAGEMENT");
+    btnVehicles = new JButton("VEHICLE MANAGEMENT");
+    btnParking = new JButton("SYSTEM SETTINGS");
+
+    // Aplicar estilos
+    styleActionCard(btnCustomers);
+    styleActionCard(btnVehicles);
+    styleActionCard(btnParking);
+
+    // Agregar Listeners
+    btnCustomers.addActionListener(this);
+    btnVehicles.addActionListener(this);
+    btnParking.addActionListener(this);
+
+    contentPanel.add(btnCustomers);
+    contentPanel.add(btnVehicles);
+    contentPanel.add(btnParking);
+
+    // 5. Agregar paneles a la ventana
+    add(headerPanel, BorderLayout.NORTH);
+    add(contentPanel, BorderLayout.CENTER);
+}
+
+private void applyPermissions() {
+    // Verificamos que los objetos existan
+    if (currentUser == null) return;
+
+    if (currentUser instanceof Administrator) {
+        headerPanel.setBackground(new Color(192, 57, 43)); // Rojo
+        lblTitle.setText("ADMINISTRATOR: " + currentUser.getName().toUpperCase());
+        btnParking.setVisible(true);
+    } else {
+        headerPanel.setBackground(new Color(39, 174, 96)); // Verde
+        lblTitle.setText("OPERATOR: " + currentUser.getName().toUpperCase());
+        btnParking.setVisible(false); // El Clerk no ve configuración
     }
-
-    private void initComponents() {
-        setTitle("Parking System");
-        setSize(500, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
-
-        headerPanel = new JPanel();
-        lblTitle = new JLabel();
-        lblTitle.setForeground(Color.WHITE);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
-        headerPanel.add(lblTitle);
-
-        initComponents();        // 2. CREAMOS los botones, etiquetas y paneles (Esto DEBE ir aquí)
-
-        btnCustomers = new JButton("Manage Customers");
-        btnVehicles = new JButton("Manage Vehicles");
-        btnParking = new JButton("Parking Lot Settings");
-        btnLogout = new JButton("Logout");
-
-    
-
-    private void applyPermissionss() {
-        // Verificamos que los componentes existan antes de tocarlos
-        if (lblTitle == null || headerPanel == null || btnParking == null) {
-            System.err.println("Error: Los componentes no se han inicializado aún.");
-            return;
-        }
-
-        if (currentUser instanceof Administrator) {
-            headerPanel.setBackground(new Color(192, 57, 43));
-            lblTitle.setText("ADMINISTRATOR MODE: " + currentUser.getName());
-            btnParking.setVisible(true);
-        } else {
-            headerPanel.setBackground(new Color(39, 174, 96));
-            lblTitle.setText("OPERATOR TERMINAL: " + currentUser.getName());
-            btnParking.setVisible(false);
-        }
-    }
+}
 
     @Override
     public void actionPerformed(ActionEvent e) {

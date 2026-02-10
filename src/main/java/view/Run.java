@@ -9,15 +9,8 @@ package view;
  * @author 50687
  */
 public class Run {
-    
-       /**
-     * El método main que corre el proyecto.
-     *
-     * @param args
-     */
     public static void main(String args[]) {
-
-        Menu menu = new Menu(); //instancia la clase Menu para que se muestren las ventanas.
-
-    } //Fin del método main
+        // El programa ahora inicia SIEMPRE en el Login
+        new LoginWindow().setVisible(true);
+    }
 }
