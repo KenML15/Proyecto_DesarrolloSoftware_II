@@ -8,6 +8,7 @@ import controller.CustomerFileController;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JInternalFrame;
@@ -72,8 +73,8 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
     private void initController() {
         try {
             customerController = new CustomerFileController(FILECUSTOMER);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al inicializar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "No se puede acceder al archivo de clientes" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -214,6 +215,8 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
             textFieldNumber.setText(String.valueOf(nextId));
         }catch (Exception e){
             textFieldNumber.setText("1"); //Este es un valor por defecto
+            JOptionPane.showMessageDialog(this, "No se puede calcular el siguiente ID automáticamente" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            
         }
     }
     
@@ -227,8 +230,9 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
                 }
             }
             return maxId + 1;
-        }catch (Exception e){
+        }catch (IOException e){
             return 1;
+            //JOptionPane.showMessageDialog(this, "Ocurrió un problema al leer la lista de clientes. El nuevo ID podría estar duplicado" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -258,9 +262,9 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
 //            setNextId();
             
         } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this, "Error de validación: " + e.getMessage());
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,"Error al insertar cliente: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "No se puede registrar al cliente" + e.getMessage());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this,"Error al guardar los datos en el archivo" + e.getMessage());
         }
     }
 
@@ -275,9 +279,9 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
             JOptionPane.showMessageDialog(this, "Cliente modificado con éxito");
             this.dispose();
         } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this, "Error de validación: " + e.getMessage());
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al modificar cliente: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "No se puede actualizar la información del cliente" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al modificar los datos en el archivo" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -313,10 +317,10 @@ public class CustomerWindow extends JInternalFrame implements ActionListener{
 
                 customer.setId(Integer.parseInt(idText));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Número de cliente inválido");
+                JOptionPane.showMessageDialog(this, "El número(ID) del cliente es inválido" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            throw new IllegalArgumentException("Número de cliente no generado");
+            JOptionPane.showMessageDialog(this, "Número del cliente no generado");
         }
 
         customer.setName(textFieldName.getText().trim());

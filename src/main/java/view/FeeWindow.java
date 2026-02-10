@@ -46,7 +46,7 @@ public class FeeWindow extends JInternalFrame{
         JPanel mainPanel = new JPanel(new GridLayout(8, 2, 10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        // Tipo de vehículo
+        //Tipo de vehículo
         mainPanel.add(new JLabel("Tipo de Vehículo*:"));
         vehicleTypeCombo = new JComboBox<>();
         vehicleTypeCombo.addItem("-- Seleccione --");
@@ -57,7 +57,7 @@ public class FeeWindow extends JInternalFrame{
         vehicleTypeCombo.addItem("Otro");
         mainPanel.add(vehicleTypeCombo);
         
-        // Campos de tarifas
+        //Campos de tarifas
         mainPanel.add(new JLabel("Media Hora (₡)*:"));
         txtHalfHour = new JTextField();
         mainPanel.add(txtHalfHour);
@@ -82,7 +82,7 @@ public class FeeWindow extends JInternalFrame{
         txtYear = new JTextField();
         mainPanel.add(txtYear);
         
-        // Panel de botones
+        //Panel de botones
         JPanel buttonPanel = new JPanel(new FlowLayout());
         btnSave = new JButton("Guardar");
         btnCancel = new JButton("Cancelar");
@@ -93,7 +93,7 @@ public class FeeWindow extends JInternalFrame{
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
         
-        // Agregar al frame
+        //Agregar al frame
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(mainPanel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -101,11 +101,11 @@ public class FeeWindow extends JInternalFrame{
     
     private void loadFeeData() {
         if (feeToEdit != null) {
-            // Seleccionar tipo de vehículo
+            //Seleccionar tipo de vehículo
             for (int i = 0; i < vehicleTypeCombo.getItemCount(); i++) {
                 if (vehicleTypeCombo.getItemAt(i).equals(feeToEdit.getVehicleType())) {
                     vehicleTypeCombo.setSelectedIndex(i);
-                    vehicleTypeCombo.setEnabled(false); // No se puede cambiar el tipo
+                    vehicleTypeCombo.setEnabled(false); //No se puede cambiar el tipo
                     break;
                 }
             }
@@ -156,25 +156,25 @@ public class FeeWindow extends JInternalFrame{
                 throw new IllegalArgumentException("Todas las tarifas deben ser positivas");
             }
             
-            // Validar progresión lógica
+            //Validar progresión lógica
             if (hour < halfHour) {
-                throw new IllegalArgumentException("La tarifa por hora debe ser mayor o igual a media hora");
+                JOptionPane.showMessageDialog(this, "La tarifa por hora debe ser mayor o igual a media hora");
             }
             if (day < hour) {
-                throw new IllegalArgumentException("La tarifa diaria debe ser mayor o igual a la horaria");
+                JOptionPane.showMessageDialog(this, "La tarifa diaria debe ser mayor o igual a la horaria");
             }
             if (week < day) {
-                throw new IllegalArgumentException("La tarifa semanal debe ser mayor o igual a la diaria");
+                JOptionPane.showMessageDialog(this, "La tarifa semanal debe ser mayor o igual a la diaria");
             }
             if (month < week) {
-                throw new IllegalArgumentException("La tarifa mensual debe ser mayor o igual a la semanal");
+                JOptionPane.showMessageDialog(this, "La tarifa mensual debe ser mayor o igual a la semanal");
             }
             if (year < month) {
-                throw new IllegalArgumentException("La tarifa anual debe ser mayor o igual a la mensual");
+                JOptionPane.showMessageDialog(this, "La tarifa anual debe ser mayor o igual a la mensual");
             }
             
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Todos los valores deben ser números válidos");
+            JOptionPane.showMessageDialog(this, "¡Error! El monto de la tarifa debe ser mayor al anterior.");
         }
     }
     

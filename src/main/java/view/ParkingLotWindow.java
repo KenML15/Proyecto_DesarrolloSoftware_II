@@ -103,7 +103,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
                 handleCancel();
             }
         } catch (Exception ex) {
-            showError(ex.getMessage());
+            showError("Ocurrió un error al provcesar la acción del botón" + ex.getMessage());
         }
     }
 
@@ -117,7 +117,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
 
     private void validateInput(String name, String spacesText) {
         if (name.isEmpty() || spacesText.isEmpty()) {
-            throw new IllegalArgumentException("Complete todos los campos");
+            JOptionPane.showMessageDialog(this, "Complete todos los campos", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
         
         int spaces = parseSpaces(spacesText);
@@ -128,16 +128,17 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
         try {
             return Integer.parseInt(spacesText);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Número inválido");
+            showError("Número inválido" + e.getMessage());
         }
+        return 0;
     }
 
     private void validateSpacesCount(int spaces) {
         if (spaces <= 0) {
-            throw new IllegalArgumentException("Mínimo 1 espacio");
+            JOptionPane.showMessageDialog(this, "El parqueo debe tener mínimo un espacio", "Advertencia", JOptionPane.WARNING_MESSAGE);;
         }
         if (spaces > 100) {
-            throw new IllegalArgumentException("Máximo 100 espacios");
+            JOptionPane.showMessageDialog(this, "El parqueo debe tener máximo 100 espacios", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -157,7 +158,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
             showError(e.getMessage());
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al guardar el parqueo: " + e.getMessage());
+            showError("Error al guardar el parqueo" + e.getMessage());
         }
     }
 

@@ -6,6 +6,8 @@ package view;
 
 import controller.ParkingLotFileController;
 import java.awt.Color;
+import java.awt.HeadlessException;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
@@ -31,7 +33,6 @@ public class ParkingLotManagement extends JInternalFrame {
     private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Espacios Ocupados"};
 
     private ParkingLotFileController controller;
-    //private ParkingLotWindow parkingLotWindow;
 
     public ParkingLotManagement() {
         super("Gestión de Parqueos", false, true, false, true);
@@ -43,9 +44,8 @@ public class ParkingLotManagement extends JInternalFrame {
     private void initializeController() {
         try {
             this.controller = new ParkingLotFileController();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Error inicializando controlador: " + e.getMessage());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "No se puede acceder al archivo de parqueos" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -110,7 +110,7 @@ public class ParkingLotManagement extends JInternalFrame {
                 });
             }
         } catch (Exception e) {
-            showError("Error cargando parqueos: " + e.getMessage());
+            showError("Error al cargar los parqueos" + e.getMessage());
         }
     }
     
@@ -141,7 +141,7 @@ public class ParkingLotManagement extends JInternalFrame {
     private int getSelectedParkingLotId() {
         int row = tableParkingLots.getSelectedRow();
         if (row == -1) {
-            throw new IllegalStateException("Seleccione un parqueo");
+            JOptionPane.showMessageDialog(this, "Seleccione un parqueo", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
         return Integer.parseInt(modelDataTable.getValueAt(row, 0).toString());
     }
@@ -159,8 +159,8 @@ public class ParkingLotManagement extends JInternalFrame {
                 showSuccess("Parqueo eliminado");
             }
 
-        } catch (Exception e) {
-            showError(e.getMessage());
+        } catch (HeadlessException e) {
+            showError("Error al procesar la eliminación del parqueo" + e.getMessage());
         }
     }
 
@@ -177,8 +177,8 @@ public class ParkingLotManagement extends JInternalFrame {
             SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, controller);
             getDesktopPane().add(window);
 
-        } catch (Exception e) {
-            showError(e.getMessage());
+        } catch (IOException e) {
+            showError("Error al configurar parqueos" + e.getMessage());
         }
     }
 
@@ -188,8 +188,8 @@ public class ParkingLotManagement extends JInternalFrame {
             String status = controller.getParkingLotStatusById(id);
             JOptionPane.showMessageDialog(this, status, "Estado",
                     JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            showError(e.getMessage());
+        } catch (IOException e) {
+            showError("Información de estado no disponible" + e.getMessage());
         }
     }
 

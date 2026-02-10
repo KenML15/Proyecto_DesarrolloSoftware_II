@@ -60,8 +60,8 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
         try {
             this.vehicleTypes = new ArrayList<>();
             vehicleTypes = vehicleTypeController.getAllVehicleTypes();
-        } catch (Exception e) {
-            showError("Error cargando tipos: " + e.getMessage());  
+        } catch (IOException e) {
+            showError("No se puede acceder al archivo de los tipos de vehículo: " + e.getMessage());  
         }
     }
 
@@ -123,7 +123,7 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof VehicleType) {
                     VehicleType vt = (VehicleType) value;
-                    setText(vt.getDescription()); // Solo mostramos la descripción
+                    setText(vt.getDescription()); //Solo mostramos la descripción
                 }
                 return this;
             }
@@ -174,7 +174,7 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
                 cancelConfiguration();
             }
         } catch (Exception ex) {
-            showError(ex.getMessage());
+            showError("Ocurrió un error al provcesar la acción del botón" + ex.getMessage());
         }
     }
 
@@ -186,7 +186,7 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
             showSuccess(result);
             dispose();
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Error");
+            showError("Error al intentar guardar la configuración de espacios" + ex.getMessage());
         }
     }
 
@@ -231,7 +231,7 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
             "Confirmar", JOptionPane.YES_NO_OPTION);
         
         if (result != JOptionPane.YES_OPTION) {
-            throw new IllegalStateException("Operación cancelada");
+            JOptionPane.showMessageDialog(this, "Operación cancelada", "Información", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

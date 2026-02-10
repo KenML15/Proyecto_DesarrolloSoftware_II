@@ -9,6 +9,7 @@ import controller.VehicleFileController;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -54,8 +55,8 @@ public class VehicleManagement extends JInternalFrame{
         try {
             vehicleController = new VehicleFileController();
             customerController = new CustomerFileController();
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+        } catch (IOException e) {
+            showError("No se pueden acceder a los archivos de los clientes y vehículos" + e.getMessage());
             dispose();
         }
     }
@@ -135,8 +136,8 @@ public class VehicleManagement extends JInternalFrame{
             ArrayList<Vehicle> vehicles = vehicleController.getAll();
             showVehiclesInTable(vehicles);
             searchField.setText("");
-        } catch (Exception e) {
-            showError("Error cargando: " + e.getMessage());
+        } catch (IOException e) {
+            showError("No se pudo cargar la lista de vehículos" + e.getMessage());
         }
     }
     
@@ -208,8 +209,8 @@ public class VehicleManagement extends JInternalFrame{
             }
             
             showVehiclesInTable(results);
-        } catch (Exception e) {
-            showError("Error buscando: " + e.getMessage());
+        } catch (IOException e) {
+            showError("No se pudo realizar la busqueda de vehículos" + e.getMessage());
         }
     }
     
@@ -255,8 +256,8 @@ public class VehicleManagement extends JInternalFrame{
             if (vehicle != null) {
                 openVehicleWindow(vehicle);
             }
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+        } catch (IOException e) {
+            showError("Error al intentar editar la información del vehículo" + e.getMessage());
         }
     }
     
@@ -281,8 +282,8 @@ public class VehicleManagement extends JInternalFrame{
                 vehicleController.delete(plate);
                 showInfo("Vehículo eliminado");
                 loadAllVehicles();
-            } catch (Exception e) {
-                showError("Error: " + e.getMessage());
+            } catch (IOException | IllegalArgumentException e) {
+                showError("No se pudo eliminar el vehículo" + e.getMessage());
             }
         }
     }
@@ -309,7 +310,7 @@ public class VehicleManagement extends JInternalFrame{
             });
             
         } catch (Exception e) {
-            showError("Error abriendo ventana: " + e.getMessage());
+            showError("No se pudo abrir la pantalla de vehículos" + e.getMessage());
         }
     }
     

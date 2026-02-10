@@ -93,8 +93,8 @@ public class VehicleWindow extends JInternalFrame {
             customerController = new CustomerFileController();
             parkingLotController = new ParkingLotFileController();
             vehicleTypeController = new VehicleTypeController();
-        } catch (Exception e) {
-            showMessage("Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            showError("No se puede acceder al archivo de vehículos" + e.getMessage());
             dispose();
         }
     }
@@ -226,7 +226,7 @@ public class VehicleWindow extends JInternalFrame {
                 customerCombo.addItem(c.getName() + " (" + c.getEmail() + ")");
             }
         } catch (IOException e) {
-            showMessage("Error cargando clientes", "Error", JOptionPane.ERROR_MESSAGE);
+            showError("Error al cargar la lista de clientes del vehículo" + e.getMessage());
         }
     }
     
@@ -240,8 +240,8 @@ public class VehicleWindow extends JInternalFrame {
         for (VehicleType type : allVehicleTypes) {
             vehicleTypeCombo.addItem(type.getDescription());
         }
-    } catch (Exception e) {
-        showMessage("Error cargando tipos", "Error", JOptionPane.ERROR_MESSAGE);
+    } catch (IOException e) {
+        showError("Error al cargar los tipos de vehículo" + e.getMessage());
     }
 }
     
@@ -256,7 +256,7 @@ public class VehicleWindow extends JInternalFrame {
                 parkingLotCombo.addItem(parkingLot.getName());
             }
         } catch (Exception e) {
-            showMessage("Error cargando parqueos", "Error", JOptionPane.ERROR_MESSAGE);
+            showError("Error al cargar los parqueos" + e.getMessage());
         }
     }
     
@@ -352,7 +352,7 @@ public class VehicleWindow extends JInternalFrame {
             dispose();
             
         } catch (IllegalArgumentException e) {
-            showMessage(e.getMessage(), "Validación", JOptionPane.WARNING_MESSAGE);
+            showError("No se pudo completar el registro del vehículo" + e.getMessage());
         } catch (Exception e) {
             showMessage("Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -385,7 +385,7 @@ public class VehicleWindow extends JInternalFrame {
         if (availableSpace != null) {
             vehicle.setVehicleType(type);
         } else {
-            throw new Exception("No hay espacios disponibles para este tipo");
+            showError("No hay espacios disponibles para este tipo de vehículo");
         }
 
         return vehicle;
@@ -407,16 +407,16 @@ public class VehicleWindow extends JInternalFrame {
 
     private void parkVehicleInParkingLot(Vehicle vehicle, ParkingLot parkingLot) throws Exception {
         if (vehicle == null) {
-            throw new IllegalArgumentException("Vehículo no puede ser nulo");
+            showWarning("Vehículo no puede ser nulo");
         }
         if (parkingLot == null) {
-            throw new IllegalArgumentException("Seleccione un parqueo");
+            showWarning("Seleccione un parqueo");
         }
 
         // Verificar si hay espacio disponible
         int occupiedSpaces = parkingLot.getVehicles().size();
         if (occupiedSpaces >= parkingLot.getNumberOfSpaces()) {
-            throw new IllegalStateException("No hay espacios disponibles en el parqueo");
+            showError("No hay espacios disponibles en el parqueo");
         }
 
         // Agregar vehículo al parqueo
@@ -435,16 +435,16 @@ public class VehicleWindow extends JInternalFrame {
     //Validar campos
     private void validateFields() {
         if (plateField.getText().trim().isEmpty()) {
-            throw new IllegalArgumentException("Placa requerida");
+            showWarning("Placa requerida");
         }
         if (vehicleTypeCombo.getSelectedIndex() <= 0) {
-            throw new IllegalArgumentException("Seleccione tipo de vehículo");
+            showWarning("Seleccione tipo de vehículo");
         }
         if (parkingLotCombo.getSelectedIndex() <= 0) {
-            throw new IllegalArgumentException("Seleccione parqueo");
+            showWarning("Seleccione parqueo");
         }
         if (selectedCustomers.isEmpty()) {
-            throw new IllegalArgumentException("Agregue al menos un cliente");
+            showWarning("Agregue al menos un cliente");
         }
     }
     
@@ -484,14 +484,22 @@ public class VehicleWindow extends JInternalFrame {
             } else {
                 vehicleController.create(vehicle);
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Error guardando: " + e.getMessage());
+        } catch (IOException | IllegalArgumentException e) {
+           showError("No se pudo de guardar la información del vehículo en el archivo" + e.getMessage());
         }
     }
     
     //Verificar modo edición
     private boolean isEditMode() {
         return vehicleToEdit != null;
+    }
+    
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
     
     //Mostrar mensaje

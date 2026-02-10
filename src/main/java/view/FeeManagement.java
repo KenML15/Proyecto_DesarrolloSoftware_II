@@ -7,6 +7,7 @@ package view;
 import controller.FeeController;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
@@ -48,10 +49,10 @@ public class FeeManagement extends JInternalFrame{
         try {
             feeController = new FeeController();
         } catch (JDOMException e) {
-            JOptionPane.showMessageDialog(this, "Error inicializando el controller de FeeManagement: " + e.getMessage(),
+            JOptionPane.showMessageDialog(this, "El archivo tiene un formato inválido" + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error inicializando el controller: " + e.getMessage(),
+            JOptionPane.showMessageDialog(this, "No se pudo acceder al archivo" + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
             dispose();
         }
@@ -129,8 +130,8 @@ public class FeeManagement extends JInternalFrame{
             ArrayList<Fee> fees = feeController.getAllFees();
             updateTable(fees);
             vehicleTypeCombo.setSelectedIndex(0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error cargando tarifas: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar las tarifas" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -168,8 +169,8 @@ public class FeeManagement extends JInternalFrame{
             }
             
             updateTable(filteredFees);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error filtrando: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al filtrar las tarifas" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -200,8 +201,8 @@ public class FeeManagement extends JInternalFrame{
             if (fee != null) {
                 openFeeWindow(fee);
             }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "No se pudo encontrar la información del tipo de vehículo en el archivo" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -226,8 +227,8 @@ public class FeeManagement extends JInternalFrame{
                 loadFees();
             }
             
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "No se pudo eliminar la tarifa del sistema" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

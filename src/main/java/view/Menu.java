@@ -6,11 +6,8 @@ package view;
 
 import controller.FeeController;
 import controller.ParkingLotFileController;
-import controller.VehicleFileController;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -117,22 +114,6 @@ public class Menu extends JFrame {
         return menu;
     }
     
-    //Menú de reportes
-//    private JMenu createReportsMenu() {
-//        JMenu menu = new JMenu("Reportes");
-//        
-//        JMenuItem vehicleReport = createMenuItem("Reporte de Vehículos", 
-//            e -> showMessage("Generando reporte de vehículos...", "Reporte"));
-//        
-//        JMenuItem customerReport = createMenuItem("Reporte de Clientes", 
-//            e -> showMessage("Generando reporte de clientes...", "Reporte"));
-//        
-//        menu.add(vehicleReport);
-//        menu.add(customerReport);
-//        
-//        return menu;
-//    }
-    
     //Crear item de menú genérico
     private JMenuItem createMenuItem(String text, java.awt.event.ActionListener action) {
         JMenuItem item = new JMenuItem(text);
@@ -220,28 +201,6 @@ public class Menu extends JFrame {
             showError("Error: " + e.getMessage());
         }
     }
-    
-//    private void showParkedVehiclesReport(HomeDesktop desktop) {
-//        try {
-//            ParkingLotFileController parkingLotController = new ParkingLotFileController();
-//            String report = parkingLotController.getParkedVehiclesReport();
-//            
-//            JTextArea textArea = new JTextArea(20, 60);
-//            textArea.setText(report);
-//            textArea.setEditable(false);
-//            
-//            JScrollPane scrollPane = new JScrollPane(textArea);
-//            
-//            JDialog dialog = new JDialog(this, "Vehículos Estacionados", true);
-//            dialog.add(scrollPane);
-//            dialog.pack();
-//            dialog.setLocationRelativeTo(this);
-//            dialog.setVisible(true);
-//            
-//        } catch (Exception e) {
-//            showError("Error: " + e.getMessage());
-//        }
-//    }
     
     private void showFeeReport(HomeDesktop desktop) {
         try {

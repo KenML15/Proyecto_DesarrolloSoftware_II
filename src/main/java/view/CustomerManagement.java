@@ -8,6 +8,7 @@ import controller.CustomerFileController;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -48,8 +49,8 @@ public class CustomerManagement extends JInternalFrame {
     private void setupController() {
         try {
             controller = new CustomerFileController("Customers.txt");
-        } catch (Exception e) {
-            showMessage("Error al iniciar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            showMessage("No se puede acceder al archivo de clientes" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             this.dispose();
         }
     }
@@ -131,8 +132,8 @@ public class CustomerManagement extends JInternalFrame {
             ArrayList<Customer> customers = controller.getAllCustomers();
             showCustomersInTable(customers);
             searchField.setText("");
-        } catch (Exception e) {
-            showError("No se pudieron cargar los clientes: " + e.getMessage());
+        } catch (IOException e) {
+            showMessage("No se puedo cargar la lista de clientes" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);;
         }
     }
     
@@ -174,7 +175,7 @@ public class CustomerManagement extends JInternalFrame {
             ArrayList<Customer> results = controller.searchCustomers(searchText);
             showCustomersInTable(results);
         } catch (Exception e) {
-            showError("Error en la búsqueda: " + e.getMessage());
+            showError("Error en la búsqueda de clientes" + e.getMessage());
         }
     }
     
@@ -199,8 +200,8 @@ public class CustomerManagement extends JInternalFrame {
             if (customer != null) {
                 openCustomerWindow(customer);
             }
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+        } catch (IOException e) {
+            showError("No se pudo recuperar la información detallada del cliente" + e.getMessage());
         }
     }
     
@@ -228,7 +229,7 @@ public class CustomerManagement extends JInternalFrame {
                 showInfo("Cliente eliminado correctamente");
                 loadAllCustomers(); //Refresca la tablaº    
             } catch (Exception e) {
-                showError("Error al eliminar: " + e.getMessage());
+                showError("Error al eliminar el cliente" + e.getMessage());
             }
         }
     }
@@ -256,7 +257,7 @@ public class CustomerManagement extends JInternalFrame {
             });
             
         } catch (Exception e) {
-            showError("Error al abrir ventana: " + e.getMessage());
+            showError("Error al abrir ventana de clientes" + e.getMessage());
         }
     }
 
