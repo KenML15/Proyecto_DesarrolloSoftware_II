@@ -142,25 +142,19 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
         }
     }
 
-    private void createParkingLot(String name, String spacesText) {
-        try {
-            int numberOfSpaces = Integer.parseInt(spacesText);
-            Space[] spaces = createSpaces(numberOfSpaces);
+   private void createParkingLot(String name, String spacesText) {
+    try {
+        int numberOfSpaces = Integer.parseInt(spacesText);
+        // Enviamos null o un arreglo vacío, el Controller debe generar los objetos finales
+        controller.registerParkingLot(name, new Space[numberOfSpaces]); 
 
-            controller.registerParkingLot(name, spaces);
-
-            JOptionPane.showMessageDialog(null, "El parqueo se ha creado con éxito");
-            clearFields();
-            dispose();
-        } catch (NumberFormatException e) {
-            showError("Cantidad de espacios inválida");
-        } catch (IllegalArgumentException e) {
-            showError(e.getMessage());
-
-        } catch (IOException e) {
-            showError("Error al guardar el parqueo" + e.getMessage());
-        }
+        JOptionPane.showMessageDialog(null, "El parqueo se ha creado con éxito");
+        clearFields();
+        dispose();
+    } catch (Exception e) {
+        showError("Error: " + e.getMessage());
     }
+}
 
     private Space[] createSpaces(int numberOfSpaces) {
         Space[] spaces = new Space[numberOfSpaces];
