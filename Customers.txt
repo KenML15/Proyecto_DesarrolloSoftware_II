@@ -1,2 +1,1 @@
-1;Eilyn;false;eilyn.rivera@ucr.ac.cr;null;87603888
-2;Bruno;false;bruno.sanabria@ucr.ac.cr;null;70411200
+1;Eilyn;false;eilyn.rivera@ucr.ac.cr;Cachí;87603888
