@@ -26,7 +26,7 @@ public class ParkingLotDataFile {
     private static final String ITEM_DELIMITER = ",";
 
     private SpaceDataFile spaceData = new SpaceDataFile();
-    private VehicleDataFile vehicleData;
+    private final VehicleDataFile vehicleData;
 
     public ParkingLotDataFile() throws IOException {
         spaceData = new SpaceDataFile();
@@ -34,19 +34,16 @@ public class ParkingLotDataFile {
         ensureFileExists();
     }
 
-    private void ensureFileExists() {
+    private void ensureFileExists() throws IOException{
         File file = new File(PARKINGLOT_FILE);
         if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                System.out.println("Error al crear el archivo del parqueo");
-            }
+            
+            file.createNewFile();           
         }
     }
     
     //Verifica si el nombre del parqueo ya existe
-    public boolean existsByName(String name) {
+    public boolean existsByName(String name) throws IOException{
         for (ParkingLot p : getAllParkingLots()) {
             if (p.getName().equalsIgnoreCase(name.trim())) {
                 return true;
@@ -116,7 +113,7 @@ public class ParkingLotDataFile {
         return maxId + 1;
     }
     
-    private String formatParkingLot(ParkingLot parkingLot) {
+    private String formatParkingLot(ParkingLot parkingLot) throws IOException, NullPointerException{
 
         String vehicles = formatVehicles(parkingLot.getVehicles());
         String spaces = formatSpaces(parkingLot.getSpaces());
@@ -128,7 +125,7 @@ public class ParkingLotDataFile {
                 + spaces;
     }
     
-    private String formatVehicles(ArrayList<Vehicle> vehicles) {
+    private String formatVehicles(ArrayList<Vehicle> vehicles) throws IOException{
         if (vehicles == null || vehicles.isEmpty()) {
             return "";
         }
@@ -140,7 +137,7 @@ public class ParkingLotDataFile {
         return sb.substring(0, sb.length() - 1);
     }
 
-    private String formatSpaces(Space[] spaces) {
+    private String formatSpaces(Space[] spaces) throws IOException{
         if (spaces == null || spaces.length == 0) {
             return "";
         }
@@ -154,7 +151,7 @@ public class ParkingLotDataFile {
         return sb.substring(0, sb.length() - 1);
     }
 
-    public ArrayList<ParkingLot> getAllParkingLots() {
+    public ArrayList<ParkingLot> getAllParkingLots() throws IOException{
         ArrayList<ParkingLot> parkingLots = new ArrayList<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PARKINGLOT_FILE))) {

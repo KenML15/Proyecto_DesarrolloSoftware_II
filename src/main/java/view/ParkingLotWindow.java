@@ -103,7 +103,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
                 handleCancel();
             }
         } catch (Exception ex) {
-            showError("Ocurrió un error al provcesar la acción del botón" + ex.getMessage());
+            showError("Ocurrió un error al procesar la acción del botón" + ex.getMessage());
         }
     }
 

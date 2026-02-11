@@ -109,7 +109,7 @@ public class ParkingLotManagement extends JInternalFrame {
                     countOccupiedSpaces(parkingLot)
                 });
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             showError("Error al cargar los parqueos" + e.getMessage());
         }
     }

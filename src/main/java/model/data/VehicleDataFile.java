@@ -59,7 +59,7 @@ public class VehicleDataFile {
         appendToFile(vehicle);
     }
 
-    private void validateVehicle(Vehicle vehicle) {
+    private void validateVehicle(Vehicle vehicle) throws IOException{
         if (vehicle.getPlate() == null || vehicle.getPlate().trim().isEmpty()) {
             throw new IllegalArgumentException("Placa requerida");
         }
@@ -80,7 +80,7 @@ public class VehicleDataFile {
         }
     }
 
-    private String formatVehicle(Vehicle vehicle) {
+    private String formatVehicle(Vehicle vehicle) throws IOException{
         String exitTime = (vehicle.getExitTime() != null) ? 
             vehicle.getExitTime().format(DATE_FORMATTER) : "null";
         
@@ -99,7 +99,7 @@ public class VehicleDataFile {
         );
     }
 
-    private String getCustomerIds(ArrayList<Customer> customers) {
+    private String getCustomerIds(ArrayList<Customer> customers) throws IOException{
         if (customers == null || customers.isEmpty()) {
             return "";
         }
@@ -135,7 +135,7 @@ public class VehicleDataFile {
         }
     }
 
-    private boolean isSameVehicle(String line, Vehicle vehicle) {
+    private boolean isSameVehicle(String line, Vehicle vehicle) throws IOException, NullPointerException{
         String[] parts = line.split(DELIMITER);
         return parts.length > 1 && parts[1].equals(vehicle.getPlate());
     }
@@ -219,7 +219,7 @@ public class VehicleDataFile {
         return buildVehicle(id, plate, color, brand, model, customers, vehicleType, space, entryTime, exitTime, feeToPay);
     }
     
-    private Vehicle buildVehicle(int id, String plate, String color, String brand, String model, ArrayList<Customer> customers, VehicleType vehicleType, Space space, LocalDateTime entryTime, LocalDateTime exitTime, float feeToPay){
+    private Vehicle buildVehicle(int id, String plate, String color, String brand, String model, ArrayList<Customer> customers, VehicleType vehicleType, Space space, LocalDateTime entryTime, LocalDateTime exitTime, float feeToPay) throws IOException, NullPointerException{
         Vehicle vehicle = new Vehicle();
         
         vehicle.setId(id);
@@ -288,7 +288,7 @@ public class VehicleDataFile {
         return result;
     }
     
-    public boolean isCurrentlyParked(Vehicle vehicle) {
+    public boolean isCurrentlyParked(Vehicle vehicle) throws IOException{
         return vehicle.getEntryTime() != null && vehicle.getExitTime() == null;
     }
     

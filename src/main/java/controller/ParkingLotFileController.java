@@ -108,7 +108,6 @@ public class ParkingLotFileController {
         
         spaceData.updateSpace(availableSpace);
         parkingLotData.updateParkingLot(parkingLot);
-        //occupySpaceWithVehicle(vehicle, availableSpace, parkingLot);
         return availableSpace.getId();
     }
 
@@ -191,7 +190,7 @@ public class ParkingLotFileController {
         return parkingLotData.getParkingLotById(id);
     }
 
-    public ArrayList<ParkingLot> getAllParkingLots() {
+    public ArrayList<ParkingLot> getAllParkingLots() throws IOException{
         return parkingLotData.getAllParkingLots();
     }
 

@@ -28,8 +28,7 @@ public class SpaceDataFile {
         this(DEFAULT_FILE, new VehicleTypeDataFile());
     }
     
-    public SpaceDataFile(String fileName, VehicleTypeDataFile vehicleTypeData) 
-            throws IOException {
+    public SpaceDataFile(String fileName, VehicleTypeDataFile vehicleTypeData) throws IOException {
         this.fileName = fileName;
         this.vehicleTypeData = vehicleTypeData;
         ensureFileExists();
@@ -48,7 +47,7 @@ public class SpaceDataFile {
         appendToFile(space);
     }
     
-    private void validateSpace(Space space) {
+    private void validateSpace(Space space) throws IOException{
         if (space.getId() < 0) {
             throw new IllegalArgumentException("ID inválido");
         }
@@ -61,9 +60,9 @@ public class SpaceDataFile {
     }
     
     private void appendToFile(Space space) throws IOException {
-        PrintWriter writer = new PrintWriter(new FileWriter(fileName, true));
-        writer.println(formatSpace(space));
-        writer.close();
+        try (PrintWriter writer = new PrintWriter(new FileWriter(fileName, true))) {
+            writer.println(formatSpace(space));
+        }
     }
 
     
@@ -85,9 +84,10 @@ public class SpaceDataFile {
     }
     
     public Space getSpaceFromFile(int id) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        Space result = findSpaceById(id, reader);
-        reader.close();
+        Space result;
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            result = findSpaceById(id, reader);
+        }
         return result;
     }
     
@@ -112,11 +112,7 @@ public class SpaceDataFile {
             return null;
         }
         
-        try {
-            return createSpaceFromParts(parts);
-        } catch (Exception e) {
-            throw new IOException("Error parseando espacio: " + e.getMessage());
-        }
+        return createSpaceFromParts(parts);
     }
     
     private Space createSpaceFromParts(String[] parts) throws IOException {
@@ -141,22 +137,20 @@ public class SpaceDataFile {
     public Space[] getAllSpaces() throws IOException {
         int totalSpaces = countLines(fileName);
         Space[] spaces = new Space[totalSpaces];
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        addAllSpacesFromReader(spaces, reader);
-        reader.close();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            addAllSpacesFromReader(spaces, reader);
+        }
         return spaces;
     }
     
     private int countLines(String fileName) throws IOException {
 
         int count = 0;
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
-
-        while (reader.readLine() != null) {
-            count++;
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            while (reader.readLine() != null) {
+                count++;
+            }
         }
-
-        reader.close();
         return count;
     }
 
@@ -183,10 +177,11 @@ public class SpaceDataFile {
     }
     
     private void replaceInFile(Space space, File source, File target) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(source));
-        PrintWriter writer = new PrintWriter(new FileWriter(target));
-        writeUpdatedFile(space, reader, writer);
-        reader.close();
+        PrintWriter writer;
+        try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
+            writer = new PrintWriter(new FileWriter(target));
+            writeUpdatedFile(space, reader, writer);
+        }
         writer.close();
     }
     
@@ -201,7 +196,7 @@ public class SpaceDataFile {
         }
     }
     
-    private boolean isSameSpace(String line, Space space) {
+    private boolean isSameSpace(String line, Space space) throws IOException{
         String[] parts = line.split(DELIMITER);
         return parts.length > 0 && Integer.parseInt(parts[0]) == space.getId();
     }
@@ -222,17 +217,16 @@ public class SpaceDataFile {
         replaceFile(file, temp);
     }
     
-    private void deleteFromFile(int id, File source, File target) 
-            throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(source));
-        PrintWriter writer = new PrintWriter(new FileWriter(target));
-        writeFileWithoutId(id, reader, writer);
-        reader.close();
+    private void deleteFromFile(int id, File source, File target) throws IOException {
+        PrintWriter writer;
+        try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
+            writer = new PrintWriter(new FileWriter(target));
+            writeFileWithoutId(id, reader, writer);
+        }
         writer.close();
     }
     
-    private void writeFileWithoutId(int id, BufferedReader reader, 
-                                   PrintWriter writer) throws IOException {
+    private void writeFileWithoutId(int id, BufferedReader reader, PrintWriter writer) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
             Space space = parseSpace(line);

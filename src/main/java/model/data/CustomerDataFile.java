@@ -44,7 +44,8 @@ public class CustomerDataFile {
         appendToFile(customer);
     }
 
-    private void validateCustomer(Customer customer) {
+    //TODO: Revisar esto ===================================
+    private void validateCustomer(Customer customer) throws IOException, NullPointerException{
         if (isNullOrEmpty(customer.getName())) {
             throw new IllegalArgumentException("Nombre requerido");
         }
@@ -53,13 +54,14 @@ public class CustomerDataFile {
         }
     }
 
-    private boolean isNullOrEmpty(String str) {
+    private boolean isNullOrEmpty(String str) throws IOException{
         return str == null || str.trim().isEmpty();
     }
 
-    private boolean isValidEmail(String email) {
+    private boolean isValidEmail(String email) throws IOException{
         return email != null && email.contains("@");
     }
+    //======================================================
 
     private void checkDuplicate(Customer customer) throws IOException {
         if (existsByEmail(customer.getEmail())) {
@@ -77,7 +79,7 @@ public class CustomerDataFile {
         }
     }
 
-    private String formatCustomer(Customer customer) {
+    private String formatCustomer(Customer customer) throws IOException{
         return String.join(DELIMITER,
                 String.valueOf(customer.getId()),
                 customer.getName(),
@@ -109,7 +111,7 @@ public class CustomerDataFile {
         }
     }
 
-    private boolean isSameCustomer(String line, Customer customer) {
+    private boolean isSameCustomer(String line, Customer customer) throws IOException{
         return line.startsWith(customer.getId() + DELIMITER);
     }
 
@@ -154,7 +156,7 @@ public class CustomerDataFile {
         return customers;
     }
 
-    private Customer parseCustomer(String line) {
+    private Customer parseCustomer(String line) throws IOException, NullPointerException{
         String[] parts = line.split(DELIMITER, -1);
         if (parts.length != 6) {
             return null;

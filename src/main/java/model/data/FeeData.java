@@ -22,7 +22,7 @@ import org.jdom2.output.Format;
  * @author 50687
  */
 public class FeeData {
-    
+
     private static final String FEE_FILE = "Fees.xml";
     private Element root;
     private Document document;
@@ -30,7 +30,7 @@ public class FeeData {
     public FeeData() throws IOException, JDOMException {
         ensureFileExists();
     }
-    
+
     private void ensureFileExists() throws IOException, JDOMException {
         File file = new File(FEE_FILE);
         if (!file.exists()) {
@@ -44,7 +44,7 @@ public class FeeData {
             root = document.getRootElement();
         }
     }
-    
+
     private void saveToFile() throws IOException {
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat()); // Para que el XML sea legible
@@ -52,11 +52,11 @@ public class FeeData {
             xmlOutput.output(document, writer);
         }
     }
-    
+
     //Este método sirve para insertar ymodificar todo lo del registro
     public void insertFee(Fee fee) throws IOException {
         deleteFee(fee.getVehicleType());
-        
+
         Element feeXML = new Element("fee");
         //feeXML.setAttribute("id", String.valueOf(fee.getId()));
         Element feeVehicleType = new Element("vehicleType");
@@ -81,16 +81,15 @@ public class FeeData {
         feeXML.addContent(feeWeekly);
         feeXML.addContent(feeMonthly);
         feeXML.addContent(feeAnnual);
-        
 
         root.addContent(feeXML);
         saveToFile();
     }//insertarEquipo
-    
-    public ArrayList<Fee> getAllFees(){
+
+    public ArrayList<Fee> getAllFees() throws IOException {
         ArrayList<Fee> fees = new ArrayList<>();
         List<Element> feeList = root.getChildren("fee");
-        
+
         for (Element element : feeList) {
             fees.add(new Fee(
                     element.getChildText("vehicleType"),
@@ -102,32 +101,32 @@ public class FeeData {
                     Float.parseFloat(element.getChildText("annual")))
             );
         }
-        
+
         return fees;
     }
-    
+
     //Metodo para mostrar las tarifas de forma individual
-    public Fee getFeeByVehicleType(String vehicleType) {
-    for (Fee fee : getAllFees()) {
-        if (fee.getVehicleType().equalsIgnoreCase(vehicleType)) {
-            return fee;
+    public Fee getFeeByVehicleType(String vehicleType) throws IOException {
+        for (Fee fee : getAllFees()) {
+            if (fee.getVehicleType().equalsIgnoreCase(vehicleType)) {
+                return fee;
+            }
         }
+        return null;
     }
-    return null; 
-}
-    
-    public void deleteFee(String vehicleType) throws IOException{
+
+    public void deleteFee(String vehicleType) throws IOException {
         List<Element> feeList = root.getChildren("fee");
         Element element = null;
-        
+
         for (Element elementToFound : feeList) {
-            if(elementToFound.getChildText("vehicleType").equalsIgnoreCase(vehicleType)){
+            if (elementToFound.getChildText("vehicleType").equalsIgnoreCase(vehicleType)) {
                 element = elementToFound;
                 break;
-            }  
+            }
         }
-        
-        if (element != null){
+
+        if (element != null) {
             root.removeContent(element);
             saveToFile();
         }

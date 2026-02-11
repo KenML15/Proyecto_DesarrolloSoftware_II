@@ -20,6 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 import model.entities.Customer;
 import model.entities.ParkingLot;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -127,7 +128,7 @@ public class Menu extends JFrame {
             CustomerWindow customerWindow = (customer == null) ? new CustomerWindow() : new CustomerWindow(customer);
             addWindowToDesktop(desktop, customerWindow);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se puede abrir la ventana de clientes" + e.getMessage());
         }
     }
     
@@ -137,7 +138,7 @@ public class Menu extends JFrame {
             CustomerManagement customerManagement = new CustomerManagement();
             addWindowToDesktop(desktop, customerManagement);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se puede abrir el panel de gestión de clientes" + e.getMessage());
         }
     }
     
@@ -147,7 +148,7 @@ public class Menu extends JFrame {
             VehicleWindow vehicleWindow = (vehicle == null) ? new VehicleWindow() : new VehicleWindow(vehicle);
             addWindowToDesktop(desktop, vehicleWindow);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se puede abrir la ventana de vehículos" + e.getMessage());
         }
     }
     
@@ -157,7 +158,7 @@ public class Menu extends JFrame {
             VehicleManagement vehicleManagement = new VehicleManagement();
             addWindowToDesktop(desktop, vehicleManagement);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se pudo abrir el panel de gestión de vehículos" + e.getMessage());
         }
     }
     
@@ -167,7 +168,7 @@ public class Menu extends JFrame {
             VehicleWindow window = new VehicleWindow();
             addWindowToDesktop(desktop, window);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se pudo cargar el módulo de salida de vehículos" + e.getMessage());
         }
     }
     
@@ -177,8 +178,8 @@ public class Menu extends JFrame {
             ParkingLotFileController parkingLotController = new ParkingLotFileController();
             ParkingLotWindow window = new ParkingLotWindow(parkingLotController);
             addWindowToDesktop(desktop, window);
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+        } catch (IOException e) {
+            showError("ERROR: No se pudo abrir la ventana de parqueos" + e.getMessage());
         }
     }
     
@@ -188,7 +189,7 @@ public class Menu extends JFrame {
             ParkingLotManagement parkingLotWindow = new ParkingLotManagement();
             addWindowToDesktop(desktop, parkingLotWindow);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se pudo abrir el panel de gestión de parqueos" + e.getMessage());
         }
     }
     
@@ -198,7 +199,7 @@ public class Menu extends JFrame {
             FeeManagement feeWindow = new FeeManagement();
             addWindowToDesktop(desktop, feeWindow);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("ERROR: No se pudo abrir el panel de las tarifas" + e.getMessage());
         }
     }
     
@@ -232,8 +233,10 @@ public class Menu extends JFrame {
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
             
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+        } catch (JDOMException e) {
+            showError("ERROR: No se pudo cargar el reporte de tarifas" + e.getMessage());
+        } catch (IOException e){
+            showError("Error: El archivo de configuración es inválido" + e.getMessage());
         }
     }
     
@@ -242,28 +245,32 @@ public class Menu extends JFrame {
         try {
             ParkingLotFileController controller = new ParkingLotFileController();
             selectParkingLotForConfig(desktop, controller);
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+        } catch (IOException e) {
+            showError("ERROR: No se pudo cargar la ventana de configuración de espacios" + e.getMessage());
         }
     }
     
     //Seleccionar parqueo para configuración
     private void selectParkingLotForConfig(HomeDesktop desktop, ParkingLotFileController controller) {
-        ArrayList<ParkingLot> parkingLots = controller.getAllParkingLots();
-        
-        if (parkingLots.isEmpty()) {
-            showMessage("Cree un parqueo primero", "Información");
-            return;
-        }
-        
-        String[] options = createParkingLotOptions(parkingLots);
-        String selected = showParkingLotSelectionDialog(options);
-        
-        if (selected != null) {
-            ParkingLot selectedLot = findParkingLot(parkingLots, selected);
-            if (selectedLot != null) {
-                openSpaceConfigWindow(desktop, controller, selectedLot);
+        try {
+            ArrayList<ParkingLot> parkingLots = controller.getAllParkingLots();
+
+            if (parkingLots.isEmpty()) {
+                showMessage("Cree un parqueo primero", "Información");
+                return;
             }
+
+            String[] options = createParkingLotOptions(parkingLots);
+            String selected = showParkingLotSelectionDialog(options);
+
+            if (selected != null) {
+                ParkingLot selectedLot = findParkingLot(parkingLots, selected);
+                if (selectedLot != null) {
+                    openSpaceConfigWindow(desktop, controller, selectedLot);
+                }
+            }
+        } catch (IOException e) {
+            showError("ERROR: No se pudieron cargar los datos de los parqueos desde el archivo");
         }
     }
     
@@ -304,7 +311,7 @@ public class Menu extends JFrame {
             SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, controller);
             addWindowToDesktop(desktop, window);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Error al configurar espacios");
+            showError("Error al configurar espacios" + ex.getMessage());
         }
     }
     

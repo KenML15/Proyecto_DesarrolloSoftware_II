@@ -304,6 +304,7 @@ public class VehicleManagement extends JInternalFrame{
             
             //Cuando se cierre, actualizar tabla
             window.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
                 public void internalFrameClosed(InternalFrameEvent e) {
                     loadAllVehicles();
                 }

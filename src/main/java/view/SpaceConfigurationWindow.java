@@ -118,12 +118,13 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
         }
 
         comboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
             public Component getListCellRendererComponent(JList<?> list,
                     Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof VehicleType) {
-                    VehicleType vt = (VehicleType) value;
-                    setText(vt.getDescription()); //Solo mostramos la descripción
+                    VehicleType vehicleType = (VehicleType) value;
+                    setText(vehicleType.getDescription()); //Solo mostramos la descripción
                 }
                 return this;
             }
