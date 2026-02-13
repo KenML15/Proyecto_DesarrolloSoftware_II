@@ -31,50 +31,56 @@ public class ParkingLotFileController {
     }
 
     //Parqueos
-    public void registerParkingLot(String name, Space[] spaces) throws IOException {
-        validateParkingLotName(name);
-        validateSpaces(spaces);
+   public void registerParkingLot(String name, Space[] spacesArray) throws IOException {
+    // 1. Validar que el nombre no exista
+    if (parkingLotData.existsByName(name)) {
+        throw new IOException("El nombre del parqueo ya existe.");
+    }
+
+    int nextLotId = parkingLotData.getNextId();
+    ParkingLot newLot = new ParkingLot();
+    newLot.setId(nextLotId);
+    newLot.setName(name);
+    newLot.setNumberOfSpaces(spacesArray.length);
+    
+    // 3. Crear los espacios con IDs ÚNICOS (Ej: Parqueo 1, Espacio 1 -> ID 101)
+    Space[] finalSpaces = new Space[spacesArray.length];
+    for (int i = 0; i < spacesArray.length; i++) {
+        Space s = new Space();
+        s.setId((nextLotId * 100) + (i + 1)); // Genera 101, 102, 201, etc.
+        s.setSpaceTaken(false);
+        finalSpaces[i] = s;
         
-        if (parkingLotData.existsByName(name)) {
-            throw new IllegalArgumentException("Ya existe un parqueo con el nombre: " + name);
-        }
-
-        ParkingLot parkingLot = createParkingLot(name, spaces);
-        
-        for (Space space : spaces) {
-            if (spaceData.getSpaceFromFile(space.getId()) != null) {
-                throw new IOException("Error crítico: El ID de espacio " + space.getId() + " ya existe.");
-            }
-        }
-
-        parkingLotData.insertParkingLot(parkingLot);
-
-        for (Space space : spaces) {
-            spaceData.insertSpace(space);
-        }
+        // GUARDAR CADA ESPACIO EN EL ARCHIVO DE ESPACIOS
+        spaceData.insertSpace(s); 
     }
     
+    newLot.setSpaces(finalSpaces);
+    newLot.setVehicles(new ArrayList<>());
+
+    // 4. Guardar el parqueo en el archivo de parqueos
+    parkingLotData.insertParkingLot(newLot);
+}
+    
     //Construye el objeto, pero no guarda en el archivoo
-    private ParkingLot createParkingLot(String name, Space[] spaces) throws IOException {
-        ParkingLot parkingLot = new ParkingLot();
-        parkingLot.setId(getNextId());
-        parkingLot.setName(name);
-        parkingLot.setNumberOfSpaces(spaces.length);
-        
-        for(int i = 0; i<spaces.length; i++){
-            Space space = new Space();
-            space.setId((parkingLot.getId() * 100) + (i+1));
-            space.setSpaceTaken(false);
-            spaces[i] = space;
-        }
-        parkingLot.setSpaces(spaces);
-        parkingLot.setVehicles(new ArrayList<>());
-        
-        for (Space space : spaces) {
-            spaceData.insertSpace(space);
-        }
-        return parkingLot;
+   private ParkingLot createParkingLot(String name, Space[] spaces) throws IOException {
+    ParkingLot parkingLot = new ParkingLot();
+    parkingLot.setId(getNextId());
+    parkingLot.setName(name);
+    parkingLot.setNumberOfSpaces(spaces.length);
+    
+    for(int i = 0; i < spaces.length; i++){
+        Space space = new Space();
+        // Genera un ID único combinando el ID del parqueo y el índice
+        space.setId((parkingLot.getId() * 100) + (i + 1));
+        space.setSpaceTaken(false);
+        spaces[i] = space;
     }
+    parkingLot.setSpaces(spaces);
+    parkingLot.setVehicles(new ArrayList<>());
+    
+    return parkingLot;
+}
     
         private void validateParkingLotName(String name) {
         if (name == null || name.trim().isEmpty()) {

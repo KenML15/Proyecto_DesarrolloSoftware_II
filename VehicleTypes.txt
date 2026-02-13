@@ -1,0 +1,5 @@
+1;Moto;2
+2;Liviano;4
+3;Pesado;6
+4;Bicicleta;2
+5;Otro;4
