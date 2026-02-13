@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fees>
+  <fee>
+    <vehicleType>Motocicleta</vehicleType>
+    <halfHour>250.0</halfHour>
+    <hourly>500.0</hourly>
+    <daily>2000.0</daily>
+    <weekly>14000.0</weekly>
+    <monthly>56000.0</monthly>
+    <annual>672000.0</annual>
+  </fee>
+  <fee>
+    <vehicleType>Liviano</vehicleType>
+    <halfHour>500.0</halfHour>
+    <hourly>1000.0</hourly>
+    <daily>4000.0</daily>
+    <weekly>28000.0</weekly>
+    <monthly>112000.0</monthly>
+    <annual>1344000.0</annual>
+  </fee>
+</fees>

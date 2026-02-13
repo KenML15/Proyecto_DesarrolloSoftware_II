@@ -116,9 +116,11 @@ public class ParkingLotManagement extends JInternalFrame {
     
     private int countOccupiedSpaces(ParkingLot parkingLot) {
         int count = 0;
-        for (Space space : parkingLot.getSpaces()) {
-            if (space.isSpaceTaken()) {
-                count++;
+        if (parkingLot.getSpaces() != null) {
+            for (Space space : parkingLot.getSpaces()) {
+                if (space != null && space.isSpaceTaken()) {
+                    count++;
+                }
             }
         }
         return count;

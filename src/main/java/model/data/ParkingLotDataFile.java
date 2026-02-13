@@ -183,10 +183,13 @@ public class ParkingLotDataFile {
         return parkingLots;
     }
 
-    private Space[] parseSpaces(String spaceIds, int numberOfSpaces) throws IOException {
+    private Space[] parseSpaces(String spaceIds, int numberOfSpaces) throws IOException, NullPointerException {
         Space[] spaces = new Space[numberOfSpaces];
 
         if (spaceIds == null || spaceIds.isEmpty()) {
+            for (int i = 0; i < numberOfSpaces; i++) {
+                spaces[i] = new Space(); // O el constructor que uses para un espacio nuevo
+            }
             return spaces;
         }
 
@@ -202,7 +205,7 @@ public class ParkingLotDataFile {
             Space space = spaceData.getSpaceFromFile(id);
             if (space != null) {
                 spaces[index] = space;
-                index++;
+                //index++;
             } else {
                 //Para probar
                 Space placeholder = new Space();
@@ -210,6 +213,7 @@ public class ParkingLotDataFile {
                 placeholder.setSpaceTaken(false);
                 spaces[index] = placeholder;
             }
+            index++;
         }
 
         return spaces;

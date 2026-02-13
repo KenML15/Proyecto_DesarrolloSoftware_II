@@ -5,10 +5,13 @@
 package view;
 
 import controller.ParkingLotFileController;
+import controller.SpaceFileController;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -29,10 +32,12 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
     private JButton buttonCreate, buttonCancel;
     
     private ParkingLotFileController controller;
+    private SpaceFileController spaceController;
 
-    public ParkingLotWindow(ParkingLotFileController controller) {
+    public ParkingLotWindow(ParkingLotFileController controller) throws IOException {
         super("Crear Parqueo", false, true, false, true);
         this.controller = controller;
+        this.spaceController = new SpaceFileController();
         setupWindow();
     }
 
@@ -162,22 +167,41 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
         }
     }
 
-    private Space[] createSpaces(int numberOfSpaces) {
+    private Space[] createSpaces(int numberOfSpaces) throws IOException {
         Space[] spaces = new Space[numberOfSpaces];
         
+        int startId = spaceController.getNextId();
+        
         for (int i = 0; i < numberOfSpaces; i++) {
-            spaces[i] = createSpace(i + 1);
+            int currentId = startId + i;
+            spaces[i] = createSpace(currentId);
         }
         
         return spaces;
     }
 
     private Space createSpace(int id) {
-        Space space = new Space();
-        space.setId(id);
-        space.setDisabilityAdaptation(false);
-        space.setSpaceTaken(false);
-        return space;
+        try {
+            Space existingSpace = spaceController.getSpaceFromFile(id);
+            if(existingSpace != null) {
+                return existingSpace;
+            } else {
+                Space newSpace = new Space();
+                newSpace.setId(id);
+                newSpace.setDisabilityAdaptation(false);
+                newSpace.setSpaceTaken(false);
+                newSpace.setVehicleTypeId(0);
+                spaceController.insertSpace(newSpace);
+                return newSpace;
+            }
+//        Space space = new Space();
+//        space.setId(id);
+//        space.setDisabilityAdaptation(false);
+//        space.setSpaceTaken(false);
+//        return space;
+        } catch (IOException ex) {
+            return null;
+        }
     }
 
     private void clearFields() {
