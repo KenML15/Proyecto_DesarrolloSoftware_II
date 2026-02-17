@@ -7,6 +7,7 @@ package controller;
 import java.io.IOException;
 import model.data.SpaceDataFile;
 import model.entities.Space;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -16,7 +17,7 @@ public class SpaceFileController {
 
     SpaceDataFile spaceData;
     
-    public SpaceFileController() throws IOException{
+    public SpaceFileController() throws IOException, JDOMException{
         spaceData = new SpaceDataFile();
     }
     

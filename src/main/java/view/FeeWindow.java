@@ -135,13 +135,13 @@ public class FeeWindow extends JInternalFrame{
             dispose();
             
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error al insertar o actualizar la tarifa");
+            showError("Error al insertar o actualizar la tarifa" + e.getMessage());
         }
     }
     
     private void validateFields() {
         if (vehicleTypeCombo.getSelectedIndex() <= 0) {
-            throw new IllegalArgumentException("Seleccione un tipo de vehículo");
+            showWarning("Seleccione un tipo de vehículo");
         }
         
         try {
@@ -153,28 +153,28 @@ public class FeeWindow extends JInternalFrame{
             double year = Double.parseDouble(txtYear.getText().trim());
             
             if (halfHour <= 0 || hour <= 0 || day <= 0 || week <= 0 || month <= 0 || year <= 0) {
-                throw new IllegalArgumentException("Todas las tarifas deben ser positivas");
+                showWarning("Todas las tarifas deben ser un valor mayor que cero");
             }
             
             //Validar progresión lógica
             if (hour < halfHour) {
-                JOptionPane.showMessageDialog(this, "La tarifa por hora debe ser mayor o igual a media hora");
+                showWarning("La tarifa por hora debe ser mayor o igual a media hora");
             }
             if (day < hour) {
-                JOptionPane.showMessageDialog(this, "La tarifa diaria debe ser mayor o igual a la horaria");
+                showWarning("La tarifa diaria debe ser mayor o igual a la horaria");
             }
             if (week < day) {
-                JOptionPane.showMessageDialog(this, "La tarifa semanal debe ser mayor o igual a la diaria");
+                showWarning("La tarifa semanal debe ser mayor o igual a la diaria");
             }
             if (month < week) {
-                JOptionPane.showMessageDialog(this, "La tarifa mensual debe ser mayor o igual a la semanal");
+                showWarning("La tarifa mensual debe ser mayor o igual a la semanal");
             }
             if (year < month) {
-                JOptionPane.showMessageDialog(this, "La tarifa anual debe ser mayor o igual a la mensual");
+                showWarning("La tarifa anual debe ser mayor o igual a la mensual");
             }
             
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "¡Error! El monto de la tarifa debe ser mayor al anterior.");
+            showError("¡Error! El monto de la tarifa debe ser mayor al anterior." + e.getMessage());
         }
     }
     
@@ -188,5 +188,13 @@ public class FeeWindow extends JInternalFrame{
         float year = Float.parseFloat(txtYear.getText().trim());
         
         return new Fee(vehicleType, halfHour, hour, day, week, month, year);
+    }
+    
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 }

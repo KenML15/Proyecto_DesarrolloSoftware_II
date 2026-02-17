@@ -9,9 +9,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import model.data.CustomerDataFile;
+import model.data.InvoiceDataFile;
 import model.data.VehicleDataFile;
 import model.entities.Customer;
+import model.entities.Invoice;
+import model.entities.ParkingLot;
 import model.entities.Vehicle;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -21,10 +25,14 @@ public class VehicleFileController {
 
     private final VehicleDataFile vehicleData;
     private final CustomerDataFile customerData;
+    private final InvoiceDataFile invoiceData;
+    private final ParkingLotFileController parkingLotController;
     
-    public VehicleFileController() throws IOException {
+    public VehicleFileController() throws IOException, JDOMException {
         this.customerData = new CustomerDataFile();
         this.vehicleData = new VehicleDataFile();
+        this.invoiceData = new InvoiceDataFile();
+        this.parkingLotController = new ParkingLotFileController();
     }
     
     public void create(Vehicle vehicle) throws IOException, IllegalArgumentException {
@@ -92,7 +100,7 @@ public class VehicleFileController {
     }
     
     //Salida y Tarifa
-    public double registerVehicleExit(String plate) throws IOException {
+    public Invoice registerVehicleExit(String plate) throws IOException {
         Vehicle vehicle = getByPlate(plate);
         
         if (vehicle == null) {
@@ -103,6 +111,20 @@ public class VehicleFileController {
             throw new IllegalStateException("Ya se registró la salida del vehículo: " + plate);
         }
         
+        //Por probar
+        if (vehicle.getVehicleType() == null) {
+            throw new IllegalStateException(
+                    "El vehículo con placa " + plate
+                    + " no tiene tipo de vehículo. Por favor, edite el vehículo y asígnele un tipo."
+            );
+        }
+        
+        ParkingLot parkingLot = findParkingLotByVehicle(vehicle);
+        
+        if (parkingLot == null) {
+            throw new IllegalStateException("No se pudo encontrar el parqueo del vehículo: " + plate);
+        }
+        
         LocalDateTime exitTime = LocalDateTime.now();
         vehicle.setExitTime(exitTime);
         
@@ -111,7 +133,35 @@ public class VehicleFileController {
 
         vehicleData.updateVehicle(vehicle);
         
-        return feeAmount;
+        parkingLotController.freeVehicleSpace(vehicle);
+        
+        Invoice invoice = createInvoice(vehicle, parkingLot, feeAmount);
+        invoiceData.insertInvoice(invoice);
+
+        return invoice;
+//        return feeAmount;
+    }
+    
+    private ParkingLot findParkingLotByVehicle(Vehicle vehicle) throws IOException {
+        for (ParkingLot lot : parkingLotController.getAllParkingLots()) {
+            for (Vehicle v : lot.getVehicles()) {
+                if (v.getPlate().equals(vehicle.getPlate())) {
+                    return lot;
+                }
+            }
+        }
+        return null;
+    }
+    
+    private Invoice createInvoice(Vehicle vehicle, ParkingLot parkingLot, float amount) throws IOException {
+        Invoice invoice = new Invoice();
+        invoice.setId(invoiceData.getNextId());
+        invoice.setVehiclePlate(vehicle.getPlate());
+        invoice.setParkingLotName(parkingLot.getName());
+        invoice.setEntryTime(vehicle.getEntryTime());
+        invoice.setExitTime(vehicle.getExitTime());
+        invoice.setTotalAmount(amount);
+        return invoice;
     }
     
     private float calculateParkingFee(Vehicle vehicle) {
@@ -119,9 +169,24 @@ public class VehicleFileController {
             return 0.0f;
         }
         
-        if (vehicle.getVehicleType() == null || vehicle.getVehicleType().getFee() == null) {
-            throw new IllegalStateException("No hay tarifa configurada para este tipo de vehículo");
+        if (vehicle.getVehicleType() == null) {
+            throw new IllegalStateException(
+                    "El vehículo con placa " + vehicle.getPlate()
+                    + " no tiene un tipo de vehículo asignado. "
+                    + "No se puede calcular la tarifa."
+            );
         }
+        
+        if (vehicle.getVehicleType().getFee() == null) {
+            throw new IllegalStateException(
+                    "El tipo de vehículo '" + vehicle.getVehicleType().getDescription()
+                    + "' no tiene una tarifa configurada."
+            );
+        }
+        
+//        if (vehicle.getVehicleType() == null || vehicle.getVehicleType().getFee() == null) {
+//            throw new IllegalStateException("No hay tarifa configurada para este tipo de vehículo");
+//        }
         
         Duration duration = Duration.between(vehicle.getEntryTime(), vehicle.getExitTime());
         long minutes = duration.toMinutes();

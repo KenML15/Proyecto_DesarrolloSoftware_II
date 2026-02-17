@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
@@ -28,6 +30,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import model.entities.Customer;
 import model.entities.Vehicle;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -58,6 +61,8 @@ public class VehicleManagement extends JInternalFrame{
         } catch (IOException e) {
             showError("No se pueden acceder a los archivos de los clientes y vehículos" + e.getMessage());
             dispose();
+        } catch (JDOMException ex) {
+            Logger.getLogger(VehicleManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

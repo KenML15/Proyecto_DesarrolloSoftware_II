@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -43,7 +44,7 @@ public class SpaceConfigurationWindow extends JInternalFrame implements ActionLi
     private VehicleTypeController vehicleTypeController;
     private ArrayList<VehicleType> vehicleTypes;
 
-    public SpaceConfigurationWindow(ParkingLot parkingLot, ParkingLotFileController controller) throws IOException {
+    public SpaceConfigurationWindow(ParkingLot parkingLot, ParkingLotFileController controller) throws IOException, JDOMException {
         
         super("Configurar Espacios: " + parkingLot.getName(), 
               false, true, false, true);

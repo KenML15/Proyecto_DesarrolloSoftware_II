@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -33,6 +35,7 @@ import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.Vehicle;
 import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -97,6 +100,8 @@ public class VehicleWindow extends JInternalFrame {
         } catch (IOException e) {
             showError("No se puede acceder al archivo de vehículos" + e.getMessage());
             dispose();
+        } catch (JDOMException ex) {
+            Logger.getLogger(VehicleWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

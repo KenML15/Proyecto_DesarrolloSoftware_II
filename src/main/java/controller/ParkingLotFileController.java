@@ -13,6 +13,7 @@ import model.entities.Customer;
 import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.Vehicle;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -24,7 +25,7 @@ public class ParkingLotFileController {
     private SpaceDataFile spaceData;
     private VehicleDataFile vehicleData;
 
-    public ParkingLotFileController() throws IOException {
+    public ParkingLotFileController() throws IOException, JDOMException {
         this.parkingLotData = new ParkingLotDataFile();
         this.spaceData = new SpaceDataFile();
         this.vehicleData = new VehicleDataFile();
@@ -266,7 +267,26 @@ public class ParkingLotFileController {
             Space space = vehicle.getSpace();
             space.setSpaceTaken(false);
             spaceData.updateSpace(space);
+            
+            //Remueve el vehículo de la lista del parqueo
+            ParkingLot parkingLot = findParkingLotByVehicle(vehicle);
+            if (parkingLot != null) {
+                parkingLot.getVehicles().removeIf(vehicleToRemove -> vehicleToRemove.getPlate().equals(vehicle.getPlate()));
+                parkingLotData.updateParkingLot(parkingLot);
+            }
         }
+    }
+    
+    //Método para buscar el parqueo según la placa del vehículo
+    public ParkingLot findParkingLotByVehicle(Vehicle vehicle) throws IOException{
+        for(ParkingLot parkingLot : getAllParkingLots()){
+            for(Vehicle vehicleToFound : parkingLot.getVehicles()){
+                if(vehicleToFound.getPlate().equals(vehicleToFound.getPlate())){
+                    return parkingLot;
+                }
+            }
+        }
+        return null;
     }
     
     //Método para buscar vehículo por placa en el parqueo

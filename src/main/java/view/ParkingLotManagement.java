@@ -9,15 +9,20 @@ import java.awt.Color;
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import model.entities.ParkingLot;
 import model.entities.Space;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -25,7 +30,7 @@ import model.entities.Space;
  */
 public class ParkingLotManagement extends JInternalFrame {
 
-    private JButton buttonDelete, buttonConfigure, buttonStatus;
+    private JButton buttonDelete, buttonConfigure, buttonStatus, buttonExit;
     private JPanel panelParkingLots;
     private JTable tableParkingLots;
     private DefaultTableModel modelDataTable;
@@ -46,12 +51,14 @@ public class ParkingLotManagement extends JInternalFrame {
             this.controller = new ParkingLotFileController();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "No se puede acceder al archivo de parqueos" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (JDOMException ex) {
+            Logger.getLogger(ParkingLotManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void initializeComponents() {
         setVisible(true);
-        setSize(650, 500);
+        setSize(750, 500);
         setLocation(230, 50);
         setResizable(false);
 
@@ -72,7 +79,7 @@ public class ParkingLotManagement extends JInternalFrame {
         panelParkingLots.add(tableParkingLots);
 
         JScrollPane scrollBar = new JScrollPane(tableParkingLots);
-        scrollBar.setBounds(25, 75, 600, 249);
+        scrollBar.setBounds(25, 75, 700, 249);
         panelParkingLots.add(scrollBar);
     }
 
@@ -80,6 +87,13 @@ public class ParkingLotManagement extends JInternalFrame {
         buttonDelete = createButton("Eliminar", 50);
         buttonConfigure = createButton("Configurar", 200);
         buttonStatus = createButton("Estado", 350);
+        
+        //Botón para registrar la salida de los vehículos
+        JButton buttonExit = new JButton("Registrar Salida");
+        buttonExit.setBounds(500, 350, 120, 30);
+        buttonExit.setBackground(new Color(255, 200, 200)); // Color suave
+        buttonExit.addActionListener(e -> openVehicleExitWindow());
+        panelParkingLots.add(buttonExit);
 
         buttonDelete.addActionListener(e -> deleteParkingLot());
         buttonConfigure.addActionListener(e -> configureSpaces());
@@ -92,6 +106,39 @@ public class ParkingLotManagement extends JInternalFrame {
         button.setBounds(x, 350, 120, 30);
         panelParkingLots.add(button);
         return button;
+    }
+    
+    private void openVehicleExitWindow() {
+        int selectedRow = tableParkingLots.getSelectedRow();
+
+        if (selectedRow < 0) {
+            showWarning("Seleccione un parqueo primero");
+            return;
+        }
+
+        try {
+            // Obtener el ID del parqueo seleccionado
+            int parkingLotId = Integer.parseInt(modelDataTable.getValueAt(selectedRow, 0).toString());
+            ParkingLot selectedLot = controller.findParkingLotById(parkingLotId);
+
+            // Crear la ventana de salida (puedes modificarla para recibir el parqueo)
+            VehicleExitWindow exitWindow = new VehicleExitWindow(selectedLot);
+
+            getDesktopPane().add(exitWindow);
+            exitWindow.setVisible(true);
+            exitWindow.toFront();
+
+            // Actualizar la tabla cuando se cierre la ventana
+            exitWindow.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    loadParkingLots(); // Refrescar la tabla
+                }
+            });
+
+        } catch (IOException | NumberFormatException e) {
+            showError("Error al abrir ventana de salida: " + e.getMessage());
+        }
     }
 
     private void loadParkingLots() {
@@ -130,11 +177,11 @@ public class ParkingLotManagement extends JInternalFrame {
         String[][] data = new String[parkingLots.size()][4];
 
         for (int i = 0; i < parkingLots.size(); i++) {
-            ParkingLot pl = parkingLots.get(i);
-            data[i][0] = String.valueOf(pl.getId());
-            data[i][1] = pl.getName();
-            data[i][2] = String.valueOf(pl.getNumberOfSpaces());
-            data[i][3] = String.valueOf(pl.getVehicles().size());
+            ParkingLot parkingLot = parkingLots.get(i);
+            data[i][0] = String.valueOf(parkingLot.getId());
+            data[i][1] = parkingLot.getName();
+            data[i][2] = String.valueOf(parkingLot.getNumberOfSpaces());
+            data[i][3] = String.valueOf(parkingLot.getVehicles().size());
         }
 
         return data;
@@ -181,6 +228,8 @@ public class ParkingLotManagement extends JInternalFrame {
 
         } catch (IOException e) {
             showError("Error al configurar parqueos" + e.getMessage());
+        } catch (JDOMException ex) {
+            Logger.getLogger(ParkingLotManagement.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -198,6 +247,10 @@ public class ParkingLotManagement extends JInternalFrame {
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error",
                 JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 
     private void showSuccess(String message) {

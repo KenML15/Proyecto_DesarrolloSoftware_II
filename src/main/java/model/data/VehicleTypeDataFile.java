@@ -11,7 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import model.entities.Fee;
 import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -22,13 +24,15 @@ public class VehicleTypeDataFile {
     private final String fileName;
     private static final String DELIMETER = ";";
     private static final String VEHICLETYPE_FILE = "VehicleTypes.txt";
+    private final FeeData feeData;
     
-    public VehicleTypeDataFile() throws IOException {
+    public VehicleTypeDataFile() throws IOException, JDOMException {
         this(VEHICLETYPE_FILE);
     }
     
-    public VehicleTypeDataFile(String fileName) throws IOException {
+    public VehicleTypeDataFile(String fileName) throws IOException, JDOMException {
         this.fileName = fileName;
+        this.feeData = new FeeData();
         ensureFileExists();
         initializeDefaultTypes();
     }
@@ -149,7 +153,7 @@ public class VehicleTypeDataFile {
         return null;
     }
     
-    private VehicleType parseVehicleType(String line) throws NumberFormatException{
+    private VehicleType parseVehicleType(String line) throws NumberFormatException, IOException{
             if (line == null || line.trim().isEmpty()) {
                 return null;
             }
@@ -158,12 +162,13 @@ public class VehicleTypeDataFile {
             if (parts.length != 3) {
                 return null;
             }
+            
+            VehicleType vehicleType = new VehicleType(Integer.parseInt(parts[0]), parts[1], Integer.parseInt(parts[2]));
+            
+            Fee fee = feeData.getFeeByVehicleType(vehicleType.getDescription());
+            vehicleType.setFee(fee);
 
-            return new VehicleType(
-                    Integer.parseInt(parts[0]),
-                    parts[1],
-                    Integer.parseInt(parts[2])
-            );
+            return vehicleType;
         }
        
     public void updateVehicleType(VehicleType vehicleType) throws IOException {

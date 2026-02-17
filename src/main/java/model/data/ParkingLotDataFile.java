@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.Vehicle;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -28,7 +29,7 @@ public class ParkingLotDataFile {
     private SpaceDataFile spaceData = new SpaceDataFile();
     private final VehicleDataFile vehicleData;
 
-    public ParkingLotDataFile() throws IOException {
+    public ParkingLotDataFile() throws IOException, JDOMException {
         spaceData = new SpaceDataFile();
         vehicleData = new VehicleDataFile();
         ensureFileExists();

@@ -17,6 +17,7 @@ import model.entities.Customer;
 import model.entities.Space;
 import model.entities.Vehicle;
 import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -42,7 +43,7 @@ public class VehicleDataFile {
         ensureFileExists();
     }
 
-    public VehicleDataFile() throws IOException {
+    public VehicleDataFile() throws IOException, JDOMException {
         this(VEHICLE_FILE, new CustomerDataFile(), new VehicleTypeDataFile(), new SpaceDataFile());
     }
 

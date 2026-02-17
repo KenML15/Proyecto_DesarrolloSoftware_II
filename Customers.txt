@@ -1,0 +1,2 @@
+1;Eilyn;false;eilyn.rivera@gmail.com;Cachí;87603888
+2;Bruno;false;bruno@ucr.ac.cr;Paraíso;70411200

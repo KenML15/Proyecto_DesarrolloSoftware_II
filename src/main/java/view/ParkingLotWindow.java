@@ -7,6 +7,7 @@ package view;
 import controller.ParkingLotFileController;
 import controller.SpaceFileController;
 import java.awt.Color;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import model.entities.Space;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -34,7 +36,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
     private ParkingLotFileController controller;
     private SpaceFileController spaceController;
 
-    public ParkingLotWindow(ParkingLotFileController controller) throws IOException {
+    public ParkingLotWindow(ParkingLotFileController controller) throws IOException, JDOMException {
         super("Crear Parqueo", false, true, false, true);
         this.controller = controller;
         this.spaceController = new SpaceFileController();
@@ -156,7 +158,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
         JOptionPane.showMessageDialog(null, "El parqueo se ha creado con éxito");
         clearFields();
         dispose();
-    } catch (Exception e) {
+    } catch (HeadlessException | IOException | NumberFormatException e) {
         showError("Error: " + e.getMessage());
     }
 }

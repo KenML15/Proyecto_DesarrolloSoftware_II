@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import model.data.VehicleTypeDataFile;
 import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -16,7 +17,7 @@ import model.entities.VehicleType;
 public class VehicleTypeController {
     VehicleTypeDataFile vehicleTypeData;
     
-    public VehicleTypeController() throws IOException {
+    public VehicleTypeController() throws IOException, JDOMException {
         this.vehicleTypeData = new VehicleTypeDataFile();
     }
     

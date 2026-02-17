@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import model.entities.Space;
 import model.entities.VehicleType;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -24,7 +25,7 @@ public class SpaceDataFile {
     private static final String DELIMITER = ";";
     private static final String DEFAULT_FILE = "Spaces.txt";
     
-    public SpaceDataFile() throws IOException {
+    public SpaceDataFile() throws IOException, JDOMException {
         this(DEFAULT_FILE, new VehicleTypeDataFile());
     }
     

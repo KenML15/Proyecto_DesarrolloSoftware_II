@@ -4,19 +4,17 @@
  */
 package view;
 
-import controller.FeeController;
 import controller.ParkingLotFileController;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.JDialog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 import model.entities.Administrator;
 import model.entities.Customer;
@@ -93,11 +91,11 @@ public class Menu extends JFrame {
         
         JMenuItem insertItem = createMenuItem("Insertar Vehículo", e -> openVehicleWindow(desktop, null));
         JMenuItem manageItem = createMenuItem("Gestionar Vehículos", e -> openVehicleManagement(desktop));
-        JMenuItem exitItem = createMenuItem("Registrar Salida", e -> openVehicleExit(desktop));
+//        JMenuItem exitItem = createMenuItem("Registrar Salida", e -> openVehicleExit(desktop));
         
         menu.add(insertItem);
         menu.add(manageItem);
-        menu.add(exitItem);
+//        menu.add(exitItem);
         
         return menu;
     }
@@ -109,10 +107,12 @@ public class Menu extends JFrame {
         JMenuItem createItem = createMenuItem("Crear Parqueo", e -> openParkingLotWindow(desktop));
         JMenuItem manageItem = createMenuItem("Gestionar Parqueos", e -> openParkingLotManagement(desktop));
         JMenuItem configItem = createMenuItem("Configurar Espacios", e -> openSpaceConfiguration(desktop));
+        //JMenuItem exitVehicleItem = createMenuItem("Registrar salida de vehículos", e -> openVehicleExit(desktop));
         
         menu.add(createItem);
         menu.add(manageItem);
         menu.add(configItem);
+        //menu.add(exitVehicleItem);
         
         return menu;
     }
@@ -176,14 +176,14 @@ public class Menu extends JFrame {
     }
     
     //Abre ventana para la salida de vehículos
-    private void openVehicleExit(HomeDesktop desktop) {
-        try {
-            VehicleWindow window = new VehicleWindow();
-            addWindowToDesktop(desktop, window);
-        } catch (Exception e) {
-            showError("ERROR: No se pudo cargar el módulo de salida de vehículos" + e.getMessage());
-        }
-    }
+//    private void openVehicleExit(HomeDesktop desktop) {
+//        try {
+//            VehicleWindow window = new VehicleWindow();
+//            addWindowToDesktop(desktop, window);
+//        } catch (Exception e) {
+//            showError("ERROR: No se pudo cargar el módulo de salida de vehículos" + e.getMessage());
+//        }
+//    }
     
     //Abrir ventana de parqueo
     private void openParkingLotWindow(HomeDesktop desktop) {
@@ -193,6 +193,8 @@ public class Menu extends JFrame {
             addWindowToDesktop(desktop, window);
         } catch (IOException e) {
             showError("ERROR: No se pudo abrir la ventana de parqueos" + e.getMessage());
+        } catch (JDOMException ex) {
+            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -216,42 +218,42 @@ public class Menu extends JFrame {
         }
     }
     
-    private void showFeeReport(HomeDesktop desktop) {
-        try {
-            FeeController controller = new FeeController();
-            StringBuilder report = new StringBuilder();
-            report.append("=== REPORTE DE TARIFAS ===\n\n");
-            
-            ArrayList<model.entities.Fee> fees = controller.getAllFees();
-            for (model.entities.Fee fee : fees) {
-                report.append("Tipo: ").append(fee.getVehicleType()).append("\n");
-                report.append("  Media Hora: ₡").append(String.format("%.2f", fee.getHalfHourRate())).append("\n");
-                report.append("  Hora: ₡").append(String.format("%.2f", fee.getHourlyRate())).append("\n");
-                report.append("  Día: ₡").append(String.format("%.2f", fee.getDailyRate())).append("\n");
-                report.append("  Semana: ₡").append(String.format("%.2f", fee.getWeeklyRate())).append("\n");
-                report.append("  Mes: ₡").append(String.format("%.2f", fee.getMonthlyRate())).append("\n");
-                report.append("  Año: ₡").append(String.format("%.2f", fee.getAnnualRate())).append("\n");
-                report.append("---\n");
-            }
-            
-            JTextArea textArea = new JTextArea(20, 60);
-            textArea.setText(report.toString());
-            textArea.setEditable(false);
-            
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            
-            JDialog dialog = new JDialog(this, "Reporte de Tarifas", true);
-            dialog.add(scrollPane);
-            dialog.pack();
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
-            
-        } catch (JDOMException e) {
-            showError("ERROR: No se pudo cargar el reporte de tarifas" + e.getMessage());
-        } catch (IOException e){
-            showError("ERROR: El archivo de configuración es inválido" + e.getMessage());
-        }
-    }
+//    private void showFeeReport(HomeDesktop desktop) {
+//        try {
+//            FeeController controller = new FeeController();
+//            StringBuilder report = new StringBuilder();
+//            report.append("=== REPORTE DE TARIFAS ===\n\n");
+//            
+//            ArrayList<model.entities.Fee> fees = controller.getAllFees();
+//            for (model.entities.Fee fee : fees) {
+//                report.append("Tipo: ").append(fee.getVehicleType()).append("\n");
+//                report.append("  Media Hora: ₡").append(String.format("%.2f", fee.getHalfHourRate())).append("\n");
+//                report.append("  Hora: ₡").append(String.format("%.2f", fee.getHourlyRate())).append("\n");
+//                report.append("  Día: ₡").append(String.format("%.2f", fee.getDailyRate())).append("\n");
+//                report.append("  Semana: ₡").append(String.format("%.2f", fee.getWeeklyRate())).append("\n");
+//                report.append("  Mes: ₡").append(String.format("%.2f", fee.getMonthlyRate())).append("\n");
+//                report.append("  Año: ₡").append(String.format("%.2f", fee.getAnnualRate())).append("\n");
+//                report.append("---\n");
+//            }
+//            
+//            JTextArea textArea = new JTextArea(20, 60);
+//            textArea.setText(report.toString());
+//            textArea.setEditable(false);
+//            
+//            JScrollPane scrollPane = new JScrollPane(textArea);
+//            
+//            JDialog dialog = new JDialog(this, "Reporte de Tarifas", true);
+//            dialog.add(scrollPane);
+//            dialog.pack();
+//            dialog.setLocationRelativeTo(this);
+//            dialog.setVisible(true);
+//            
+//        } catch (JDOMException e) {
+//            showError("ERROR: No se pudo cargar el reporte de tarifas" + e.getMessage());
+//        } catch (IOException e){
+//            showError("ERROR: El archivo de configuración es inválido" + e.getMessage());
+//        }
+//    }
     
     //Abrir configuración de espacios
     private void openSpaceConfiguration(HomeDesktop desktop) {
@@ -260,6 +262,8 @@ public class Menu extends JFrame {
             selectParkingLotForConfig(desktop, controller);
         } catch (IOException e) {
             showError("ERROR: No se pudo cargar la ventana de configuración de espacios" + e.getMessage());
+        } catch (JDOMException ex) {
+            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -325,6 +329,8 @@ public class Menu extends JFrame {
             addWindowToDesktop(desktop, window);
         } catch (IOException ex) {
             showError("Error al configurar espacios" + ex.getMessage());
+        } catch (JDOMException ex) {
+            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
