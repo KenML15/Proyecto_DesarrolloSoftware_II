@@ -66,9 +66,11 @@ public class VehicleWindow extends JInternalFrame {
 
     //Constructor para nuevo vehículo
     public VehicleWindow() {
-        super("Registrar Vehículo", true, true, true, true);
+        super("Registro de Vehículo", false, true, false, true);
         this.vehicleToEdit = null;
         initWindow();
+        setVisible(true);
+
     }
 
     //Constructor para editar vehículo

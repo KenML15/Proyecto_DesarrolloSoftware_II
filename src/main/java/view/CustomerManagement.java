@@ -6,12 +6,14 @@ package view;
 
 import controller.CustomerFileController;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -29,237 +31,203 @@ import model.entities.Customer;
  *
  * @author 50687
  */
-public class CustomerManagement extends JInternalFrame {
+public class CustomerManagement extends BaseInternalFrame {
 
     private CustomerFileController controller;
     private JTable customerTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
-
     private final String[] COLUMNS = {"ID", "Nombre", "Discapacidad", "Email", "Dirección", "Teléfono"};
-    
+
     public CustomerManagement() {
-        super("Gestión de Clientes", true, true, true, true);
+        super("GESTIÓN DE CLIENTES"); // Título para la barra superior
         setupController();
         createInterface();
         loadAllCustomers();
     }
-    
-    //Setup de controller
+
     private void setupController() {
         try {
             controller = new CustomerFileController("Customers.txt");
         } catch (IOException e) {
-            showMessage("No se puede acceder al archivo de clientes" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            showError("No se puede acceder al archivo: " + e.getMessage());
             this.dispose();
         }
     }
-    
-    //Crea la interfaz de usuario
+
     private void createInterface() {
-        this.setSize(900, 550);
-        this.setLocation(50, 50);
+        this.setSize(1000, 600); // Un poco más ancha para la tabla
         
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        //Panel de busqueda
-        mainPanel.add(createSearchPanel(), BorderLayout.NORTH);
-        
-        //Tabla con los clientes
+        JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
+        mainPanel.setBackground(backgroundColor);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // --- PARTE SUPERIOR: BUSQUEDA ---
+        mainPanel.add(createTopPanel(), BorderLayout.NORTH);
+
+        // --- PARTE CENTRAL: TABLA ---
         mainPanel.add(createTablePanel(), BorderLayout.CENTER);
-        
-        //Botones de acción
-        mainPanel.add(createButtonsPanel(), BorderLayout.SOUTH);
-        
+
+        // --- PARTE INFERIOR: ACCIONES ---
+        mainPanel.add(createActionsPanel(), BorderLayout.SOUTH);
+
         this.setContentPane(mainPanel);
     }
-    
-    //Crea un panel de busqueda con botones
-    private JPanel createSearchPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+    private JPanel createTopPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
+
+        // Panel izquierdo: Buscador
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        searchPanel.setOpaque(false);
         
-        JLabel label = new JLabel("Buscar:");
-        panel.add(label);
+        JLabel lblSearch = new JLabel("Buscar Cliente:");
+        lblSearch.setFont(labelFont);
         
-        searchField = new JTextField(20);
-        panel.add(searchField);
+        searchField = new JTextField(25);
+        styleTextField(searchField); // Método de BaseInternalFrame
         
-        JButton searchButton = new JButton("Buscar");
-        searchButton.addActionListener(e -> searchCustomers());
-        panel.add(searchButton);
-        
-        JButton showAllButton = new JButton("Mostrar Todos");
-        showAllButton.addActionListener(e -> loadAllCustomers());
-        panel.add(showAllButton);
-        
+        JButton btnSearch = new JButton("BUSCAR");
+        styleButton(btnSearch);
+        btnSearch.addActionListener(e -> searchCustomers());
+
+        searchPanel.add(lblSearch);
+        searchPanel.add(searchField);
+        searchPanel.add(btnSearch);
+
+        // Panel derecho: Refrescar
+        JButton btnReload = new JButton("MOSTRAR TODOS");
+        styleButton(btnReload);
+        btnReload.setBackground(accentColor); // Diferente color para distinguir
+        btnReload.addActionListener(e -> loadAllCustomers());
+
+        panel.add(searchPanel, BorderLayout.WEST);
+        panel.add(btnReload, BorderLayout.EAST);
+
         return panel;
     }
-    
-    //Crea una tabla para mostrar a los clientes
+
     private JScrollPane createTablePanel() {
-        tableModel = new DefaultTableModel(COLUMNS, 0);
+        tableModel = new DefaultTableModel(COLUMNS, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        
         customerTable = new JTable(tableModel);
+        styleTable(customerTable); // Método de BaseInternalFrame
         
-        //Solo se puede seleccionar una fila a la vez
-        customerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scroll = new JScrollPane(customerTable);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        scroll.getViewport().setBackground(Color.WHITE);
         
-        return new JScrollPane(customerTable);
+        return scroll;
     }
-    
-    //Crea un panel con botones de acción
-    private JPanel createButtonsPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
+
+    private JPanel createActionsPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        panel.setOpaque(false);
+
+        JButton btnAdd = new JButton("NUEVO CLIENTE");
+        JButton btnEdit = new JButton("EDITAR");
+        JButton btnDelete = new JButton("ELIMINAR");
+
+        styleButton(btnAdd);
+        styleButton(btnEdit);
+        styleButton(btnDelete);
         
-        panel.add(createButton("Agregar", e -> openAddWindow()));
-        panel.add(createButton("Editar", e -> openEditWindow()));
-        panel.add(createButton("Eliminar", e -> deleteCustomer()));
-        panel.add(createButton("Actualizar", e -> loadAllCustomers()));
-        
+        // Color especial para eliminar
+        btnDelete.setBackground(new Color(192, 57, 43)); 
+
+        btnAdd.addActionListener(e -> openAddWindow());
+        btnEdit.addActionListener(e -> openEditWindow());
+        btnDelete.addActionListener(e -> deleteCustomer());
+
+        panel.add(btnDelete);
+        panel.add(btnEdit);
+        panel.add(btnAdd);
+
         return panel;
     }
-    
-    //Ayuda a crear botones (es para que haya más modularidad)
-    private JButton createButton(String text, ActionListener action) {
-        JButton button = new JButton(text);
-        button.addActionListener(action);
-        return button;
-    }
-    
-    //Carga o trae todos los clientes del controlador
+
+    // --- MANTENEMOS TU LÓGICA DE NEGOCIO IGUAL ---
     private void loadAllCustomers() {
         try {
             ArrayList<Customer> customers = controller.getAllCustomers();
             showCustomersInTable(customers);
             searchField.setText("");
         } catch (IOException e) {
-            showMessage("No se puedo cargar la lista de clientes" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);;
+            showError("Error al cargar: " + e.getMessage());
         }
     }
-    
-    //Muestra a los clientes en la tabla 
+
     private void showCustomersInTable(ArrayList<Customer> customers) {
-        //limpia la tabla
         tableModel.setRowCount(0);
-        
-        //Añade a cada cliente en una fila
-        for (Customer customer : customers) {
-            addCustomerToTable(customer);
+        for (Customer c : customers) {
+            Object[] row = {
+                c.getId(), c.getName(), c.isDisabilityPresented() ? "Sí" : "No",
+                c.getEmail(), c.getAddress(), c.getPhoneNumber()
+            };
+            tableModel.addRow(row);
         }
     }
-    
-    //Añade a un cliente en la tabla
-    private void addCustomerToTable(Customer customer) {
-        Object[] row = {
-            customer.getId(),
-            customer.getName(),
-            customer.isDisabilityPresented() ? "Sí" : "No",
-            customer.getEmail(),
-            customer.getAddress(),
-            customer.getPhoneNumber()
-        };
-        
-        tableModel.addRow(row);
-    }
-    
-    //Buscador de clientes
+
     private void searchCustomers() {
-        String searchText = searchField.getText().trim();
-        
-        if (searchText.isEmpty()) {
-            loadAllCustomers();
-            return;
-        }
-        
+        String text = searchField.getText().trim();
+        if (text.isEmpty()) { loadAllCustomers(); return; }
         try {
-            ArrayList<Customer> results = controller.searchCustomers(searchText);
-            showCustomersInTable(results);
+            showCustomersInTable(controller.searchCustomers(text));
         } catch (Exception e) {
-            showError("Error en la búsqueda de clientes" + e.getMessage());
+            showError("Error en búsqueda: " + e.getMessage());
         }
     }
-    
-    //Ventana para añadir a un nuevo cliente
-    private void openAddWindow() {
-        openCustomerWindow(null);
-    }
-    
-    //Ventana para editar al cliente seleccionado
+
+    private void openAddWindow() { openCustomerWindow(null); }
+
     private void openEditWindow() {
-        int selectedRow = customerTable.getSelectedRow();
-        
-        if (selectedRow < 0) {
-            showWarning("Seleccione un cliente de la tabla");
-            return;
-        }
-        
+        int row = customerTable.getSelectedRow();
+        if (row < 0) { showWarning("Seleccione un cliente"); return; }
         try {
-            int customerId = (int) tableModel.getValueAt(selectedRow, 0);
-            Customer customer = controller.getCustomerById(customerId);
-            
-            if (customer != null) {
-                openCustomerWindow(customer);
-            }
+            int id = (int) tableModel.getValueAt(row, 0);
+            openCustomerWindow(controller.getCustomerById(id));
         } catch (IOException e) {
-            showError("No se pudo recuperar la información detallada del cliente" + e.getMessage());
+            showError("Error al recuperar datos");
         }
     }
-    
-    //Elimina al cliente seleccionado
+
     private void deleteCustomer() {
-        int selectedRow = customerTable.getSelectedRow();
+        int row = customerTable.getSelectedRow();
+        if (row < 0) { showWarning("Seleccione un cliente"); return; }
         
-        if (selectedRow < 0) {
-            showWarning("Seleccione un cliente de la tabla");
-            return;
-        }
-        
-        int customerId = (int) tableModel.getValueAt(selectedRow, 0);
-        String customerName = (String) tableModel.getValueAt(selectedRow, 1);
-        
-        //Pregunta de confirmación
-        int answer = JOptionPane.showConfirmDialog(this,
-            "¿Está seguro de eliminar a " + customerName + "?",
-            "Confirmar eliminación",
-            JOptionPane.YES_NO_OPTION);
-        
-        if (answer == JOptionPane.YES_OPTION) {
+        int id = (int) tableModel.getValueAt(row, 0);
+        String name = (String) tableModel.getValueAt(row, 1);
+
+        int ans = JOptionPane.showConfirmDialog(this, "¿Eliminar a " + name + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (ans == JOptionPane.YES_OPTION) {
             try {
-                controller.deleteCustomer(customerId);
-                showInfo("Cliente eliminado correctamente");
-                loadAllCustomers(); //Refresca la tablaº    
+                controller.deleteCustomer(id);
+                loadAllCustomers();
+                showInfo("Cliente eliminado");
             } catch (Exception e) {
-                showError("Error al eliminar el cliente" + e.getMessage());
+                showError("Error al eliminar");
             }
         }
     }
-    
-    //Ventana de clientes
+
     private void openCustomerWindow(Customer customer) {
-        try {
-            CustomerWindow window;
-            
-            if (customer == null) {
-                window = new CustomerWindow();
-            } else {
-                window = new CustomerWindow(customer);
-            }
-            
-            //Añade la ventana al desktop
-            getDesktopPane().add(window);
+        CustomerWindow window = (customer == null) ? new CustomerWindow() : new CustomerWindow(customer);
+        JDesktopPane desktop = getDesktopPane();
+        if (desktop != null) {
+            desktop.add(window);
+            window.setVisible(true);
             window.toFront();
-            
-            //Cuando la ventana se cierra la tabla se refresca
             window.addInternalFrameListener(new InternalFrameAdapter() {
-                public void internalFrameClosed(InternalFrameEvent e) {
-                    loadAllCustomers();
-                }
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) { loadAllCustomers(); }
             });
-            
-        } catch (Exception e) {
-            showError("Error al abrir ventana de clientes" + e.getMessage());
         }
     }
+
 
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);

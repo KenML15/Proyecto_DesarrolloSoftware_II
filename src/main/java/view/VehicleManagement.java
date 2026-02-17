@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -294,31 +295,34 @@ public class VehicleManagement extends JInternalFrame{
     }
     
     //Abrir ventana de vehículo
-    private void openVehicleWindow(Vehicle vehicle) {
-        try {
-            VehicleWindow window;
-            
-            if (vehicle == null) {
-                window = new VehicleWindow();
-            } else {
-                window = new VehicleWindow(vehicle);
-            }
-            
-            getDesktopPane().add(window);
+   private void openVehicleWindow(Vehicle vehicle) {
+    try {
+        VehicleWindow window = (vehicle == null) ? new VehicleWindow() : new VehicleWindow(vehicle);
+        
+        // Obtenemos el desktop de forma segura
+        JDesktopPane desktop = getDesktopPane();
+        
+        if (desktop != null) {
+            desktop.add(window);
+            window.setVisible(true); // ¡IMPORTANTE!
             window.toFront();
+            window.setSelected(true);
             
-            //Cuando se cierre, actualizar tabla
             window.addInternalFrameListener(new InternalFrameAdapter() {
                 @Override
                 public void internalFrameClosed(InternalFrameEvent e) {
                     loadAllVehicles();
                 }
             });
-            
-        } catch (Exception e) {
-            showError("No se pudo abrir la pantalla de vehículos" + e.getMessage());
+        } else {
+            // Si el desktop es null, algo va mal con la jerarquía
+            System.err.println("Error: No se encontró el DesktopPane");
         }
+    } catch (Exception e) {
+        showError("No se pudo abrir la pantalla de registro: " + e.getMessage());
+        e.printStackTrace(); // Esto forzará que salga algo en consola si falla
     }
+}
     
     //Mostrar error
     private void showError(String message) {
