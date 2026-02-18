@@ -55,7 +55,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
 
    private void initComponents() {
     // 1. Configuración básica de la ventana
-    setTitle("Parking System Dashboard");
+    setTitle("Tablero del sistema de parqueos");
     setSize(900, 500);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLocationRelativeTo(null);
@@ -66,7 +66,7 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     headerPanel.setPreferredSize(new Dimension(900, 70));
     headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
 
-    lblTitle = new JLabel("PARKING SYSTEM");
+    lblTitle = new JLabel("Sistema de parqueos");
     lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
     lblTitle.setForeground(Color.WHITE);
 
@@ -82,9 +82,9 @@ public class RegistrationWindow extends JFrame implements ActionListener {
     JPanel contentPanel = new JPanel(new GridLayout(1, 3, 20, 0));
     contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 40, 50, 40));
 
-    btnCustomers = new JButton("CUSTOMER MANAGEMENT");
-    btnVehicles = new JButton("VEHICLE MANAGEMENT");
-    btnParking = new JButton("SYSTEM SETTINGS");
+    btnCustomers = new JButton("Gestión de clientes");
+    btnVehicles = new JButton("Gestión de vehículos");
+    btnParking = new JButton("Configuraciones del sistema");
 
     // Aplicar estilos
     styleActionCard(btnCustomers);
@@ -111,11 +111,11 @@ private void applyPermissions() {
 
     if (currentUser instanceof Administrator) {
         headerPanel.setBackground(new Color(192, 57, 43)); // Rojo
-        lblTitle.setText("ADMINISTRATOR: " + currentUser.getName().toUpperCase());
+        lblTitle.setText("ADMINISTRADOR: " + currentUser.getName().toUpperCase());
         btnParking.setVisible(true);
     } else {
         headerPanel.setBackground(new Color(39, 174, 96)); // Verde
-        lblTitle.setText("OPERATOR: " + currentUser.getName().toUpperCase());
+        lblTitle.setText("OPERADOR: " + currentUser.getName().toUpperCase());
         btnParking.setVisible(false); // El Clerk no ve configuración
     }
 }

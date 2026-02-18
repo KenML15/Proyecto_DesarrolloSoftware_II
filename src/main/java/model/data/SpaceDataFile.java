@@ -66,7 +66,6 @@ public class SpaceDataFile {
         }
     }
 
-    
     private String formatSpace(Space space) {
         int typeId = getVehicleTypeId(space);
         return String.join(DELIMITER,
@@ -145,7 +144,6 @@ public class SpaceDataFile {
     }
     
     private int countLines(String fileName) throws IOException {
-
         int count = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             while (reader.readLine() != null) {
@@ -154,8 +152,7 @@ public class SpaceDataFile {
         }
         return count;
     }
-
-    
+  
     private void addAllSpacesFromReader(Space[] spaces, BufferedReader reader) throws IOException {
         String line;
         int index = 0;

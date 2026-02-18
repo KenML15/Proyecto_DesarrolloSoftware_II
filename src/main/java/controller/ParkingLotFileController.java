@@ -32,58 +32,58 @@ public class ParkingLotFileController {
     }
 
     //Parqueos
-   public void registerParkingLot(String name, Space[] spacesArray) throws IOException {
-    // 1. Validar que el nombre no exista
-    if (parkingLotData.existsByName(name)) {
-        throw new IOException("El nombre del parqueo ya existe.");
+    public void registerParkingLot(String name, Space[] spacesArray) throws IOException {
+        //Validar que el nombre no exista
+        if (parkingLotData.existsByName(name)) {
+            throw new IOException("El nombre del parqueo ya existe.");
+        }
+
+        int nextLotId = parkingLotData.getNextId();
+        ParkingLot newLot = new ParkingLot();
+        newLot.setId(nextLotId);
+        newLot.setName(name);
+        newLot.setNumberOfSpaces(spacesArray.length);
+
+        //Crear los espacios con IDs únicos para que no haya problemas al repetirlo
+        Space[] finalSpaces = new Space[spacesArray.length];
+        for (int i = 0; i < spacesArray.length; i++) {
+            Space s = new Space();
+            s.setId((nextLotId * 100) + (i + 1)); //Genera 101, 102, 201, etc.
+            s.setSpaceTaken(false);
+            finalSpaces[i] = s;
+
+            //Guarda los espacios en el archivo de espacios
+            spaceData.insertSpace(s);
+        }
+
+        newLot.setSpaces(finalSpaces);
+        newLot.setVehicles(new ArrayList<>());
+
+        //Guardar el parqueo en el archivo de parqueos
+        parkingLotData.insertParkingLot(newLot);
     }
 
-    int nextLotId = parkingLotData.getNextId();
-    ParkingLot newLot = new ParkingLot();
-    newLot.setId(nextLotId);
-    newLot.setName(name);
-    newLot.setNumberOfSpaces(spacesArray.length);
-    
-    // 3. Crear los espacios con IDs ÚNICOS (Ej: Parqueo 1, Espacio 1 -> ID 101)
-    Space[] finalSpaces = new Space[spacesArray.length];
-    for (int i = 0; i < spacesArray.length; i++) {
-        Space s = new Space();
-        s.setId((nextLotId * 100) + (i + 1)); // Genera 101, 102, 201, etc.
-        s.setSpaceTaken(false);
-        finalSpaces[i] = s;
-        
-        // GUARDAR CADA ESPACIO EN EL ARCHIVO DE ESPACIOS
-        spaceData.insertSpace(s); 
-    }
-    
-    newLot.setSpaces(finalSpaces);
-    newLot.setVehicles(new ArrayList<>());
-
-    // 4. Guardar el parqueo en el archivo de parqueos
-    parkingLotData.insertParkingLot(newLot);
-}
-    
     //Construye el objeto, pero no guarda en el archivoo
-   private ParkingLot createParkingLot(String name, Space[] spaces) throws IOException {
-    ParkingLot parkingLot = new ParkingLot();
-    parkingLot.setId(getNextId());
-    parkingLot.setName(name);
-    parkingLot.setNumberOfSpaces(spaces.length);
-    
-    for(int i = 0; i < spaces.length; i++){
-        Space space = new Space();
-        // Genera un ID único combinando el ID del parqueo y el índice
-        space.setId((parkingLot.getId() * 100) + (i + 1));
-        space.setSpaceTaken(false);
-        spaces[i] = space;
+    private ParkingLot createParkingLot(String name, Space[] spaces) throws IOException {
+        ParkingLot parkingLot = new ParkingLot();
+        parkingLot.setId(getNextId());
+        parkingLot.setName(name);
+        parkingLot.setNumberOfSpaces(spaces.length);
+
+        for (int i = 0; i < spaces.length; i++) {
+            Space space = new Space();
+            //Genera un ID único combinando el ID del parqueo y el índice
+            space.setId((parkingLot.getId() * 100) + (i + 1));
+            space.setSpaceTaken(false);
+            spaces[i] = space;
+        }
+        parkingLot.setSpaces(spaces);
+        parkingLot.setVehicles(new ArrayList<>());
+
+        return parkingLot;
     }
-    parkingLot.setSpaces(spaces);
-    parkingLot.setVehicles(new ArrayList<>());
-    
-    return parkingLot;
-}
-    
-        private void validateParkingLotName(String name) {
+
+    private void validateParkingLotName(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Nombre requerido");
         }
@@ -94,7 +94,7 @@ public class ParkingLotFileController {
             throw new IllegalArgumentException("Espacios requeridos");
         }
     }
-    
+
     //Asignaciones
     private void saveSpaces(Space[] spaces) throws IOException {
         for (Space space : spaces) {
@@ -106,13 +106,13 @@ public class ParkingLotFileController {
 
         validateVehicle(vehicle);
         validateParkingLot(parkingLot);
-        
+
         Space availableSpace = findAvailableSpace(vehicle, parkingLot);
         availableSpace.setSpaceTaken(true);
         vehicle.setSpace(availableSpace);
-        
+
         parkingLot.getVehicles().add(vehicle);
-        
+
         spaceData.updateSpace(availableSpace);
         parkingLotData.updateParkingLot(parkingLot);
         return availableSpace.getId();
@@ -138,11 +138,11 @@ public class ParkingLotFileController {
 
     public Space findAvailableSpace(Vehicle vehicle, ParkingLot parkingLot) {
         boolean needsDisabled = hasDisabledCustomer(vehicle);
-        
+
         for (Space space : parkingLot.getSpaces()) {
             if (!space.isSpaceTaken()
-                && hasSameType(space, vehicle)
-                && space.isDisabilityAdaptation() == needsDisabled) {
+                    && hasSameType(space, vehicle)
+                    && space.isDisabilityAdaptation() == needsDisabled) {
                 return space;
             }
         }
@@ -161,9 +161,9 @@ public class ParkingLotFileController {
 
         throw new IllegalStateException("No hay espacios disponibles");
     }
-    
-        private boolean hasSameType(Space space, Vehicle vehicle) {
-        if (space.getVehicleType() == null){
+
+    private boolean hasSameType(Space space, Vehicle vehicle) {
+        if (space.getVehicleType() == null) {
             return true;
         }
         if (vehicle.getVehicleType() == null) {
@@ -173,10 +173,10 @@ public class ParkingLotFileController {
     }
 
     private boolean hasDisabledCustomer(Vehicle vehicle) {
-        if (vehicle.getCustomer() == null){
+        if (vehicle.getCustomer() == null) {
             return false;
         }
-        
+
         for (Customer customer : vehicle.getCustomer()) {
             if (customer.isDisabilityPresented()) {
                 return true;
@@ -184,7 +184,7 @@ public class ParkingLotFileController {
         }
         return false;
     }
-    
+
     public void updateParkingLot(ParkingLot parkingLot) {
         try {
             parkingLotData.updateParkingLot(parkingLot);
@@ -192,12 +192,12 @@ public class ParkingLotFileController {
             throw new RuntimeException("Error actualizando: " + e.getMessage());
         }
     }
-    
-        public ParkingLot findParkingLotById(int id) throws IOException{
+
+    public ParkingLot findParkingLotById(int id) throws IOException {
         return parkingLotData.getParkingLotById(id);
     }
 
-    public ArrayList<ParkingLot> getAllParkingLots() throws IOException{
+    public ArrayList<ParkingLot> getAllParkingLots() throws IOException {
         return parkingLotData.getAllParkingLots();
     }
 
@@ -212,8 +212,8 @@ public class ParkingLotFileController {
             throw new RuntimeException("Error eliminando: " + e.getMessage());
         }
     }
-    
-        private void validateParkingLotForRemoval(ParkingLot parkingLot) {
+
+    private void validateParkingLotForRemoval(ParkingLot parkingLot) {
         if (parkingLot == null) {
             throw new IllegalArgumentException("Parqueo no encontrado");
         }
@@ -237,8 +237,8 @@ public class ParkingLotFileController {
         updateParkingLotWithSpaces(parkingLot, newSpaces);
         return "Espacios actualizados exitosamente";
     }
-    
-        private void validateParkingLotForUpdate(ParkingLot parkingLot) {
+
+    private void validateParkingLotForUpdate(ParkingLot parkingLot) {
         if (parkingLot == null) {
             throw new IllegalArgumentException("Parqueo no encontrado");
         }
@@ -252,8 +252,8 @@ public class ParkingLotFileController {
         parkingLot.setNumberOfSpaces(newSpaces.length);
         updateParkingLot(parkingLot);
     }
-    
-        private int getNextId() {
+
+    private int getNextId() {
         try {
             return parkingLotData.getNextId();
         } catch (IOException e) {
@@ -267,7 +267,7 @@ public class ParkingLotFileController {
             Space space = vehicle.getSpace();
             space.setSpaceTaken(false);
             spaceData.updateSpace(space);
-            
+
             //Remueve el vehículo de la lista del parqueo
             ParkingLot parkingLot = findParkingLotByVehicle(vehicle);
             if (parkingLot != null) {
@@ -276,56 +276,55 @@ public class ParkingLotFileController {
             }
         }
     }
-    
+
     //Método para buscar el parqueo según la placa del vehículo
-    public ParkingLot findParkingLotByVehicle(Vehicle vehicle) throws IOException{
-        for(ParkingLot parkingLot : getAllParkingLots()){
-            for(Vehicle vehicleToFound : parkingLot.getVehicles()){
-                if(vehicleToFound.getPlate().equals(vehicleToFound.getPlate())){
+    public ParkingLot findParkingLotByVehicle(Vehicle vehicle) throws IOException {
+        for (ParkingLot parkingLot : getAllParkingLots()) {
+            for (Vehicle vehicleToFound : parkingLot.getVehicles()) {
+                if (vehicleToFound.getPlate().equals(vehicleToFound.getPlate())) {
                     return parkingLot;
                 }
             }
         }
         return null;
     }
-    
+
     //Método para buscar vehículo por placa en el parqueo
     public Vehicle findVehicleInParkingLot(int parkingLotId, String plate) throws IOException {
         ParkingLot parkingLot = findParkingLotById(parkingLotId);
         if (parkingLot == null) {
             return null;
         }
-        
+
         for (Vehicle vehicle : parkingLot.getVehicles()) {
             if (vehicle.getPlate().equalsIgnoreCase(plate)) {
                 return vehicle;
             }
         }
-        
+
         return null;
     }
-    
+
     //Método para verificar disponibilidad de espacios por tipo de vehículo
     public int countAvailableSpacesByType(int parkingLotId, String vehicleTypeDescription) throws IOException {
         ParkingLot parkingLot = findParkingLotById(parkingLotId);
         if (parkingLot == null) {
             return 0;
         }
-        
+
         int count = 0;
         for (Space space : parkingLot.getSpaces()) {
             if (!space.isSpaceTaken()) {
                 //Si el espacio no tiene tipo asignado o coincide con el tipo buscado
-                if (space.getVehicleType() == null || 
-                    space.getVehicleType().getDescription().equalsIgnoreCase(vehicleTypeDescription)) {
+                if (space.getVehicleType() == null || space.getVehicleType().getDescription().equalsIgnoreCase(vehicleTypeDescription)) {
                     count++;
                 }
             }
         }
-        
+
         return count;
     }
-    
+
     //Estado
     public String getParkingLotStatusById(int parkingLotId) throws IOException {
         ParkingLot parkingLot = parkingLotData.getParkingLotById(parkingLotId);
@@ -336,7 +335,7 @@ public class ParkingLotFileController {
 
         return buildStatus(parkingLot);
     }
-    
+
     private String buildStatus(ParkingLot parkingLot) {
         Space[] spaces = parkingLot.getSpaces();
 
@@ -344,8 +343,12 @@ public class ParkingLotFileController {
         int disability = 0;
 
         for (Space space : spaces) {
-            if (space.isSpaceTaken()) occupied++;
-            if (space.isDisabilityAdaptation()) disability++;
+            if (space.isSpaceTaken()) {
+                occupied++;
+            }
+            if (space.isDisabilityAdaptation()) {
+                disability++;
+            }
         }
 
         return """
