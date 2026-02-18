@@ -6,7 +6,9 @@ package view;
 
 import controller.FeeController;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
@@ -27,68 +29,68 @@ import org.jdom2.JDOMException;
  *
  * @author 50687
  */
-public class FeeManagement extends JInternalFrame{
+public class FeeManagement extends BaseInternalFrame {
 
     private JTable feeTable;
     private DefaultTableModel tableModel;
     private JButton btnAdd, btnEdit, btnDelete, btnRefresh;
     private JComboBox<String> vehicleTypeCombo;
     private FeeController feeController;
-    
+
     private final String[] COLUMNS = {"Tipo de Vehículo", "Media Hora", "Hora", "Día", "Semana", "Mes", "Año"};
 
     public FeeManagement() {
-        super("Gestión de Tarifas", true, true, true, true);
+        super("GESTIÓN DE TARIFAS"); // Título para la barra superior azul
         init();
         createUI();
         loadFees();
     }
-    
+
     private void init() {
         try {
             feeController = new FeeController();
-        } catch (JDOMException e) {
-            JOptionPane.showMessageDialog(this, "El archivo tiene un formato inválido" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo acceder al archivo" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            dispose();
+        } catch (JDOMException | IOException e) {
+            showError("Error al inicializar el controlador de tarifas: " + e.getMessage());
+            if (e instanceof IOException) {
+                dispose();
+            }
         }
     }
-    
+
     private void createUI() {
-        setSize(900, 500);
-        setLocation(100, 100);
-        
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        mainPanel.add(createFilterPanel(), BorderLayout.NORTH);
-        mainPanel.add(createTablePanel(), BorderLayout.CENTER);
-        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
-        
-        setContentPane(mainPanel);
+        setSize(1000, 600); // Un poco más de ancho para que las columnas de dinero no se amontonen
+        setLayout(new BorderLayout(0, 0));
+
+        // Panel Central que contiene Filtros y Tabla
+        JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
+        centerPanel.setBackground(backgroundColor);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        centerPanel.add(createFilterPanel(), BorderLayout.NORTH);
+        centerPanel.add(createTablePanel(), BorderLayout.CENTER);
+
+        add(centerPanel, BorderLayout.CENTER);
+        add(createButtonPanel(), BorderLayout.SOUTH);
     }
-    
+
     private JPanel createFilterPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        
-        panel.add(new JLabel("Tipo de Vehículo:"));
-        vehicleTypeCombo = new JComboBox<>();
-        vehicleTypeCombo.addItem("Todos");
-        vehicleTypeCombo.addItem("Motocicleta");
-        vehicleTypeCombo.addItem("Liviano");
-        vehicleTypeCombo.addItem("Pesado");
-        vehicleTypeCombo.addItem("Bicicleta");
-        vehicleTypeCombo.addItem("Otro");
-        
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        panel.setBackground(backgroundColor);
+
+        JLabel lblFilter = new JLabel("Filtrar por Vehículo:");
+        lblFilter.setFont(labelFont);
+        panel.add(lblFilter);
+
+        vehicleTypeCombo = new JComboBox<>(new String[]{"Todos", "Motocicleta", "Liviano", "Pesado", "Bicicleta", "Otro"});
+        // Estilo manual para el combo ya que no suele estar en BaseInternalFrame
+        vehicleTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        vehicleTypeCombo.setBackground(Color.WHITE);
         vehicleTypeCombo.addActionListener(e -> filterFees());
         panel.add(vehicleTypeCombo);
-        
+
         return panel;
     }
-    
+
     private JScrollPane createTablePanel() {
         tableModel = new DefaultTableModel(COLUMNS, 0) {
             @Override
@@ -96,34 +98,43 @@ public class FeeManagement extends JInternalFrame{
                 return false;
             }
         };
-        
+
         feeTable = new JTable(tableModel);
-        feeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
-        return new JScrollPane(feeTable);
+        styleTable(feeTable); // Método de BaseInternalFrame
+
+        // Ajuste de ancho de columnas (El tipo de vehículo necesita menos espacio que los precios)
+        feeTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+
+        JScrollPane scroll = new JScrollPane(feeTable);
+        scroll.setBorder(BorderFactory.createLineBorder(fieldBorderColor));
+        return scroll;
     }
-    
+
     private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
-        
-        btnAdd = new JButton("Agregar Tarifa");
-        btnEdit = new JButton("Editar Tarifa");
-        btnDelete = new JButton("Eliminar Tarifa");
-        btnRefresh = new JButton("Actualizar");
-        
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
+        panel.setBackground(backgroundColor);
+
+        btnAdd = createStyledButton("AGREGAR TARIFA", new Color(39, 174, 96), panel);
+        btnEdit = createStyledButton("EDITAR SELECCIÓN", new Color(230, 126, 34), panel);
+        btnDelete = createStyledButton("ELIMINAR TARIFA", new Color(192, 57, 43), panel);
+        btnRefresh = createStyledButton("ACTUALIZAR", primaryColor, panel);
+
         btnAdd.addActionListener(e -> openFeeWindow(null));
         btnEdit.addActionListener(e -> editSelectedFee());
         btnDelete.addActionListener(e -> deleteSelectedFee());
         btnRefresh.addActionListener(e -> loadFees());
-        
-        panel.add(btnAdd);
-        panel.add(btnEdit);
-        panel.add(btnDelete);
-        panel.add(btnRefresh);
-        
+
         return panel;
     }
-    
+
+    private JButton createStyledButton(String text, Color bg, JPanel panel) {
+        JButton btn = new JButton(text);
+        styleButton(btn); // Método de BaseInternalFrame
+        btn.setBackground(bg);
+        panel.add(btn);
+        return btn;
+    }
+
     private void loadFees() {
         try {
             ArrayList<Fee> fees = feeController.getAllFees();
@@ -133,10 +144,10 @@ public class FeeManagement extends JInternalFrame{
             JOptionPane.showMessageDialog(this, "Error al cargar las tarifas" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void updateTable(ArrayList<Fee> fees) {
         tableModel.setRowCount(0);
-        
+
         for (Fee fee : fees) {
             Object[] row = {
                 fee.getVehicleType(),
@@ -150,13 +161,13 @@ public class FeeManagement extends JInternalFrame{
             tableModel.addRow(row);
         }
     }
-    
+
     private void filterFees() {
         try {
             String selectedType = (String) vehicleTypeCombo.getSelectedItem();
             ArrayList<Fee> allFees = feeController.getAllFees();
             ArrayList<Fee> filteredFees = new ArrayList<>();
-            
+
             if ("Todos".equals(selectedType)) {
                 filteredFees = allFees;
             } else {
@@ -166,13 +177,13 @@ public class FeeManagement extends JInternalFrame{
                     }
                 }
             }
-            
+
             updateTable(filteredFees);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error al filtrar las tarifas" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void openFeeWindow(Fee fee) {
         FeeWindow window = new FeeWindow(fee, feeController);
         window.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
@@ -181,19 +192,19 @@ public class FeeManagement extends JInternalFrame{
                 loadFees();
             }
         });
-        
+
         getDesktopPane().add(window);
         window.setVisible(true);
         window.toFront();
     }
-    
+
     private void editSelectedFee() {
         int row = feeTable.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione una tarifa para editar", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         try {
             String vehicleType = (String) tableModel.getValueAt(row, 0);
             Fee fee = feeController.getFeeByVehicleType(vehicleType);
@@ -204,30 +215,39 @@ public class FeeManagement extends JInternalFrame{
             JOptionPane.showMessageDialog(this, "No se pudo encontrar la información del tipo de vehículo en el archivo" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void deleteSelectedFee() {
         int row = feeTable.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione una tarifa para eliminar", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            showWarning("Seleccione una tarifa de la tabla para eliminarla.");
             return;
         }
-        
-        try {
-            String vehicleType = (String) tableModel.getValueAt(row, 0);
-            
-            int confirm = JOptionPane.showConfirmDialog(this,
-                "¿Eliminar tarifa para " + vehicleType + "?",
-                "Confirmar Eliminación",
-                JOptionPane.YES_NO_OPTION);
-            
-            if (confirm == JOptionPane.YES_OPTION) {
+
+        String vehicleType = (String) tableModel.getValueAt(row, 0);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de eliminar permanentemente la tarifa para: " + vehicleType + "?",
+                "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
                 feeController.deleteFee(vehicleType);
-                JOptionPane.showMessageDialog(this, "Tarifa eliminada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                showSuccess("La tarifa se ha eliminado correctamente.");
                 loadFees();
+            } catch (IOException e) {
+                showError("Error al intentar eliminar la tarifa: " + e.getMessage());
             }
-            
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo eliminar la tarifa del sistema" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void showError(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private void showWarning(String seleccione_una_tarifa_de_la_tabla_para_el) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private void showSuccess(String la_tarifa_se_ha_eliminado_correctamente) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

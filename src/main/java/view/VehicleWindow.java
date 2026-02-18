@@ -9,10 +9,15 @@ import controller.ParkingLotFileController;
 import controller.VehicleFileController;
 import controller.VehicleTypeController;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
+import java.awt.Insets;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,9 +25,12 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -42,7 +50,7 @@ import org.jdom2.JDOMException;
  * @author 50687
  * @author user
  */
-public class VehicleWindow extends JInternalFrame {
+public class VehicleWindow extends BaseInternalFrame {
 
     //Controladores
     private VehicleFileController vehicleController;
@@ -66,30 +74,23 @@ public class VehicleWindow extends JInternalFrame {
 
     //Constructor para nuevo vehículo
     public VehicleWindow() {
-        super("Registro de Vehículo", false, true, false, true);
+        // Pasamos el título directamente al constructor de BaseInternalFrame
+        super("REGISTRO DE VEHÍCULO");
         this.vehicleToEdit = null;
+        this.selectedCustomers = new ArrayList<>(); // Inicializar lista vacía
         initWindow();
         setVisible(true);
-
     }
 
-    //Constructor para editar vehículo
+    // Constructor para editar vehículo
     public VehicleWindow(Vehicle vehicle) {
-        super("Editar Vehículo", true, true, true, true);
+        // Título dinámico para edición
+        super("EDITAR VEHÍCULO");
         this.vehicleToEdit = vehicle;
+        // Obtenemos los clientes ya asociados al vehículo
         this.selectedCustomers = vehicle.getCustomer();
         initWindow();
-    }
-
-    //Inicializar ventana
-    private void initWindow() {
-        initControllers();
-        initData();
-        createUI();
-        loadData();
-        if (isEditMode()) {
-            loadVehicleData();
-        }
+        setVisible(true);
     }
 
     //Inicializar controladores
@@ -119,108 +120,170 @@ public class VehicleWindow extends JInternalFrame {
 
     //Crear interfaz
     private void createUI() {
-        setSize(550, 550);
-        setLocation(100, 50);
+        setSize(600, 700); // Un poco más grande para que no se vea apretado
+        setLayout(new BorderLayout());
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // --- PANEL DE TÍTULO ---
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(primaryColor);
+        headerPanel.setPreferredSize(new Dimension(600, 50));
+        JLabel lblTitle = new JLabel(isEditMode() ? "EDITAR VEHÍCULO" : "REGISTRO DE VEHÍCULO");
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(titleFont);
+        headerPanel.add(lblTitle);
 
-        mainPanel.add(createVehiclePanel(), BorderLayout.NORTH);
-        mainPanel.add(createCustomerPanel(), BorderLayout.CENTER);
-        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
+        // --- CONTENEDOR PRINCIPAL CON SCROLL ---
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.setBackground(backgroundColor);
+        container.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        setContentPane(mainPanel);
+        container.add(createVehiclePanel());
+        container.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio entre paneles
+        container.add(createCustomerPanel());
+
+        JScrollPane scroll = new JScrollPane(container);
+        scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        add(headerPanel, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
+        add(createButtonPanel(), BorderLayout.SOUTH);
     }
 
-    //Panel de datos del vehículo
+    private void initWindow() {
+        initControllers();
+        // Nota: initData() ya no es estrictamente necesario si inicializas 
+        // selectedCustomers en los constructores como puse arriba, 
+        // pero puedes mantenerlo para los otros ArrayLists (allCustomers, etc.)
+        initData();
+        createUI();
+        loadData();
+
+        if (isEditMode()) {
+            loadVehicleData();
+        }
+    }
+    
+    private void loadData() {
+        // 1. Llenar el combo de Clientes disponibles
+        loadCustomers();
+        
+        // 2. Llenar el combo de Tipos de Vehículo (Automóvil, Moto, etc.)
+        loadVehicleTypes();
+        
+        // 3. Llenar el combo de Parqueos (Norte, Sur, etc.)
+        loadParkingLots();
+        
+        // 4. Refrescar la JList visual de clientes que ya están "a bordo"
+        updateCustomerList();
+    }
+
     private JPanel createVehiclePanel() {
-        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("Datos del Vehículo"));
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(fieldBorderColor), " DATOS DEL VEHÍCULO ", 0, 0, labelFont, primaryColor),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
 
-        panel.add(new JLabel("Placa*:"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Inicializar y Estilizar campos
         plateField = new JTextField();
-        panel.add(plateField);
-
-        panel.add(new JLabel("Color:"));
+        styleTextField(plateField);
         colorField = new JTextField();
-        panel.add(colorField);
-
-        panel.add(new JLabel("Marca:"));
+        styleTextField(colorField);
         brandField = new JTextField();
-        panel.add(brandField);
-
-        panel.add(new JLabel("Modelo:"));
+        styleTextField(brandField);
         modelField = new JTextField();
-        panel.add(modelField);
+        styleTextField(modelField);
 
-        panel.add(new JLabel("Tipo*:"));
+        // Añadir al GridBag
+        addFormRow(panel, "Placa*:", plateField, gbc, 0);
+        addFormRow(panel, "Color:", colorField, gbc, 1);
+        addFormRow(panel, "Marca:", brandField, gbc, 2);
+        addFormRow(panel, "Modelo:", modelField, gbc, 3);
+
         vehicleTypeCombo = new JComboBox<>();
-        panel.add(vehicleTypeCombo);
-
-        panel.add(new JLabel("Parqueo*:"));
         parkingLotCombo = new JComboBox<>();
-        panel.add(parkingLotCombo);
+        addFormRow(panel, "Tipo*:", vehicleTypeCombo, gbc, 4);
+        addFormRow(panel, "Parqueo*:", parkingLotCombo, gbc, 5);
 
         return panel;
     }
 
-    //Panel de clientes
     private JPanel createCustomerPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("Clientes a Bordo*"));
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(fieldBorderColor), " CLIENTES A BORDO ", 0, 0, labelFont, primaryColor),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
 
-        //Panel superior para agregar clientes
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topPanel.add(new JLabel("Cliente:"));
+        // Selector superior
+        JPanel top = new JPanel(new BorderLayout(10, 0));
+        top.setOpaque(false);
         customerCombo = new JComboBox<>();
-        customerCombo.setPreferredSize(new Dimension(250, 25));
-        topPanel.add(customerCombo);
-
-        JButton addButton = new JButton("Agregar");
+        JButton addButton = new JButton("AGREGAR");
+        styleButton(addButton);
         addButton.addActionListener(e -> addCustomer());
-        topPanel.add(addButton);
 
-        //Lista de clientes seleccionados
+        top.add(new JLabel("Seleccionar Cliente:"), BorderLayout.NORTH);
+        top.add(customerCombo, BorderLayout.CENTER);
+        top.add(addButton, BorderLayout.EAST);
+
+        // Lista central
         customerListModel = new DefaultListModel<>();
         customerList = new JList<>(customerListModel);
-        JScrollPane scrollPane = new JScrollPane(customerList);
-        scrollPane.setPreferredSize(new Dimension(400, 100));
+        customerList.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        JScrollPane listScroll = new JScrollPane(customerList);
+        listScroll.setPreferredSize(new Dimension(0, 120));
 
-        //Panel inferior para remover
-        JPanel bottomPanel = new JPanel(new FlowLayout());
-        JButton removeButton = new JButton("Remover");
+        // Botón remover
+        JButton removeButton = new JButton("REMOVER SELECCIONADO");
+        styleButton(removeButton);
+        removeButton.setBackground(new Color(192, 57, 43)); // Rojo
         removeButton.addActionListener(e -> removeCustomer());
-        bottomPanel.add(removeButton);
 
-        panel.add(topPanel, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        panel.add(bottomPanel, BorderLayout.SOUTH);
+        panel.add(top, BorderLayout.NORTH);
+        panel.add(listScroll, BorderLayout.CENTER);
+        panel.add(removeButton, BorderLayout.SOUTH);
 
         return panel;
     }
 
-    //Panel de botones
     private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 15));
+        panel.setBackground(backgroundColor);
 
-        JButton saveButton = new JButton("Guardar");
+        JButton saveButton = new JButton("GUARDAR VEHÍCULO");
+        JButton cancelButton = new JButton("CANCELAR");
+
+        styleButton(saveButton);
+        styleButton(cancelButton);
+        cancelButton.setBackground(new Color(127, 140, 141)); // Gris
+
         saveButton.addActionListener(e -> saveVehicle());
-
-        JButton cancelButton = new JButton("Cancelar");
         cancelButton.addActionListener(e -> dispose());
 
-        panel.add(saveButton);
         panel.add(cancelButton);
+        panel.add(saveButton);
 
         return panel;
     }
 
-    //Cargar datos
-    private void loadData() {
-        loadCustomers();
-        loadVehicleTypes();
-        loadParkingLots();
-        updateCustomerList();
+    // Método auxiliar para el GridBagLayout
+    private void addFormRow(JPanel p, String text, JComponent comp, GridBagConstraints gbc, int row) {
+        gbc.gridy = row;
+        gbc.gridx = 0;
+        gbc.weightx = 0.3;
+        p.add(new JLabel(text), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        p.add(comp, gbc);
     }
 
     //Cargar clientes

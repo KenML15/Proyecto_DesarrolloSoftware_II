@@ -5,12 +5,15 @@
 package view;
 
 import controller.ParkingLotFileController;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
@@ -28,19 +31,17 @@ import org.jdom2.JDOMException;
  *
  * @author 50687
  */
-public class ParkingLotManagement extends JInternalFrame {
+public class ParkingLotManagement extends BaseInternalFrame {
 
     private JButton buttonDelete, buttonConfigure, buttonStatus, buttonExit;
     private JPanel panelParkingLots;
     private JTable tableParkingLots;
     private DefaultTableModel modelDataTable;
-    
     private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Espacios Ocupados"};
-
     private ParkingLotFileController controller;
 
     public ParkingLotManagement() {
-        super("Gestión de Parqueos", false, true, false, true);
+        super("GESTIÓN DE PARQUEOS"); // Título para la barra superior
         initializeController();
         initializeComponents();
         loadParkingLots();
@@ -57,57 +58,52 @@ public class ParkingLotManagement extends JInternalFrame {
     }
 
     private void initializeComponents() {
-        setVisible(true);
-        setSize(750, 500);
-        setLocation(230, 50);
-        setResizable(false);
+        setSize(800, 550);
+        setLocation(150, 50);
+        setLayout(new BorderLayout(0, 0));
 
-        panelParkingLots = new JPanel();
-        panelParkingLots.setLayout(null);
-        panelParkingLots.setBackground(Color.WHITE);
-        panelParkingLots.setVisible(true);
-        add(panelParkingLots);
+        // Panel Central para la Tabla
+        JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
+        centerPanel.setBackground(backgroundColor);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        createTable();
-        createButtons();
-    }
-
-    private void createTable() {
         tableParkingLots = new JTable();
-        tableParkingLots.setSize(400, 1000);
-        tableParkingLots.setLocation(95, 300);
-        panelParkingLots.add(tableParkingLots);
+        styleTable(tableParkingLots); // Método de BaseInternalFrame
 
-        JScrollPane scrollBar = new JScrollPane(tableParkingLots);
-        scrollBar.setBounds(25, 75, 700, 249);
-        panelParkingLots.add(scrollBar);
+        JScrollPane scrollPane = new JScrollPane(tableParkingLots);
+        scrollPane.setBorder(BorderFactory.createLineBorder(fieldBorderColor));
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Panel de Botones Inferior
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        buttonPanel.setBackground(backgroundColor);
+
+        createButtons(buttonPanel);
+
+        add(centerPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void createButtons() {
-        buttonDelete = createButton("Eliminar", 50);
-        buttonConfigure = createButton("Configurar", 200);
-        buttonStatus = createButton("Estado", 350);
-        
-        //Botón para registrar la salida de los vehículos
-        JButton buttonExit = new JButton("Registrar Salida");
-        buttonExit.setBounds(500, 350, 120, 30);
-        buttonExit.setBackground(new Color(255, 200, 200)); // Color suave
-        buttonExit.addActionListener(e -> openVehicleExitWindow());
-        panelParkingLots.add(buttonExit);
+    private void createButtons(JPanel panel) {
+        buttonDelete = createStyledButton("ELIMINAR", new Color(192, 57, 43), panel);
+        buttonConfigure = createStyledButton("CONFIGURAR", new Color(39, 174, 96), panel);
+        buttonStatus = createStyledButton("ESTADO", primaryColor, panel);
+        buttonExit = createStyledButton("REGISTRAR SALIDA", new Color(230, 126, 34), panel);
 
         buttonDelete.addActionListener(e -> deleteParkingLot());
         buttonConfigure.addActionListener(e -> configureSpaces());
         buttonStatus.addActionListener(e -> showParkingLotStatus());
+        buttonExit.addActionListener(e -> openVehicleExitWindow());
+    }
 
+    private JButton createStyledButton(String text, Color bg, JPanel panel) {
+        JButton btn = new JButton(text);
+        styleButton(btn); // Método de BaseInternalFrame
+        btn.setBackground(bg);
+        panel.add(btn);
+        return btn;
     }
-    
-    private JButton createButton(String text, int x) {
-        JButton button = new JButton(text);
-        button.setBounds(x, 350, 120, 30);
-        panelParkingLots.add(button);
-        return button;
-    }
-    
+
     private void openVehicleExitWindow() {
         int selectedRow = tableParkingLots.getSelectedRow();
 
@@ -160,7 +156,7 @@ public class ParkingLotManagement extends JInternalFrame {
             showError("Error al cargar los parqueos" + e.getMessage());
         }
     }
-    
+
     private int countOccupiedSpaces(ParkingLot parkingLot) {
         int count = 0;
         if (parkingLot.getSpaces() != null) {
@@ -194,22 +190,28 @@ public class ParkingLotManagement extends JInternalFrame {
         }
         return Integer.parseInt(modelDataTable.getValueAt(row, 0).toString());
     }
-    
+
     private void deleteParkingLot() {
         try {
             int id = getSelectedParkingLotId();
+
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "¿Eliminar el parqueo?", "Confirmar",
-                    JOptionPane.YES_NO_OPTION);
+                    "¿Está seguro de eliminar el parqueo? Esta acción no se puede deshacer.",
+                    "Confirmar Eliminación",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
                 controller.removeParkingLot(id);
                 loadParkingLots();
-                showSuccess("Parqueo eliminado");
+                showSuccess("Parqueo eliminado exitosamente.");
             }
 
-        } catch (HeadlessException e) {
-            showError("Error al procesar la eliminación del parqueo" + e.getMessage());
+        } catch (IllegalStateException ex) {
+
+            showError("No se puede eliminar: " + ex.getMessage());
+        } catch (Exception e) {
+
+            showError("Ocurrió un error inesperado: " + e.getMessage());
         }
     }
 
@@ -222,7 +224,7 @@ public class ParkingLotManagement extends JInternalFrame {
                 showError("No se puede configurar con vehículos estacionados");
                 return;
             }
-            
+
             SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, controller);
             getDesktopPane().add(window);
 
@@ -248,7 +250,7 @@ public class ParkingLotManagement extends JInternalFrame {
         JOptionPane.showMessageDialog(this, message, "Error",
                 JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private void showWarning(String message) {
         JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }

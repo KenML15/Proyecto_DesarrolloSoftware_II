@@ -7,7 +7,9 @@ package view;
 import controller.ParkingLotFileController;
 import controller.VehicleFileController;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +31,7 @@ import org.jdom2.JDOMException;
  *
  * @author 50687
  */
-public class VehicleExitWindow extends JInternalFrame {
+public class VehicleExitWindow extends BaseInternalFrame {
 
     private VehicleFileController vehicleController;
     private ParkingLotFileController parkingLotController;
@@ -41,16 +43,17 @@ public class VehicleExitWindow extends JInternalFrame {
     private Vehicle currentVehicle;
     private ParkingLot selectedParkingLot;
 
-    public VehicleExitWindow(ParkingLot parkingLot){
-        super("Registrar salida de vehículo - " + parkingLot.getName(), true, true, true, true);
+    public VehicleExitWindow(ParkingLot parkingLot) {
+        super("REGISTRAR SALIDA - " + parkingLot.getName());
         this.selectedParkingLot = parkingLot;
         initControllers();
         initUI();
-        
         parkingLotLabel.setText(parkingLot.getName());
+        parkingLotLabel.setForeground(primaryColor); // Resaltar el nombre del parqueo
     }
+
     public VehicleExitWindow() {
-        super("Registrar Salida de Vehículo", true, true, true, true);
+        super("REGISTRAR SALIDA DE VEHÍCULO");
         initControllers();
         initUI();
     }
@@ -70,58 +73,81 @@ public class VehicleExitWindow extends JInternalFrame {
     }
 
     private void initUI() {
-        setSize(500, 350);
-        setLocation(200, 150);
+        setSize(550, 450); // Un poco más de espacio para la factura
+        setLayout(new BorderLayout(15, 15));
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // --- PANEL NORTE: BÚSQUEDA ---
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
+        searchPanel.setBackground(backgroundColor);
 
-        // Panel de búsqueda
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        searchPanel.add(new JLabel("Placa del Vehículo:"));
-        plateField = new JTextField(15);
+        JLabel lblPlate = new JLabel("Placa del Vehículo:");
+        lblPlate.setFont(labelFont);
+        searchPanel.add(lblPlate);
+
+        plateField = new JTextField(12);
+        styleTextField(plateField); // Método de BaseInternalFrame
         searchPanel.add(plateField);
-        searchButton = new JButton("Buscar");
+
+        searchButton = new JButton("BUSCAR");
+        styleButton(searchButton);
         searchButton.addActionListener(e -> searchVehicle());
         searchPanel.add(searchButton);
-        mainPanel.add(searchPanel, BorderLayout.NORTH);
 
-        // Panel de información
-        JPanel infoPanel = new JPanel(new GridLayout(4, 2, 10, 10));
-        infoPanel.setBorder(BorderFactory.createTitledBorder("Información del Vehículo"));
+        add(searchPanel, BorderLayout.NORTH);
 
-        infoPanel.add(new JLabel("Placa:"));
-        plateLabel = new JLabel("-");
-        infoPanel.add(plateLabel);
+        // --- PANEL CENTRAL: INFORMACIÓN ---
+        JPanel infoPanel = new JPanel(new GridLayout(4, 2, 10, 20));
+        infoPanel.setBackground(Color.WHITE);
+        infoPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(null, " DETALLES DE ESTANCIA ", 0, 0, labelFont, primaryColor),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
 
-        infoPanel.add(new JLabel("Parqueo:"));
-        parkingLotLabel = new JLabel("-");
-        infoPanel.add(parkingLotLabel);
+        // Estilizamos las etiquetas de datos
+        plateLabel = createDataLabel();
+        parkingLotLabel = createDataLabel();
+        clientsLabel = createDataLabel();
+        entryTimeLabel = createDataLabel();
 
-        infoPanel.add(new JLabel("Clientes a bordo:"));
-        clientsLabel = new JLabel("-");
-        infoPanel.add(clientsLabel);
+        addInfoRow(infoPanel, "Placa:", plateLabel);
+        addInfoRow(infoPanel, "Parqueo:", parkingLotLabel);
+        addInfoRow(infoPanel, "Clientes:", clientsLabel);
+        addInfoRow(infoPanel, "Hora de Entrada:", entryTimeLabel);
 
-        infoPanel.add(new JLabel("Hora de Entrada:"));
-        entryTimeLabel = new JLabel("-");
-        infoPanel.add(entryTimeLabel);
+        add(infoPanel, BorderLayout.CENTER);
 
-        mainPanel.add(infoPanel, BorderLayout.CENTER);
+        // --- PANEL SUR: ACCIONES ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
+        buttonPanel.setBackground(backgroundColor);
 
-        // Panel de botones
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        exitButton = new JButton("Registrar Salida y Facturar");
+        exitButton = new JButton("REGISTRAR SALIDA Y FACTURAR");
+        styleButton(exitButton);
+        exitButton.setBackground(new Color(39, 174, 96)); // Verde para éxito
         exitButton.setEnabled(false);
         exitButton.addActionListener(e -> registerExit());
 
-        cancelButton = new JButton("Cancelar");
+        cancelButton = new JButton("CANCELAR");
+        styleButton(cancelButton);
+        cancelButton.setBackground(new Color(127, 140, 141));
         cancelButton.addActionListener(e -> dispose());
 
         buttonPanel.add(exitButton);
         buttonPanel.add(cancelButton);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
 
-        setContentPane(mainPanel);
+    // Auxiliares para el diseño
+    private JLabel createDataLabel() {
+        JLabel label = new JLabel("-");
+        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        return label;
+    }
+
+    private void addInfoRow(JPanel panel, String text, JLabel valueLabel) {
+        JLabel title = new JLabel(text);
+        title.setFont(labelFont);
+        panel.add(title);
+        panel.add(valueLabel);
     }
 
     private void searchVehicle() {
@@ -132,20 +158,19 @@ public class VehicleExitWindow extends JInternalFrame {
         }
 
         try {
-            Vehicle vehicle = null;//vehicleController.getByPlate(plate);
+            Vehicle vehicle = null;
             if (selectedParkingLot != null) {
                 vehicle = parkingLotController.findVehicleInParkingLot(selectedParkingLot.getId(), plate);
-            }else{
+            } else {
                 vehicle = vehicleController.getByPlate(plate);
             }
 
-            if (vehicle == null){
+            if (vehicle == null) {
                 showError("No se encontró el vehículo en el parqueo seleccionado");
                 resetInfo();
                 return;
             }
-            
-            
+
             // Vehículo encontrado y activo
             currentVehicle = vehicle;
 
@@ -200,7 +225,7 @@ public class VehicleExitWindow extends JInternalFrame {
         if (currentVehicle == null) {
             return;
         }
-        
+
         //Por probar
 //        if (currentVehicle.getVehicleType() == null) {
 //            JOptionPane.showMessageDialog(this,
@@ -211,7 +236,6 @@ public class VehicleExitWindow extends JInternalFrame {
 //                    JOptionPane.ERROR_MESSAGE);
 //            return;
 //        }
-
         int confirm = JOptionPane.showConfirmDialog(this,
                 "¿Registrar salida del vehículo " + currentVehicle.getPlate() + "?",
                 "Confirmar Salida",
@@ -252,17 +276,17 @@ public class VehicleExitWindow extends JInternalFrame {
                 plateField.setText("");
 
             } catch (IOException e) {
-                showError( "Error al registrar la salida: " + e.getMessage());
+                showError("Error al registrar la salida: " + e.getMessage());
             } catch (IllegalStateException e) {
                 showError("Error: " + e.getMessage());
             }
         }
     }
-    
+
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private void showWarning(String message) {
         JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }

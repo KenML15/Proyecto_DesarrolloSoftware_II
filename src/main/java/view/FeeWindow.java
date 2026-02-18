@@ -6,7 +6,9 @@ package view;
 
 import controller.FeeController;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.IOException;
 import javax.swing.BorderFactory;
@@ -23,82 +25,88 @@ import model.entities.Fee;
  *
  * @author 50687
  */
-public class FeeWindow extends JInternalFrame{
+public class FeeWindow extends BaseInternalFrame {
 
     private JComboBox<String> vehicleTypeCombo;
     private JTextField txtHalfHour, txtHour, txtDay, txtWeek, txtMonth, txtYear;
     private JButton btnSave, btnCancel;
     private FeeController feeController;
     private Fee feeToEdit;
-    
+
     public FeeWindow(Fee fee, FeeController controller) {
-        super(fee == null ? "Nueva Tarifa" : "Editar Tarifa", true, true, true, true);
+        super(fee == null ? "NUEVA TARIFA" : "EDITAR TARIFA");
         this.feeToEdit = fee;
         this.feeController = controller;
         initUI();
         loadFeeData();
     }
-    
+
     private void initUI() {
-        setSize(450, 400);
-        setLocation(200, 150);
-        
-        JPanel mainPanel = new JPanel(new GridLayout(8, 2, 10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        //Tipo de vehículo
-        mainPanel.add(new JLabel("Tipo de Vehículo*:"));
-        vehicleTypeCombo = new JComboBox<>();
-        vehicleTypeCombo.addItem("-- Seleccione --");
-        vehicleTypeCombo.addItem("Motocicleta");
-        vehicleTypeCombo.addItem("Liviano");
-        vehicleTypeCombo.addItem("Pesado");
-        vehicleTypeCombo.addItem("Bicicleta");
-        vehicleTypeCombo.addItem("Otro");
-        mainPanel.add(vehicleTypeCombo);
-        
-        //Campos de tarifas
-        mainPanel.add(new JLabel("Media Hora (₡)*:"));
-        txtHalfHour = new JTextField();
-        mainPanel.add(txtHalfHour);
-        
-        mainPanel.add(new JLabel("Hora (₡)*:"));
-        txtHour = new JTextField();
-        mainPanel.add(txtHour);
-        
-        mainPanel.add(new JLabel("Día (₡)*:"));
-        txtDay = new JTextField();
-        mainPanel.add(txtDay);
-        
-        mainPanel.add(new JLabel("Semana (₡)*:"));
-        txtWeek = new JTextField();
-        mainPanel.add(txtWeek);
-        
-        mainPanel.add(new JLabel("Mes (₡)*:"));
-        txtMonth = new JTextField();
-        mainPanel.add(txtMonth);
-        
-        mainPanel.add(new JLabel("Año (₡)*:"));
-        txtYear = new JTextField();
-        mainPanel.add(txtYear);
-        
-        //Panel de botones
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        btnSave = new JButton("Guardar");
-        btnCancel = new JButton("Cancelar");
-        
+        setSize(500, 550);
+        setLayout(new BorderLayout());
+
+        // Panel de Formulario
+        JPanel formPanel = new JPanel(new GridLayout(7, 2, 15, 15));
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder(null, " DATOS DE TARIFARIO ", 0, 0, labelFont, primaryColor),
+                BorderFactory.createEmptyBorder(20, 30, 20, 30)
+        ));
+
+        // Tipo de vehículo
+        formPanel.add(createLabel("Tipo de Vehículo*:"));
+        vehicleTypeCombo = new JComboBox<>(new String[]{
+            "-- Seleccione --", "Motocicleta", "Liviano", "Pesado", "Bicicleta", "Otro"
+        });
+        vehicleTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        formPanel.add(vehicleTypeCombo);
+
+        // Creación y estilización de campos
+        txtHalfHour = createStyledField(formPanel, "Media Hora (₡)*:");
+        txtHour = createStyledField(formPanel, "Hora (₡)*:");
+        txtDay = createStyledField(formPanel, "Día (₡)*:");
+        txtWeek = createStyledField(formPanel, "Semana (₡)*:");
+        txtMonth = createStyledField(formPanel, "Mes (₡)*:");
+        txtYear = createStyledField(formPanel, "Año (₡)*:");
+
+        add(formPanel, BorderLayout.CENTER);
+
+        // Panel de botones
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
+        buttonPanel.setBackground(backgroundColor);
+
+        btnSave = new JButton("GUARDAR");
+        styleButton(btnSave);
         btnSave.addActionListener(e -> insertFee());
+
+        btnCancel = new JButton("CANCELAR");
+        styleButton(btnCancel);
+        btnCancel.setBackground(new Color(127, 140, 141));
         btnCancel.addActionListener(e -> dispose());
-        
+
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
-        
-        //Agregar al frame
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(mainPanel, BorderLayout.CENTER);
-        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
+
+ private JTextField createStyledField(JPanel panel, String labelText) {
+    // Aquí usamos createLabel para que procese el HTML del asterisco
+    panel.add(createLabel(labelText)); 
     
+    JTextField field = new JTextField();
+    styleTextField(field); // El método de estilo que ya tenías
+    panel.add(field);
+    return field;
+}
+
+private JLabel createLabel(String text) {
+    // Buscamos el * y le ponemos una etiqueta de color mediante HTML
+    String htmlText = "<html>" + text.replace("*", "<font color='red'>*</font>") + "</html>";
+    JLabel label = new JLabel(htmlText);
+    label.setFont(labelFont); // Usamos la fuente moderna de la aplicación
+    return label;
+}
+
     private void loadFeeData() {
         if (feeToEdit != null) {
             //Seleccionar tipo de vehículo
@@ -109,7 +117,7 @@ public class FeeWindow extends JInternalFrame{
                     break;
                 }
             }
-            
+
             txtHalfHour.setText(String.valueOf(feeToEdit.getHalfHourRate()));
             txtHour.setText(String.valueOf(feeToEdit.getHourlyRate()));
             txtDay.setText(String.valueOf(feeToEdit.getDailyRate()));
@@ -118,66 +126,66 @@ public class FeeWindow extends JInternalFrame{
             txtYear.setText(String.valueOf(feeToEdit.getAnnualRate()));
         }
     }
-    
+
     private void insertFee() {
+        if (!validateFields()) {
+            return;
+        }
+
         try {
-            validateFields();
             Fee fee = createFeeFromFields();
-            
+
             if (feeToEdit == null) {
                 feeController.insertFee(fee);
-                JOptionPane.showMessageDialog(this, "Tarifa creada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                showSuccess("Tarifa creada exitosamente.");
             } else {
                 feeController.updateFee(fee);
-                JOptionPane.showMessageDialog(this, "Tarifa actualizada exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                showSuccess("Tarifa actualizada exitosamente.");
             }
-            
             dispose();
-            
+
         } catch (IOException e) {
-            showError("Error al insertar o actualizar la tarifa" + e.getMessage());
+            showError("Error al procesar la tarifa: " + e.getMessage());
         }
     }
-    
-    private void validateFields() {
+
+    private boolean validateFields() {
         if (vehicleTypeCombo.getSelectedIndex() <= 0) {
-            showWarning("Seleccione un tipo de vehículo");
+            showWarning("Por favor, seleccione un tipo de vehículo.");
+            return false;
         }
-        
+
         try {
-            double halfHour = Double.parseDouble(txtHalfHour.getText().trim());
-            double hour = Double.parseDouble(txtHour.getText().trim());
-            double day = Double.parseDouble(txtDay.getText().trim());
-            double week = Double.parseDouble(txtWeek.getText().trim());
-            double month = Double.parseDouble(txtMonth.getText().trim());
-            double year = Double.parseDouble(txtYear.getText().trim());
-            
-            if (halfHour <= 0 || hour <= 0 || day <= 0 || week <= 0 || month <= 0 || year <= 0) {
-                showWarning("Todas las tarifas deben ser un valor mayor que cero");
+            // Validar que no estén vacíos y sean números
+            double fHalf = parse(txtHalfHour);
+            double fHour = parse(txtHour);
+            double fDay = parse(txtDay);
+            double fWeek = parse(txtWeek);
+            double fMonth = parse(txtMonth);
+            double fYear = parse(txtYear);
+
+            if (fHalf <= 0 || fHour <= 0 || fDay <= 0 || fWeek <= 0 || fMonth <= 0 || fYear <= 0) {
+                showWarning("Todos los montos deben ser mayores a cero.");
+                return false;
             }
-            
-            //Validar progresión lógica
-            if (hour < halfHour) {
-                showWarning("La tarifa por hora debe ser mayor o igual a media hora");
+
+            // Validación de progresión lógica
+            if (fHour < fHalf || fDay < fHour || fWeek < fDay || fMonth < fWeek || fYear < fMonth) {
+                showWarning("Error de progresión: Una tarifa de mayor tiempo no puede ser menor a la anterior.");
+                return false;
             }
-            if (day < hour) {
-                showWarning("La tarifa diaria debe ser mayor o igual a la horaria");
-            }
-            if (week < day) {
-                showWarning("La tarifa semanal debe ser mayor o igual a la diaria");
-            }
-            if (month < week) {
-                showWarning("La tarifa mensual debe ser mayor o igual a la semanal");
-            }
-            if (year < month) {
-                showWarning("La tarifa anual debe ser mayor o igual a la mensual");
-            }
-            
+
+            return true;
         } catch (NumberFormatException e) {
-            showError("¡Error! El monto de la tarifa debe ser mayor al anterior." + e.getMessage());
+            showWarning("Asegúrese de ingresar solo números válidos en las tarifas.");
+            return false;
         }
     }
-    
+
+    private double parse(JTextField field) {
+        return Double.parseDouble(field.getText().trim());
+    }
+
     private Fee createFeeFromFields() {
         String vehicleType = (String) vehicleTypeCombo.getSelectedItem();
         float halfHour = Float.parseFloat(txtHalfHour.getText().trim());
@@ -186,15 +194,19 @@ public class FeeWindow extends JInternalFrame{
         float week = Float.parseFloat(txtWeek.getText().trim());
         float month = Float.parseFloat(txtMonth.getText().trim());
         float year = Float.parseFloat(txtYear.getText().trim());
-        
+
         return new Fee(vehicleType, halfHour, hour, day, week, month, year);
     }
-    
+
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private void showWarning(String message) {
         JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void showSuccess(String tarifa_creada_exitosamente) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

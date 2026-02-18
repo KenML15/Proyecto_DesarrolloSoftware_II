@@ -26,7 +26,7 @@ import org.jdom2.JDOMException;
  *
  * @author 50687
  */
-public class ParkingLotWindow extends JInternalFrame implements ActionListener{
+public class ParkingLotWindow extends BaseInternalFrame implements ActionListener{
     
     private JPanel panel;
     private JLabel labelName, labelSpaces;
@@ -36,8 +36,8 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
     private ParkingLotFileController controller;
     private SpaceFileController spaceController;
 
-    public ParkingLotWindow(ParkingLotFileController controller) throws IOException, JDOMException {
-        super("Crear Parqueo", false, true, false, true);
+   public ParkingLotWindow(ParkingLotFileController controller) throws IOException, JDOMException {
+        super("CREAR NUEVO PARQUEO"); // Título para el encabezado azul
         this.controller = controller;
         this.spaceController = new SpaceFileController();
         setupWindow();
@@ -56,50 +56,54 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
         setResizable(false);
     }
 
-    private void createPanel() {
+   private void createPanel() {
         panel = new JPanel();
         panel.setLayout(null);
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(Color.WHITE); // Fondo limpio
         add(panel);
     }
 
     private void createComponents() {
-        createNameField();
-        createSpacesField();
+        // Estilo para Etiquetas
+        labelName = new JLabel("Nombre del Parqueo:");
+        labelName.setBounds(50, 40, 150, 25);
+        labelName.setFont(labelFont);
+        panel.add(labelName);
+
+        labelSpaces = new JLabel("Espacios totales (1-100):");
+        labelSpaces.setBounds(50, 90, 180, 25);
+        labelSpaces.setFont(labelFont);
+        panel.add(labelSpaces);
+
+        // Estilo para campos de texto
+        textFieldName = new JTextField();
+        textFieldName.setBounds(200, 40, 150, 30);
+        styleTextField(textFieldName); // Aplicamos borde azul y padding
+        panel.add(textFieldName);
+
+        textFieldSpaces = new JTextField();
+        textFieldSpaces.setBounds(200, 90, 150, 30);
+        styleTextField(textFieldSpaces); // Aplicamos borde azul y padding
+        panel.add(textFieldSpaces);
+
         createButtons();
     }
 
-    private void createNameField() {
-        labelName = new JLabel("Nombre:");
-        labelName.setBounds(50, 30, 100, 25);
-        panel.add(labelName);
-
-        textFieldName = new JTextField();
-        textFieldName.setBounds(200, 30, 150, 25);
-        panel.add(textFieldName);
-    }
-
-    private void createSpacesField() {
-        labelSpaces = new JLabel("Espacios totales:");
-        labelSpaces.setBounds(50, 80, 150, 25);
-        panel.add(labelSpaces);
-
-        textFieldSpaces = new JTextField();
-        textFieldSpaces.setBounds(200, 80, 150, 25);
-        panel.add(textFieldSpaces);
-    }
-
     private void createButtons() {
-        buttonCreate = new JButton("Crear");
-        buttonCreate.setBounds(100, 180, 100, 30);
+        buttonCreate = new JButton("CREAR");
+        buttonCreate.setBounds(70, 180, 120, 35);
+        styleButton(buttonCreate); // Botón azul profesional
         buttonCreate.addActionListener(this);
         panel.add(buttonCreate);
 
-        buttonCancel = new JButton("Cancelar");
-        buttonCancel.setBounds(220, 180, 100, 30);
+        buttonCancel = new JButton("CANCELAR");
+        buttonCancel.setBounds(210, 180, 120, 35);
+        styleButton(buttonCancel);
+        buttonCancel.setBackground(new Color(127, 140, 141)); // Gris para cancelar
         buttonCancel.addActionListener(this);
         panel.add(buttonCancel);
     }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -113,6 +117,7 @@ public class ParkingLotWindow extends JInternalFrame implements ActionListener{
             showError("Ocurrió un error al procesar la acción del botón" + ex.getMessage());
         }
     }
+    
 
     private void handleCreate() {
         String name = textFieldName.getText().trim();
