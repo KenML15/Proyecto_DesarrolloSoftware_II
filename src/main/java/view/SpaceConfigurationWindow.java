@@ -21,12 +21,14 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDesktopPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.VehicleType;
@@ -50,14 +52,19 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     private ArrayList<VehicleType> vehicleTypes;
 
     public SpaceConfigurationWindow(ParkingLot parkingLot, ParkingLotFileController controller) throws IOException, JDOMException {
-        super("CONFIGURAR ESPACIOS: " + parkingLot.getName());
-        this.parkingLot = parkingLot;
-        this.parkingLotController = controller;
-        this.vehicleTypeController = new VehicleTypeController();
+    super("CONFIGURAR ESPACIOS: " + parkingLot.getName());
+    
+    // Propiedades críticas de superposición
+    this.setClosable(true);
+    this.setLayer(JDesktopPane.DRAG_LAYER); // Se define a sí misma en capa alta
+    
+    this.parkingLot = parkingLot;
+    this.parkingLotController = controller;
+    this.vehicleTypeController = new VehicleTypeController();
 
-        loadVehicleTypes();
-        setupWindow();
-    }
+    loadVehicleTypes();
+    setupWindow();
+}
 
     private void loadVehicleTypes() {
         try {
@@ -76,11 +83,22 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     }
 
     private void setWindowProperties() {
-        setVisible(true);
-        setSize(600, 500);
-        setLocation(200, 100);
-        setResizable(true);
-    }
+    setSize(600, 500);
+    setLocation(200, 100);
+    setResizable(true);
+    setVisible(true);
+
+    // Pequeño retraso para asegurar que el escritorio ya la registró
+    SwingUtilities.invokeLater(() -> {
+        try {
+            this.moveToFront(); // Método específico de JInternalFrame para ir al frente
+            this.setSelected(true);
+            this.requestFocusInWindow();
+        } catch (java.beans.PropertyVetoException e) {
+            e.printStackTrace();
+        }
+    });
+}
 
     private void createMainPanel() {
         mainPanel = new JPanel();

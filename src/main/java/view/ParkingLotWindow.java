@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import org.jdom2.JDOMException;
 
 /**
@@ -48,11 +49,22 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
     }
 
     private void setWindowProperties() {
-        setVisible(true);
-        setSize(450, 380);
-        setLocation(250, 150);
-        setResizable(false);
-    }
+    setSize(450, 380);
+    setLocation(250, 150);
+    setResizable(false);
+    setVisible(true);
+
+    // Forzar el frente y el foco después de la renderización inicial
+    SwingUtilities.invokeLater(() -> {
+        try {
+            this.toFront();
+            this.setSelected(true);
+            this.requestFocus();
+        } catch (java.beans.PropertyVetoException e) {
+            e.printStackTrace();
+        }
+    });
+}
 
    private void createPanel() {
         panel = new JPanel();

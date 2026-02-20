@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -83,6 +84,7 @@ public class Menu extends JFrame {
         addSidebarButton("PARQUEOS", e -> openParkingLotManagement(desktop));
         addSidebarButton("TARIFAS", e -> openFeeManagement(desktop));
         addSidebarButton("NUEVO PARQUEO", e -> openParkingLotWindow(desktop));
+        addSidebarButton("VER PARQUEO", e -> openParkingVisualView(desktop));
         // addSidebarButton("CONFIGURAR ESPACIOS", e -> openSpaceConfiguration(desktop));
 
         // Espacio flexible y botón de salida
@@ -151,30 +153,51 @@ public class Menu extends JFrame {
 
     // --- MÉTODOS DE SOPORTE (LIMPIOS) ---
     private void addWindowToDesktop(HomeDesktop desktop, JInternalFrame window) {
-        try {
-            // Verificar si ya está agregada para no duplicar
-            Component[] components = desktop.getComponents();
-            for (Component c : components) {
-                if (c.getClass() == window.getClass()) {
-                    ((JInternalFrame) c).setSelected(true);
-                    ((JInternalFrame) c).toFront();
-                    return;
-                }
+    try {
+        // 1. Evitar duplicados
+        for (Component c : desktop.getComponents()) {
+            if (c.getClass() == window.getClass()) {
+                JInternalFrame win = (JInternalFrame) c;
+                win.setSelected(true);
+                win.toFront();
+                return;
             }
-
-            desktop.add(window);
-            window.setVisible(true);
-            window.toFront();
-            window.setSelected(true);
-        } catch (Exception e) {
-            showError("No se pudo abrir la ventana: " + e.getMessage());
         }
+
+        // 2. FORZAR CAPA MÁXIMA (DRAG_LAYER está por encima de PALETTE y MODAL)
+        desktop.add(window, JDesktopPane.DRAG_LAYER);
+        
+        // 3. FORZAR POSICIÓN 0 (Frente absoluto)
+        desktop.setComponentZOrder(window, 0);
+
+        window.setVisible(true);
+        window.toFront();
+        window.setSelected(true);
+        
+        // 4. REFRESCAR EL ESCRITORIO
+        desktop.revalidate();
+        desktop.repaint();
+        
+    } catch (Exception e) {
+        showError("Error: " + e.getMessage());
     }
+}
 
     private void openCustomerManagement(HomeDesktop desktop) {
         CustomerManagement window = new CustomerManagement();
         addWindowToDesktop(desktop, window);
     }
+    
+    private void openParkingVisualView(HomeDesktop desktop) {
+    try {
+        ParkingLotFileController controller = new ParkingLotFileController();
+        // Abrimos la ventana de selección de parqueo o la vista directa
+        ParkingVisualWindow window = new ParkingVisualWindow(controller);
+        addWindowToDesktop(desktop, window);
+    } catch (Exception e) {
+        showError("Error al abrir vista visual: " + e.getMessage());
+    }
+}
 
     private void openVehicleManagement(HomeDesktop desktop) {
         addWindowToDesktop(desktop, new VehicleManagement());
@@ -205,9 +228,17 @@ public class Menu extends JFrame {
     private void openParkingLotWindow(HomeDesktop desktop) {
         try {
             ParkingLotFileController controller = new ParkingLotFileController();
-
             ParkingLotWindow window = new ParkingLotWindow(controller);
-            addWindowToDesktop(desktop, window);
+
+            // 1. Agregar especificando la capa superior
+            desktop.add(window, JDesktopPane.PALETTE_LAYER);
+
+            // 2. Forzar Z-Order al frente (posición 0)
+            desktop.setComponentZOrder(window, 0);
+
+            window.setVisible(true);
+            window.toFront();
+            window.setSelected(true);
         } catch (Exception e) {
             showError("Error: " + e.getMessage());
         }
