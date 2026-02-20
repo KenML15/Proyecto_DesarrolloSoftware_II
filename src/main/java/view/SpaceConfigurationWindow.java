@@ -21,7 +21,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -213,7 +212,6 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
 
     private void saveConfiguration() {
         try {
-
             if (parkingLot.getVehicles() != null && !parkingLot.getVehicles().isEmpty()) {
                 showError("No se puede modificar la configuración: El parqueo tiene vehículos estacionados en este momento.");
                 return;
@@ -256,7 +254,8 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
 
     private Space createSpace(int index) {
         Space space = new Space();
-        space.setId(index + 1);
+        int spaceId = (parkingLot.getId() * 100) + (index + 1);
+        space.setId(spaceId);
         space.setVehicleType((VehicleType) typeComboBoxes[index].getSelectedItem());
         space.setDisabilityAdaptation(disabledCheckBoxes[index].isSelected());
         space.setSpaceTaken(false);

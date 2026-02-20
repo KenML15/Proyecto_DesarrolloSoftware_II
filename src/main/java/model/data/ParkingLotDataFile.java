@@ -26,12 +26,12 @@ public class ParkingLotDataFile {
     private static final String FIELD_DELIMITER = ";";
     private static final String ITEM_DELIMITER = ",";
 
-    private SpaceDataFile spaceData = new SpaceDataFile();
+    private final SpaceDataFile spaceData;
     private final VehicleDataFile vehicleData;
 
     public ParkingLotDataFile() throws IOException, JDOMException {
-        spaceData = new SpaceDataFile();
-        vehicleData = new VehicleDataFile();
+        this.spaceData = new SpaceDataFile();
+        this.vehicleData = new VehicleDataFile();
         ensureFileExists();
     }
 
@@ -65,6 +65,39 @@ public class ParkingLotDataFile {
         try (PrintWriter writer = new PrintWriter(new FileWriter(PARKINGLOT_FILE, true))) {
             writer.println(formatParkingLot(parkingLot));
         }
+    }
+    
+    public ArrayList<ParkingLot> getAllParkingLots() throws IOException{
+        ArrayList<ParkingLot> parkingLots = new ArrayList<>();
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PARKINGLOT_FILE))) {
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] parts = line.split(FIELD_DELIMITER);
+
+                if (parts.length < 5) {
+                    continue;
+                }
+
+                int id = Integer.parseInt(parts[0]);
+                String name = parts[1];
+                String address = parts[2];
+                int numberOfSpaces = Integer.parseInt(parts[3]);
+
+                ArrayList<Vehicle> vehicles = parseVehicles(parts[4]);
+                Space[] spaces = parseSpaces(parts[5], numberOfSpaces);
+
+                ParkingLot parkingLot = new ParkingLot(id, name, address, numberOfSpaces, vehicles, spaces);
+
+                parkingLots.add(parkingLot);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo del parqueo");
+        }
+
+        return parkingLots;
     }
 
     public void updateParkingLot(ParkingLot parkingLot) throws IOException {
@@ -121,6 +154,7 @@ public class ParkingLotDataFile {
 
         return parkingLot.getId() + FIELD_DELIMITER
                 + parkingLot.getName() + FIELD_DELIMITER
+                + parkingLot.getAddress() + FIELD_DELIMITER
                 + parkingLot.getNumberOfSpaces() + FIELD_DELIMITER
                 + vehicles + FIELD_DELIMITER
                 + spaces;
@@ -150,38 +184,6 @@ public class ParkingLotDataFile {
             }
         }
         return sb.substring(0, sb.length() - 1);
-    }
-
-    public ArrayList<ParkingLot> getAllParkingLots() throws IOException{
-        ArrayList<ParkingLot> parkingLots = new ArrayList<>();
-
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PARKINGLOT_FILE))) {
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] parts = line.split(FIELD_DELIMITER);
-
-                if (parts.length < 5) {
-                    continue;
-                }
-
-                int id = Integer.parseInt(parts[0]);
-                String name = parts[1];
-                int numberOfSpaces = Integer.parseInt(parts[2]);
-
-                ArrayList<Vehicle> vehicles = parseVehicles(parts[3]);
-                Space[] spaces = parseSpaces(parts[4], numberOfSpaces);
-
-                ParkingLot parkingLot = new ParkingLot(id, name, numberOfSpaces, vehicles, spaces);
-
-                parkingLots.add(parkingLot);
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo del parqueo");
-        }
-
-        return parkingLots;
     }
 
     private Space[] parseSpaces(String spaceIds, int numberOfSpaces) throws IOException, NullPointerException {

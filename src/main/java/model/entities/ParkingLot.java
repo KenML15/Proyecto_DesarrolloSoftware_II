@@ -14,13 +14,15 @@ public class ParkingLot {
 
     private int id;
     private String name;
+    private String address;
     private int numberOfSpaces;
     private ArrayList<Vehicle> vehicles;
     private Space[] spaces;
 
-    public ParkingLot(int id, String name, int numberOfSpaces, ArrayList<Vehicle> vehicles, Space[] spaces) {
+    public ParkingLot(int id, String name, String address, int numberOfSpaces, ArrayList<Vehicle> vehicles, Space[] spaces) {
         this.id = id;
         this.name = name;
+        this.address = address;
         this.numberOfSpaces = numberOfSpaces;
         this.vehicles = vehicles;
         this.spaces = spaces;
@@ -43,6 +45,14 @@ public class ParkingLot {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public int getNumberOfSpaces() {
@@ -73,5 +83,4 @@ public class ParkingLot {
     public String toString() {
         return "ParkingLot{" + "id=" + id + ", name=" + name + ", numberOfSpaces=" + numberOfSpaces + ", vehicles=" + vehicles + ", spaces=" + spaces + '}';
     }
-
 }

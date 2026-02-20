@@ -48,6 +48,31 @@ public class SpaceDataFile {
         appendToFile(space);
     }
     
+    public Space[] getAllSpaces() throws IOException {
+        int totalSpaces = countLines(fileName);
+        Space[] spaces = new Space[totalSpaces];
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            addAllSpacesFromReader(spaces, reader);
+        }
+        return spaces;
+    }
+    
+    public void updateSpace(Space space) throws IOException {
+        validateSpace(space);
+        File file = new File(fileName);
+        File temp = new File("temp_spaces.txt");
+        replaceInFile(space, file, temp);
+        replaceFile(file, temp);
+    }
+    
+    public void deleteSpace(int id) throws IOException {
+        File file = new File(fileName);
+        File temp = new File("temp_spaces.txt");
+        deleteFromFile(id, file, temp);
+        replaceFile(file, temp);
+    }
+    //===========================================================================
+    
     private void validateSpace(Space space) throws IOException{
         if (space.getId() < 0) {
             throw new IllegalArgumentException("ID inválido");
@@ -134,15 +159,6 @@ public class SpaceDataFile {
         return space;
     }
     
-    public Space[] getAllSpaces() throws IOException {
-        int totalSpaces = countLines(fileName);
-        Space[] spaces = new Space[totalSpaces];
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            addAllSpacesFromReader(spaces, reader);
-        }
-        return spaces;
-    }
-    
     private int countLines(String fileName) throws IOException {
         int count = 0;
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
@@ -164,14 +180,6 @@ public class SpaceDataFile {
                 index++;
             }
         }
-    }
-    
-    public void updateSpace(Space space) throws IOException {
-        validateSpace(space);
-        File file = new File(fileName);
-        File temp = new File("temp_spaces.txt");
-        replaceInFile(space, file, temp);
-        replaceFile(file, temp);
     }
     
     private void replaceInFile(Space space, File source, File target) throws IOException {
@@ -206,13 +214,6 @@ public class SpaceDataFile {
         if (!temp.renameTo(original)) {
             throw new IOException("Error renombrando archivo");
         }
-    }
-    
-    public void deleteSpace(int id) throws IOException {
-        File file = new File(fileName);
-        File temp = new File("temp_spaces.txt");
-        deleteFromFile(id, file, temp);
-        replaceFile(file, temp);
     }
     
     private void deleteFromFile(int id, File source, File target) throws IOException {

@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -37,11 +36,11 @@ public class ParkingLotManagement extends BaseInternalFrame {
     private JPanel panelParkingLots;
     private JTable tableParkingLots;
     private DefaultTableModel modelDataTable;
-    private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Espacios Ocupados"};
-    private ParkingLotFileController controller;
+    private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Espacios preferenciales", "Espacios ocupados"};
+    private ParkingLotFileController parkingLotController;
 
     public ParkingLotManagement() {
-        super("GESTIÓN DE PARQUEOS"); // Título para la barra superior
+        super("GESTIÓN DE PARQUEOS"); //Título para la barra superior
         initializeController();
         initializeComponents();
         loadParkingLots();
@@ -49,7 +48,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
 
     private void initializeController() {
         try {
-            this.controller = new ParkingLotFileController();
+            this.parkingLotController = new ParkingLotFileController();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "No se puede acceder al archivo de parqueos" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (JDOMException ex) {
@@ -98,7 +97,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
 
     private JButton createStyledButton(String text, Color bg, JPanel panel) {
         JButton btn = new JButton(text);
-        styleButton(btn); // Método de BaseInternalFrame
+        styleButton(btn); //Método de BaseInternalFrame
         btn.setBackground(bg);
         panel.add(btn);
         return btn;
@@ -115,7 +114,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
         try {
             // Obtener el ID del parqueo seleccionado
             int parkingLotId = Integer.parseInt(modelDataTable.getValueAt(selectedRow, 0).toString());
-            ParkingLot selectedLot = controller.findParkingLotById(parkingLotId);
+            ParkingLot selectedLot = parkingLotController.getParkingLotById(parkingLotId);
 
             // Crear la ventana de salida (puedes modificarla para recibir el parqueo)
             VehicleExitWindow exitWindow = new VehicleExitWindow(selectedLot);
@@ -139,19 +138,11 @@ public class ParkingLotManagement extends BaseInternalFrame {
 
     private void loadParkingLots() {
         try {
-            ArrayList<ParkingLot> parkingLots = controller.getAllParkingLots();
+            ArrayList<ParkingLot> parkingLots = parkingLotController.getAllParkingLots();
             String[][] data = createDataMatrix(parkingLots);
             modelDataTable = new DefaultTableModel(data, headings);
             tableParkingLots.setModel(modelDataTable);
 
-            for (ParkingLot parkingLot : parkingLots) {
-                modelDataTable.addRow(new Object[]{
-                    parkingLot.getId(),
-                    parkingLot.getName(),
-                    parkingLot.getNumberOfSpaces(),
-                    countOccupiedSpaces(parkingLot)
-                });
-            }
         } catch (IOException e) {
             showError("Error al cargar los parqueos" + e.getMessage());
         }
@@ -159,7 +150,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
 
     private int countOccupiedSpaces(ParkingLot parkingLot) {
         int count = 0;
-        if (parkingLot.getSpaces() != null) {
+        if (parkingLot != null && parkingLot.getSpaces() != null) {
             for (Space space : parkingLot.getSpaces()) {
                 if (space != null && space.isSpaceTaken()) {
                     count++;
@@ -170,14 +161,23 @@ public class ParkingLotManagement extends BaseInternalFrame {
     }
 
     private String[][] createDataMatrix(ArrayList<ParkingLot> parkingLots) {
-        String[][] data = new String[parkingLots.size()][4];
+        String[][] data = new String[parkingLots.size()][5];
 
         for (int i = 0; i < parkingLots.size(); i++) {
             ParkingLot parkingLot = parkingLots.get(i);
+            
+            int disability = 0;
+            for (Space space : parkingLot.getSpaces()) {
+                if (space.isDisabilityAdaptation()) {
+                    disability++;
+                }
+            }
+
             data[i][0] = String.valueOf(parkingLot.getId());
             data[i][1] = parkingLot.getName();
             data[i][2] = String.valueOf(parkingLot.getNumberOfSpaces());
-            data[i][3] = String.valueOf(parkingLot.getVehicles().size());
+            data[i][3] = String.valueOf(disability);
+            data[i][4] = String.valueOf(countOccupiedSpaces(parkingLot));
         }
 
         return data;
@@ -201,16 +201,14 @@ public class ParkingLotManagement extends BaseInternalFrame {
                     JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                controller.removeParkingLot(id);
+                parkingLotController.deleteParkingLot(id);
                 loadParkingLots();
                 showSuccess("Parqueo eliminado exitosamente.");
             }
 
         } catch (IllegalStateException ex) {
-
             showError("No se puede eliminar: " + ex.getMessage());
-        } catch (Exception e) {
-
+        } catch (HeadlessException | IOException e) {
             showError("Ocurrió un error inesperado: " + e.getMessage());
         }
     }
@@ -218,14 +216,14 @@ public class ParkingLotManagement extends BaseInternalFrame {
     private void configureSpaces() {
         try {
             int id = getSelectedParkingLotId();
-            ParkingLot parkingLot = controller.findParkingLotById(id);
+            ParkingLot parkingLot = parkingLotController.getParkingLotById(id);
 
             if (countOccupiedSpaces(parkingLot) > 0) {
                 showError("No se puede configurar con vehículos estacionados");
                 return;
             }
 
-            SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, controller);
+            SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, parkingLotController);
             getDesktopPane().add(window);
 
         } catch (IOException e) {
@@ -238,9 +236,42 @@ public class ParkingLotManagement extends BaseInternalFrame {
     private void showParkingLotStatus() {
         try {
             int id = getSelectedParkingLotId();
-            String status = controller.getParkingLotStatusById(id);
-            JOptionPane.showMessageDialog(this, status, "Estado",
-                    JOptionPane.INFORMATION_MESSAGE);
+            ParkingLot parkingLot = parkingLotController.getParkingLotById(id);
+            
+            Space[] spaces = parkingLot.getSpaces();
+            int occupied = 0;
+            int disability = 0;
+            
+            for (Space space : spaces) {
+                if (space.isSpaceTaken()) {
+                    occupied++;
+                }
+                if (space.isDisabilityAdaptation()) {
+                    disability++;
+                }
+
+            }
+            
+            String status = String.format("""
+            ┌────────────────────────────────────┐
+            │        ESTADO DEL PARQUEO      │
+            ├────────────────────────────────────┤
+            │  Nombre: %-25s                 │
+            │  Espacios totales: %-16d       │
+            │  Ocupados: %-22d               │
+            │  Libres: %-24d                 │
+            │  Espacios discapacidad: %-11d  │
+            └────────────────────────────────────┘
+            """,
+                    parkingLot.getName(),
+                    spaces.length,
+                    occupied,
+                    spaces.length - occupied,
+                    disability
+            );
+            
+            JOptionPane.showMessageDialog(this, status, "Estado del Parqueo", 
+            JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             showError("Información de estado no disponible" + e.getMessage());
         }

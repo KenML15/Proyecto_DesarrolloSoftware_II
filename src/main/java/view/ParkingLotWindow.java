@@ -11,15 +11,12 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JButton;
-import javax.swing.JInternalFrame;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import model.entities.Space;
 import org.jdom2.JDOMException;
 
 /**
@@ -29,16 +26,17 @@ import org.jdom2.JDOMException;
 public class ParkingLotWindow extends BaseInternalFrame implements ActionListener{
     
     private JPanel panel;
-    private JLabel labelName, labelSpaces;
+    private JLabel labelName, labelAddress, labelSpaces;
     private JTextField textFieldName, textFieldSpaces;
+    private JComboBox comboBoxAddress;
     private JButton buttonCreate, buttonCancel;
     
-    private ParkingLotFileController controller;
+    private ParkingLotFileController parkingLotController;
     private SpaceFileController spaceController;
 
    public ParkingLotWindow(ParkingLotFileController controller) throws IOException, JDOMException {
         super("CREAR NUEVO PARQUEO"); // Título para el encabezado azul
-        this.controller = controller;
+        this.parkingLotController = controller;
         this.spaceController = new SpaceFileController();
         setupWindow();
     }
@@ -51,7 +49,7 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
 
     private void setWindowProperties() {
         setVisible(true);
-        setSize(400, 300);
+        setSize(450, 380);
         setLocation(250, 150);
         setResizable(false);
     }
@@ -59,30 +57,41 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
    private void createPanel() {
         panel = new JPanel();
         panel.setLayout(null);
-        panel.setBackground(Color.WHITE); // Fondo limpio
+        panel.setBackground(Color.WHITE); //Fondo limpio
         add(panel);
     }
 
     private void createComponents() {
-        // Estilo para Etiquetas
+        //Nombre del parqueo
         labelName = new JLabel("Nombre del Parqueo:");
         labelName.setBounds(50, 40, 150, 25);
         labelName.setFont(labelFont);
         panel.add(labelName);
+        
+        textFieldName = new JTextField();
+        textFieldName.setBounds(200, 40, 180, 30);
+        styleTextField(textFieldName);
+        panel.add(textFieldName);
+        
+        //Dirección del parqueo
+        labelAddress = new JLabel("Dirección:");
+        labelAddress.setBounds(50, 140, 150, 25);
+        panel.add(labelAddress);
+        
+        comboBoxAddress = new JComboBox<>(addresses);
+        comboBoxAddress.setBounds(200, 140, 180, 30);
+        comboBoxAddress.setBackground(Color.WHITE);
+        comboBoxAddress.setFont(labelFont);
+        panel.add(comboBoxAddress);
 
+        //Espacios del parqueo
         labelSpaces = new JLabel("Espacios totales (1-100):");
         labelSpaces.setBounds(50, 90, 180, 25);
         labelSpaces.setFont(labelFont);
         panel.add(labelSpaces);
 
-        // Estilo para campos de texto
-        textFieldName = new JTextField();
-        textFieldName.setBounds(200, 40, 150, 30);
-        styleTextField(textFieldName); // Aplicamos borde azul y padding
-        panel.add(textFieldName);
-
         textFieldSpaces = new JTextField();
-        textFieldSpaces.setBounds(200, 90, 150, 30);
+        textFieldSpaces.setBounds(200, 90, 180, 30);
         styleTextField(textFieldSpaces); // Aplicamos borde azul y padding
         panel.add(textFieldSpaces);
 
@@ -91,15 +100,15 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
 
     private void createButtons() {
         buttonCreate = new JButton("CREAR");
-        buttonCreate.setBounds(70, 180, 120, 35);
+        buttonCreate.setBounds(100, 220, 120, 35);
         styleButton(buttonCreate); // Botón azul profesional
         buttonCreate.addActionListener(this);
         panel.add(buttonCreate);
 
         buttonCancel = new JButton("CANCELAR");
-        buttonCancel.setBounds(210, 180, 120, 35);
+        buttonCancel.setBounds(230, 220, 120, 35);
         styleButton(buttonCancel);
-        buttonCancel.setBackground(new Color(127, 140, 141)); // Gris para cancelar
+        buttonCancel.setBackground(new Color(127, 140, 141));
         buttonCancel.addActionListener(this);
         panel.add(buttonCancel);
     }
@@ -118,92 +127,57 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
         }
     }
     
-
     private void handleCreate() {
         String name = textFieldName.getText().trim();
+        String address = (String) comboBoxAddress.getSelectedItem();
         String spacesText = textFieldSpaces.getText().trim();
         
-        validateInput(name, spacesText);
-        createParkingLot(name, spacesText);
+        validateInput(name, address, spacesText);
+        createParkingLot(name, address, spacesText);
     }
 
-    private void validateInput(String name, String spacesText) {
-        if (name.isEmpty() || spacesText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Complete todos los campos", "Advertencia", JOptionPane.WARNING_MESSAGE);
+    private void validateInput(String name, String address, String spacesText) {
+        if (name.isEmpty()) {
+            showWarning("Ingrese el nombre del parqueo");
+            return;
         }
         
-        int spaces = parseSpaces(spacesText);
-        validateSpacesCount(spaces);
+        if (address.equals("-- Seleccione --")){
+            showWarning("Seleccione una dirección válida");
+            return;
+        }
+        
+        if (spacesText.isEmpty()){
+            showWarning("Ingrese la cantidad de espacios");
+            return;
+        }
     }
 
-    private int parseSpaces(String spacesText) {
+    private void createParkingLot(String name, String address, String spacesText) {
         try {
-            return Integer.parseInt(spacesText);
-        } catch (NumberFormatException e) {
-            showError("Número inválido" + e.getMessage());
-        }
-        return 0;
-    }
+            int numberOfSpaces = Integer.parseInt(spacesText);
+            // Enviamos null o un arreglo vacío, el Controller debe generar los objetos finales
+            parkingLotController.createParkingLot(name, address, numberOfSpaces);
 
-    private void validateSpacesCount(int spaces) {
-        if (spaces <= 0) {
-            JOptionPane.showMessageDialog(this, "El parqueo debe tener mínimo un espacio", "Advertencia", JOptionPane.WARNING_MESSAGE);;
-        }
-        if (spaces > 100) {
-            JOptionPane.showMessageDialog(this, "El parqueo debe tener máximo 100 espacios", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "El parqueo se ha creado con éxito");
+            clearFields();
+            dispose();
+        } catch (HeadlessException | IOException | NumberFormatException e) {
+            showError("Error: " + e.getMessage());
         }
     }
-
-   private void createParkingLot(String name, String spacesText) {
-    try {
-        int numberOfSpaces = Integer.parseInt(spacesText);
-        // Enviamos null o un arreglo vacío, el Controller debe generar los objetos finales
-        controller.registerParkingLot(name, new Space[numberOfSpaces]); 
-
-        JOptionPane.showMessageDialog(null, "El parqueo se ha creado con éxito");
-        clearFields();
-        dispose();
-    } catch (HeadlessException | IOException | NumberFormatException e) {
-        showError("Error: " + e.getMessage());
-    }
-}
-
-    private Space[] createSpaces(int numberOfSpaces) throws IOException {
-        Space[] spaces = new Space[numberOfSpaces];
-        
-        int startId = spaceController.getNextId();
-        
-        for (int i = 0; i < numberOfSpaces; i++) {
-            int currentId = startId + i;
-            spaces[i] = createSpace(currentId);
-        }
-        
-        return spaces;
-    }
-
-    private Space createSpace(int id) {
-        try {
-            Space existingSpace = spaceController.getSpaceFromFile(id);
-            if(existingSpace != null) {
-                return existingSpace;
-            } else {
-                Space newSpace = new Space();
-                newSpace.setId(id);
-                newSpace.setDisabilityAdaptation(false);
-                newSpace.setSpaceTaken(false);
-                newSpace.setVehicleTypeId(0);
-                spaceController.insertSpace(newSpace);
-                return newSpace;
-            }
-//        Space space = new Space();
-//        space.setId(id);
-//        space.setDisabilityAdaptation(false);
-//        space.setSpaceTaken(false);
-//        return space;
-        } catch (IOException ex) {
-            return null;
-        }
-    }
+    
+    // Opciones predefinidas para las direcciones
+    private final String[] addresses = {
+        "-- Seleccione --",
+        "San José",
+        "Alajuela",
+        "Cartago",
+        "Heredia",
+        "Guanacaste",
+        "Puntarenas",
+        "Limón"
+    };
 
     private void clearFields() {
         textFieldName.setText("");
@@ -217,5 +191,9 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", 
             JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 }

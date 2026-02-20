@@ -226,16 +226,6 @@ public class VehicleExitWindow extends BaseInternalFrame {
             return;
         }
 
-        //Por probar
-//        if (currentVehicle.getVehicleType() == null) {
-//            JOptionPane.showMessageDialog(this,
-//                    "El vehículo con placa " + currentVehicle.getPlate()
-//                    + " no tiene un tipo de vehículo asignado.\n\n"
-//                    + "Por favor, edite el vehículo y asígnele un tipo antes de registrar su salida.",
-//                    "Error de Configuración",
-//                    JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
         int confirm = JOptionPane.showConfirmDialog(this,
                 "¿Registrar salida del vehículo " + currentVehicle.getPlate() + "?",
                 "Confirmar Salida",

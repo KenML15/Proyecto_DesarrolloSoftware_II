@@ -133,13 +133,12 @@ public class VehicleFileController {
 
         vehicleData.updateVehicle(vehicle);
         
-        parkingLotController.freeVehicleSpace(vehicle);
+        parkingLotController.freeSpaces(vehicle);
         
         Invoice invoice = createInvoice(vehicle, parkingLot, feeAmount);
         invoiceData.insertInvoice(invoice);
 
         return invoice;
-//        return feeAmount;
     }
     
     private ParkingLot findParkingLotByVehicle(Vehicle vehicle) throws IOException {
@@ -183,10 +182,6 @@ public class VehicleFileController {
                     + "' no tiene una tarifa configurada."
             );
         }
-        
-//        if (vehicle.getVehicleType() == null || vehicle.getVehicleType().getFee() == null) {
-//            throw new IllegalStateException("No hay tarifa configurada para este tipo de vehículo");
-//        }
         
         Duration duration = Duration.between(vehicle.getEntryTime(), vehicle.getExitTime());
         long minutes = duration.toMinutes();

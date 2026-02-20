@@ -153,9 +153,6 @@ public class VehicleWindow extends BaseInternalFrame {
 
     private void initWindow() {
         initControllers();
-        // Nota: initData() ya no es estrictamente necesario si inicializas 
-        // selectedCustomers en los constructores como puse arriba, 
-        // pero puedes mantenerlo para los otros ArrayLists (allCustomers, etc.)
         initData();
         createUI();
         loadData();
@@ -166,16 +163,16 @@ public class VehicleWindow extends BaseInternalFrame {
     }
     
     private void loadData() {
-        // 1. Llenar el combo de Clientes disponibles
+        //Llenar el combo de Clientes disponibles
         loadCustomers();
         
-        // 2. Llenar el combo de Tipos de Vehículo (Automóvil, Moto, etc.)
+        //Llenar el combo de Tipos de Vehículo (Automóvil, Moto, etc.)
         loadVehicleTypes();
         
-        // 3. Llenar el combo de Parqueos (Norte, Sur, etc.)
+        //Llenar el combo de Parqueos (Norte, Sur, etc.)
         loadParkingLots();
         
-        // 4. Refrescar la JList visual de clientes que ya están "a bordo"
+        //Refrescar la JList visual de clientes que ya están "a bordo"
         updateCustomerList();
     }
 
@@ -416,8 +413,11 @@ public class VehicleWindow extends BaseInternalFrame {
             ParkingLot parkingLot = getSelectedParkingLot();
 
             saveToFile(vehicle);
-            parkVehicleInParkingLot(vehicle, parkingLot);
-            showAssignmentDetails(vehicle, parkingLot);
+            int assignedSpace = parkingLotController.assignVehicleToParkingLot(vehicle, parkingLot.getId());
+            
+            vehicle.setSpace(parkingLotController.findAvailableSpace(vehicle, parkingLot));
+            vehicleController.update(vehicle);
+            showAssignmentDetails(vehicle, parkingLot, assignedSpace);
 
             showMessage("Vehículo guardado", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             dispose();
@@ -473,36 +473,6 @@ public class VehicleWindow extends BaseInternalFrame {
         return null;
     }
 
-    private void parkVehicleInParkingLot(Vehicle vehicle, ParkingLot parkingLot) {
-        if (vehicle == null) {
-            showWarning("Vehículo no puede ser nulo");
-        }
-        if (parkingLot == null) {
-            showWarning("Seleccione un parqueo");
-        }
-
-        try {
-            // Verificar si hay espacio disponible
-            int occupiedSpaces = parkingLot.getVehicles().size();
-            if (occupiedSpaces >= parkingLot.getNumberOfSpaces()) {
-                showError("No hay espacios disponibles en el parqueo");
-            }
-
-            // Agregar vehículo al parqueo
-            parkingLot.getVehicles().add(vehicle);
-
-            // Guardar cambios del parqueo (actualizar lista de vehículos)
-            parkingLotController.updateParkingLot(parkingLot);
-
-            // Mensaje de confirmación
-            JOptionPane.showMessageDialog(this,
-                    "Vehículo parqueado en " + parkingLot.getName(),
-                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (HeadlessException e) {
-            showError("Error: " + e.getMessage());
-        }
-    }
-
     //Validar campos
     private void validateFields() {
         if (plateField.getText().trim().isEmpty()) {
@@ -520,7 +490,7 @@ public class VehicleWindow extends BaseInternalFrame {
     }
 
     //Mostrar detalles de asignación
-    private void showAssignmentDetails(Vehicle vehicle, ParkingLot parkingLot) {
+    private void showAssignmentDetails(Vehicle vehicle, ParkingLot parkingLot, int spaceId) {
         if (parkingLot == null) {
             return;
         }
@@ -536,9 +506,9 @@ public class VehicleWindow extends BaseInternalFrame {
         String message = "¡Vehículo registrado!\n\n"
                 + "Placa: " + vehicle.getPlate() + "\n"
                 + "Parqueo: " + parkingLot.getName() + "\n"
-                + "Clientes: " + clients.toString() + "\n"
-                + "Espacio:" + vehicle.getSpace() + "\n"
-                + "Entrada: " + formatDateTime(vehicle.getEntryTime());
+                + "Espacio asignado:" + spaceId + "\n"
+                + "Clientes: " + clients.toString() + "\n"  
+                + "Hora de entrada: " + formatDateTime(vehicle.getEntryTime());
 
         JOptionPane.showMessageDialog(this, message, "Registro Exitoso",
                 JOptionPane.INFORMATION_MESSAGE);

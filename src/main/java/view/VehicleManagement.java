@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -34,6 +33,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.entities.Customer;
+import model.entities.Space;
 import model.entities.Vehicle;
 import org.jdom2.JDOMException;
 
@@ -49,7 +49,7 @@ public class VehicleManagement extends BaseInternalFrame {
     private DefaultTableModel tableModel;
     private JTextField searchField;
 
-    private final String[] COLUMNS = {"Placa", "Color", "Marca", "Modelo", "Tipo", "Clientes", "Espacio", "Entrada"};
+    private final String[] COLUMNS = {"Placa", "Color", "Marca", "Modelo", "Tipo", "Clientes", "Espacio", "Estado", "Entrada"};
 
     public VehicleManagement() {
         super("GESTIÓN DE VEHÍCULOS"); // Usamos el constructor de BaseInternalFrame
@@ -128,7 +128,6 @@ public class VehicleManagement extends BaseInternalFrame {
         vehicleTable = new JTable(tableModel);
         vehicleTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // --- SOLUCIÓN PARA LA LÍNEA DEL ENCABEZADO ---
         vehicleTable.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -200,6 +199,8 @@ public class VehicleManagement extends BaseInternalFrame {
         if (vehicle.getVehicleType() != null) {
             typeName = vehicle.getVehicleType().getDescription();
         }
+        
+        String status = vehicle.getExitTime() == null ? "PARQUEADO" : "FUERA";
 
         Object[] row = {
             vehicle.getPlate(),
@@ -208,6 +209,8 @@ public class VehicleManagement extends BaseInternalFrame {
             vehicle.getModel(),
             typeName,
             formatCustomerNames(vehicle.getCustomer()),
+            formatSpace(vehicle.getSpace()),
+            status,
             formatDateTime(vehicle.getEntryTime())
         };
 
@@ -229,7 +232,15 @@ public class VehicleManagement extends BaseInternalFrame {
         }
         return stringBuilder.toString();
     }
-
+    
+    //Formatear espacios
+    private String formatSpace(Space space) {
+        if (space == null) {
+            return "N/A";
+        }
+        return String.valueOf(space.getId());
+    }
+    
     //Formatear fecha/hora
     private String formatDateTime(LocalDateTime dateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
