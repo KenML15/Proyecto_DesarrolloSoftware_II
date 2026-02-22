@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package view;
+ package view;
 
+import controller.AdministratorController;
 import controller.ClerkController;
 import java.awt.Color;
 import java.awt.Component;
@@ -13,11 +14,14 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import model.data.StaffDataFile;
 import model.entities.Administrator;
 import model.entities.Clerk;
 import model.entities.User;
@@ -38,9 +43,12 @@ public class LoginWindow extends JFrame implements ActionListener {
 
     JTextField txtUsername;
     JPasswordField txtPassword;
-    JButton btnSignIn;
+    JComboBox<String> comboRol;
+    JButton btnSignIn; 
 
+    // Controladores específicos
     ClerkController clerkController = new ClerkController();
+    AdministratorController adminController = new AdministratorController();
 
     public static void main(String[] args) {
         try {
@@ -71,190 +79,176 @@ public class LoginWindow extends JFrame implements ActionListener {
     }
 
     private void initComponents() {
-        // 1. Panel
         JPanel container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-        container.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
-        container.setBackground(Color.white);
+        container.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        container.setBackground(new Color(245, 246, 250));
 
-        // 2. Title (Usa HTML para las dos líneas)
+        // 1. Título: 
         JLabel lblTitle = new JLabel("Bienvenido al Parking System");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // 3. Username (SIN el "JTextField" al inicio para usar la global)
-        JLabel lblUser = new JLabel("Nombre de usuario: ");
+        // 2. Logo 
+        JLabel lblLogo = new JLabel();
+        try {
+            ImageIcon iconOriginal = new ImageIcon("imagenes/Logo.png");
+            Image imgEscalada = iconOriginal.getImage().getScaledInstance(100, 80, Image.SCALE_SMOOTH);
+            lblLogo.setIcon(new ImageIcon(imgEscalada));
+        } catch (Exception e) {
+            lblLogo.setText("[Logo]");
+        }
+        lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // 3. Casilla de Rol 
+        JLabel lblRol = new JLabel("Seleccione su Rol:");
+        lblRol.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        String[] roles = {"Empleado", "Administrador"};
+        comboRol = new JComboBox<>(roles);
+        styleComboBox(comboRol);
+
+        // 4. Nombre de Usuario
+        JLabel lblUser = new JLabel("Nombre de usuario:");
         lblUser.setAlignmentX(Component.CENTER_ALIGNMENT);
-        txtUsername = new JTextField(); 
+        txtUsername = new JTextField();
         styleTextField(txtUsername);
 
-        // 4. Password (SIN el "JPasswordField" al inicio)
-        JLabel lblPass = new JLabel("Contraseña: ");
+        // 5. Contraseña
+        JLabel lblPass = new JLabel("Contraseña:");
         lblPass.setAlignmentX(Component.CENTER_ALIGNMENT);
         txtPassword = new JPasswordField();
         styleTextField(txtPassword);
 
-        // 5. Olvidé contraseña
-        JLabel lblForgot = new JLabel("olvide mi contraseña");
-        lblForgot.setForeground(Color.BLUE);
-        lblForgot.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        lblForgot.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // 6. Button (SIN el "JButton" al inicio)
-        btnSignIn = new JButton("Ingresar");
+        // 7. Botón de Ingreso (Al final como en tu dibujo)
+        btnSignIn = new JButton("INGRESAR");
         styleButton(btnSignIn);
         btnSignIn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnSignIn.addActionListener(this); // IMPORTANTE: Para que el botón funcione
+        btnSignIn.addActionListener(this);
 
-// 7. Carga del Logo adaptada al ejemplo del profesor
-    JLabel lblLogo = new JLabel(); 
-    try {
-        // Usamos la ruta relativa a la carpeta raíz del proyecto
-        ImageIcon iconOriginal = new ImageIcon("imagenes/Logo.png");
-        
-        // Verificamos si la imagen cargó (si no tiene dimensiones, es que no la encontró)
-        if (iconOriginal.getImageLoadStatus() == java.awt.MediaTracker.COMPLETE || iconOriginal.getIconWidth() > 0) {
-            Image imgEscalada = iconOriginal.getImage().getScaledInstance(120, 100, Image.SCALE_SMOOTH);
-            lblLogo.setIcon(new ImageIcon(imgEscalada));
-        } else {
-            lblLogo.setText("<html><font color='red'>No se encontró: imagenes/Logo.png</font></html>");
-        }
-    } catch (Exception e) {
-        lblLogo.setText("Error al cargar imagen");
-    }
-    lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // 8. AGREGAR TODO AL CONTENEDOR (El orden importa)
+        // --- AGREGAR EN EL ORDEN DEL BOCETO ---
         container.add(lblTitle);
-        container.add(Box.createVerticalStrut(30));
+        container.add(Box.createVerticalStrut(15));
+        container.add(lblLogo);
+        container.add(Box.createVerticalStrut(20));
+
+        container.add(lblRol);
+        container.add(comboRol);
+        container.add(Box.createVerticalStrut(15));
+
         container.add(lblUser);
         container.add(txtUsername);
         container.add(Box.createVerticalStrut(15));
+
         container.add(lblPass);
         container.add(txtPassword);
-        container.add(lblForgot);
-        container.add(Box.createVerticalStrut(25));
+        container.add(Box.createVerticalStrut(10));
+
+        container.add(Box.createVerticalGlue()); // Empuja el botón hacia abajo si sobra espacio
         container.add(btnSignIn);
-        
-        // Esto empuja el logo hacia abajo
-        container.add(Box.createVerticalGlue()); 
-        container.add(lblLogo); // ¡ESTA ES LA LÍNEA QUE TE FALTABA!
+        container.add(Box.createVerticalStrut(10));
 
         add(container);
     }
 
-    // antigua ventana de login;
-//    private void initComponents() {
-//        // 1. Inicializar componentes UNA SOLA VEZ
-//        txtUsername = new JTextField(15);
-//        styleTextField(txtUsername);
-//
-//        txtPassword = new JPasswordField(15);
-//        styleTextField(txtPassword);
-//
-//        btnSignIn = new JButton("Sign In");
-//        styleButton(btnSignIn);
-//        btnSignIn.addActionListener(this);
-//
-//        // 2. Armar los paneles
-//        JPanel mainPanel = new JPanel(new BorderLayout());
-//        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-//
-//        JLabel lblTitle = new JLabel("Bienvenido al sistema de ingreso.", SwingConstants.CENTER);
-//        lblTitle.setAlignmentX(CENTER_ALIGNMENT);
-//        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 17));
-//        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-//
-//        JPanel formPanel = new JPanel();
-//        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-//
-//        // Username row
-//        JPanel usernamePanel = new JPanel(new BorderLayout(10, 0));
-//        usernamePanel.add(new JLabel("Nombre de usuario :"), BorderLayout.WEST);
-//        usernamePanel.add(txtUsername, BorderLayout.CENTER);
-//
-//        // Password row
-//        JPanel passwordPanel = new JPanel(new BorderLayout(10, 0));
-//        passwordPanel.add(new JLabel("Contraseña :"), BorderLayout.WEST);
-//        passwordPanel.add(txtPassword, BorderLayout.CENTER);
-//
-//        formPanel.add(usernamePanel);
-//        formPanel.add(Box.createVerticalStrut(15));
-//        formPanel.add(passwordPanel);
-//
-//        JPanel buttonPanel = new JPanel();
-//        buttonPanel.add(btnSignIn);
-//
-//        mainPanel.add(lblTitle, BorderLayout.NORTH);
-//        mainPanel.add(formPanel, BorderLayout.CENTER);
-//        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-//
-//        add(mainPanel);
-//    }
-    
-    private void styleTextField(JTextField field) {
+    private void styleComboBox(JComboBox<String> combo) {
+        combo.setMaximumSize(new Dimension(180, 35));
+        combo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // 3. ESTILO DE TEXTO
+        combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        combo.setForeground(new Color(44, 62, 80));
+
+        // Nota: Si usas FlatLaf, esto ayuda a que el botón de la flecha no rompa la estética
+        combo.putClientProperty("JComponent.roundRect", true);
+    }
+
+    private void styleTextField(JTextField field) {
         field.setMaximumSize(new Dimension(300, 35));
         field.setPreferredSize(new Dimension(300, 35));
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Línea azul inferior estilo moderno
+        // Transparencia total
+        field.setOpaque(false);
+        field.setBackground(new Color(0, 0, 0, 0));
+
+        // Solo línea inferior azul
         field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(52, 152, 219)));
+
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setBackground(Color.WHITE);
+        field.setForeground(new Color(44, 62, 80));
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == btnSignIn) {
-            String username = txtUsername.getText();
-            String password = new String(txtPassword.getPassword());
+public void actionPerformed(ActionEvent e) {
+    if (e.getSource() == btnSignIn) {
+        String user = txtUsername.getText();
+        String pass = new String(txtPassword.getPassword());
+        String role = comboRol.getSelectedItem().toString();
 
-            // Intentar autenticar al usuario
-            User userAuthenticated = clerkController.searchUser(username, password);
+        try {
+            StaffDataFile staffFile = new StaffDataFile();
+            ArrayList<model.entities.Clerk> allStaff = staffFile.getAllStaff();
+            model.entities.User userAuth = null;
 
-            if (userAuthenticated != null) {
-                JOptionPane.showMessageDialog(this, "Bienvenido " + userAuthenticated.getName());
-
-                // 1. Cerramos la ventana de Login
-                this.dispose();
-
-                // 2. Abrimos la clase Menu (El sistema principal con JMenuBar)
-                // Nota: Si tu clase Menu requiere el objeto usuario, deberías pasárselo por constructor
-                new Menu(userAuthenticated).setVisible(true);
-
-            } else {
-                // Lógica de fallo de autenticación
-                JOptionPane.showMessageDialog(this, "Invalid user", "Error", JOptionPane.ERROR_MESSAGE);
+            // Buscamos en el archivo Staff.txt
+            for (model.entities.Clerk emp : allStaff) {
+                if (emp.getUsername().equals(user) && emp.getPassword().equals(pass)) {
+                    userAuth = emp;
+                    break;
+                }
             }
+
+            if (userAuth != null) {
+                boolean isAdmin = (userAuth instanceof model.entities.Administrator);
+                if (role.equals("Administrador") && isAdmin) {
+                    this.dispose();
+                    new Menu_Admin(userAuth).setVisible(true);
+                } else if (role.equals("Empleado") && !isAdmin) {
+                    this.dispose();
+                    new Menu_Clerk(userAuth).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "El rol no coincide.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Credenciales incorrectas.");
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error: No se pudo leer el archivo de personal.");
         }
     }
-
-private void styleButton(JButton button) {
-    button.setBackground(new Color(52, 152, 219)); // El azul que querías
-    button.setForeground(Color.WHITE);             // Texto blanco
-    button.setFocusPainted(false);
-    button.setBorderPainted(false);                // Importante para que luzca el color plano
-    button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-    button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    
-    // Esto le da un margen interno para que no se vea apretado
-    button.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
 }
+    private void styleButton(JButton button) {
+        button.setBackground(new Color(52, 152, 219));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-    public void insertUsersTest() {
-
-        clerkController.insertClerk(new Clerk(1, "7am-3pm", 25, null, "1-111", "Pablo Operador", "pablo", "123"));
-
-        clerkController.insertClerk(new Administrator(
-                99,
-                "Full Time",
-                30,
-                null,
-                "0-000",
-                "Admin Supreme",
-                "admin", // username (String)
-                "admin123" // password (String)
-        ));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
     }
+
+//    public void insertUsersTest() {
+//        // Los administradores van al AdministratorController
+//        adminController.insertAdministrator(new Administrator(
+//                99,
+//                "Full Time",
+//                30,
+//                null,
+//                "0-000",
+//                "Admin Supremo",
+//                "admin",
+//                "admin123"
+//        ));
+//    }
+    public void insertUsersTest() {
+    try {
+        StaffDataFile sf = new StaffDataFile();
+        if (sf.getAllStaff().isEmpty()) {
+            // Crea el admin solo si el archivo está vacío
+            sf.insertStaff(new Administrator(1, "8-5", 30, null, "000", "Admin", "admin", "123"));
+        }
+    } catch (IOException e) { }
+}
 }
