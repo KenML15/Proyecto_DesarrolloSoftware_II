@@ -66,7 +66,7 @@ public class Menu extends JFrame {
         sidePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0)); // 0 spacing para control total
 
         // Encabezado del SideBar
-        JLabel lblBrand = new JLabel("PARK-SYSTEM", SwingConstants.CENTER);
+        JLabel lblBrand = new JLabel("SISTEMA DE PARQUEOS", SwingConstants.CENTER);
         lblBrand.setForeground(Color.WHITE);
         lblBrand.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblBrand.setPreferredSize(new Dimension(250, 80));
@@ -83,6 +83,7 @@ public class Menu extends JFrame {
         addSidebarButton("PARQUEOS", e -> openParkingLotManagement(desktop));
         addSidebarButton("TARIFAS", e -> openFeeManagement(desktop));
         addSidebarButton("NUEVO PARQUEO", e -> openParkingLotWindow(desktop));
+        addSidebarButton("REPORTES", e -> openReportsWindow(desktop));
         // addSidebarButton("CONFIGURAR ESPACIOS", e -> openSpaceConfiguration(desktop));
 
         // Espacio flexible y botón de salida
@@ -141,7 +142,7 @@ public class Menu extends JFrame {
                     JButton btn = (JButton) c;
                     String txt = btn.getText().toUpperCase();
                     // Ocultamos las opciones sensibles para usuarios normales
-                    if (txt.equals("PARQUEOS") || txt.equals("TARIFAS") || txt.equals("CONFIGURAR ESPACIOS")) {
+                    if (txt.equals("PARQUEOS") || txt.equals("TARIFAS") || txt.equals("CONFIGURAR ESPACIOS") || txt.equals("REPORTES")) {
                         btn.setVisible(false);
                     }
                 }
@@ -149,7 +150,7 @@ public class Menu extends JFrame {
         }
     }
 
-    // --- MÉTODOS DE SOPORTE (LIMPIOS) ---
+    // --- MÉTODOS DE SOPORTE ---
     private void addWindowToDesktop(HomeDesktop desktop, JInternalFrame window) {
         try {
             // Verificar si ya está agregada para no duplicar
@@ -186,6 +187,20 @@ public class Menu extends JFrame {
 
     private void openFeeManagement(HomeDesktop desktop) {
         addWindowToDesktop(desktop, new FeeManagement());
+    }
+    
+    private void openReportsWindow(HomeDesktop desktop) {
+        try {
+            // Obtener el nombre del usuario actual para mostrarlo en los reportes
+            String userName = currentUser.getName();
+            
+            // Crear y mostrar la ventana de reportes
+            ReportsWindow reportsWindow = new ReportsWindow(userName);
+            addWindowToDesktop(desktop, reportsWindow);
+            
+        } catch (Exception e) {
+            showError("Error al abrir ventana de reportes: " + e.getMessage());
+        }
     }
 
     private void openSpaceConfiguration(HomeDesktop desktop) {

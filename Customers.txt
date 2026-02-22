@@ -1,2 +1,3 @@
 1;Eilyn;false;eilyn@ucr.ac.cr;Cachí;87603888
 2;Fulano;true;fulano@hotmail.com;Paraíso;55550101
+3;Bruno;false;bruno@uned.cr;Paraíso;70410012
