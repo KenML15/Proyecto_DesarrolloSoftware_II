@@ -97,7 +97,7 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
         panel.add(comboBoxAddress);
 
         //Espacios del parqueo
-        labelSpaces = new JLabel("Espacios totales (1-100):");
+        labelSpaces = new JLabel("Espacios totales:");
         labelSpaces.setBounds(50, 90, 180, 25);
         labelSpaces.setFont(labelFont);
         panel.add(labelSpaces);

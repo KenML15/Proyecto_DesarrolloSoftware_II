@@ -80,15 +80,12 @@ public class Menu_Admin extends JFrame {
         addSidebarButton("TARIFAS", e -> openFeeManagement(desktop));
         addSidebarButton("NUEVO PARQUEO", e -> openParkingLotWindow(desktop));
         addSidebarButton("VER PARQUEO", e -> openParkingVisualView(desktop));
-
-        // --- AQUÍ AÑADIMOS EL NUEVO BOTÓN DE PERSONAL ---
-        // Usamos addSidebarButton para que tenga el mismo diseño que los demás
         addSidebarButton("GESTIÓN DE PERSONAL", e -> openUserManagement());
 
         // Espacio flexible y botón de salida
         JButton btnExit = addSidebarButton("CERRAR SESIÓN", e -> {
-            this.dispose(); // Cierra el menú actual
-            new LoginWindow().setVisible(true); // Abre un login nuevo que leerá los datos compartidos
+            this.dispose(); 
+            new LoginWindow().setVisible(true); 
         });
         btnExit.setBackground(new Color(192, 57, 43));
 
