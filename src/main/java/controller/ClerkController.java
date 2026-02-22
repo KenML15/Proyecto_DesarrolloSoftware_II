@@ -15,21 +15,26 @@ import model.entities.UserOperations;
  *
  * @author 50687
  */
-public class ClerkController implements UserOperations{
-    ClerkData clerkData = new ClerkData();
-    
-    public void insertClerk(Clerk clerk){
+public class ClerkController implements UserOperations {
+
+    static ClerkData clerkData = new ClerkData();
+
+    public void insertClerk(Clerk clerk) {
         clerkData.insertClerk(clerk);
     }
-    
-    public ArrayList<Clerk> getAllClerks(){
+
+    public ArrayList<Clerk> getAllClerks() {
         return clerkData.getAllClerks();
+    }
+
+    public void deleteClerk(String identification) {
+        clerkData.deleteClerk(identification);
     }
 
     @Override
     public User searchUser(String identification) {
         ArrayList<Clerk> clerks = clerkData.getAllClerks();
-        
+
         Clerk clerkToReturn = null;
         for (Clerk clerk : clerks) {
             if (clerk.getIdentification().equalsIgnoreCase(identification)) {
@@ -42,7 +47,7 @@ public class ClerkController implements UserOperations{
     @Override
     public User searchUser(User user) {
         ArrayList<Clerk> clerks = clerkData.getAllClerks();
-        
+
         Clerk clerkToReturn = null;
         for (Clerk clerk : clerks) {
             if (clerk.getUsername().equalsIgnoreCase(user.getUsername()) && clerk.getPassword().equals(user.getPassword())) {
@@ -62,23 +67,23 @@ public class ClerkController implements UserOperations{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-public User searchUser(String username, String password) {
-  
-    ArrayList<Clerk> clerks = clerkData.getAllClerks();
-    
+    public User searchUser(String username, String password) {
 
-    if (clerks == null) return null;
+        ArrayList<Clerk> clerks = clerkData.getAllClerks();
 
-
-    for (Clerk clerk : clerks) {
-      
-        if (clerk.getUsername().equalsIgnoreCase(username) && 
-            clerk.getPassword().equals(password)) {
-            return clerk; 
+        if (clerks == null) {
+            return null;
         }
+
+        for (Clerk clerk : clerks) {
+
+            if (clerk.getUsername().equalsIgnoreCase(username)
+                    && clerk.getPassword().equals(password)) {
+                return clerk;
+            }
+        }
+
+        return null;
     }
-    
-    return null; 
-}
-    
+
 }

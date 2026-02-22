@@ -13,41 +13,32 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 import model.entities.Administrator;
-import model.entities.Customer;
 import model.entities.ParkingLot;
 import model.entities.User;
-import org.jdom2.JDOMException;
 
 /**
  *
- * @author 50687
+ * @author Pablo
  */
-public class Menu extends JFrame {
+public class Menu_Clerk extends JFrame {
 
     private User currentUser;
     private JPanel sidePanel;
     private HomeDesktop desktop;
 
-    public Menu(User user) {
+    public Menu_Clerk(User user) {
         super("SISTEMA DE GESTIÓN DE PARQUEOS");
         this.currentUser = user;
         initComponents();
@@ -82,8 +73,6 @@ public class Menu extends JFrame {
         addSidebarButton("CLIENTES", e -> openCustomerManagement(desktop));
         addSidebarButton("VEHÍCULOS", e -> openVehicleManagement(desktop));
         addSidebarButton("PARQUEOS", e -> openParkingLotManagement(desktop));
-        addSidebarButton("TARIFAS", e -> openFeeManagement(desktop));
-        addSidebarButton("NUEVO PARQUEO", e -> openParkingLotWindow(desktop));
         addSidebarButton("VER PARQUEO", e -> openParkingVisualView(desktop));
         // addSidebarButton("CONFIGURAR ESPACIOS", e -> openSpaceConfiguration(desktop));
 

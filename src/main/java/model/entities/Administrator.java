@@ -6,16 +6,22 @@ package model.entities;
 
 /**
  *
- * @author 50687
+ * @author pablo
  */
 public class Administrator extends Clerk {
 
-    public Administrator(int employeeCode, String schedule, int age, ParkingLot parkingLot) {
-        super(employeeCode, schedule, age, parkingLot);
-    }
-
+    // Constructor completo
     public Administrator(int employeeCode, String schedule, int age, ParkingLot parkingLot, String identification, String name, String username, String password) {
         super(employeeCode, schedule, age, parkingLot, identification, name, username, password);
     }
 
+    // Constructor simplificado
+    public Administrator(int employeeCode, String schedule, int age, ParkingLot parkingLot) {
+        super(employeeCode, schedule, age, parkingLot);
+    }
+
+    @Override
+    public String toString() {
+        return "Administrator{" + super.toString() + "}";
+    }
 }
