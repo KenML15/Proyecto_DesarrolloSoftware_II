@@ -6,84 +6,74 @@ package controller;
 
 import java.util.ArrayList;
 import model.data.ClerkData;
+import model.data.StaffDataFile;
 import model.entities.Clerk;
-import model.entities.Customer;
+import model.entities.Administrator;
 import model.entities.User;
 import model.entities.UserOperations;
 
-/**
- *
- * @author 50687
- */
 public class ClerkController implements UserOperations {
 
     static ClerkData clerkData = new ClerkData();
 
-    public void insertClerk(Clerk clerk) {
+    public void loadFromDisk() {
+        StaffDataFile file = new StaffDataFile();
+        ArrayList<Clerk> fromFile = file.getAllStaff();
+        clerkData.getAllClerks().clear();
+        for (Clerk c : fromFile) {
+            if (!(c instanceof Administrator)) {
+                clerkData.insertClerk(c);
+            }
+        }
+    }
+
+    public boolean insertClerk(Clerk clerk) {
+        if (clerk == null) {
+            return false;
+        }
         clerkData.insertClerk(clerk);
+        return syncDisk();
+    }
+
+    public boolean deleteClerk(String identification) {
+        clerkData.deleteClerk(identification);
+        return syncDisk();
+    }
+
+    private boolean syncDisk() {
+        StaffDataFile file = new StaffDataFile();
+        ArrayList<Clerk> all = new ArrayList<>();
+        all.addAll(new AdministratorController().getAllAdministrators());
+        all.addAll(clerkData.getAllClerks());
+        return file.saveAll(all);
     }
 
     public ArrayList<Clerk> getAllClerks() {
         return clerkData.getAllClerks();
     }
 
-    public void deleteClerk(String identification) {
-        clerkData.deleteClerk(identification);
-    }
-
     @Override
-    public User searchUser(String identification) {
-        ArrayList<Clerk> clerks = clerkData.getAllClerks();
-
-        Clerk clerkToReturn = null;
-        for (Clerk clerk : clerks) {
-            if (clerk.getIdentification().equalsIgnoreCase(identification)) {
-                clerkToReturn = clerk;
+    public User searchUser(String id) {
+        for (Clerk c : clerkData.getAllClerks()) {
+            if (c.getIdentification().equals(id)) {
+                return c;
             }
         }
-        return clerkToReturn;
-    }
-
-    @Override
-    public User searchUser(User user) {
-        ArrayList<Clerk> clerks = clerkData.getAllClerks();
-
-        Clerk clerkToReturn = null;
-        for (Clerk clerk : clerks) {
-            if (clerk.getUsername().equalsIgnoreCase(user.getUsername()) && clerk.getPassword().equals(user.getPassword())) {
-                clerkToReturn = clerk;
-            }
-        }
-        return clerkToReturn;
-    }
-
-    @Override
-    public ArrayList<User> sortUsers(Customer[] allUsers) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public ArrayList<User> sortUsers(String identification, User[] allUsers) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public User searchUser(String username, String password) {
-
-        ArrayList<Clerk> clerks = clerkData.getAllClerks();
-
-        if (clerks == null) {
-            return null;
-        }
-
-        for (Clerk clerk : clerks) {
-
-            if (clerk.getUsername().equalsIgnoreCase(username)
-                    && clerk.getPassword().equals(password)) {
-                return clerk;
-            }
-        }
-
         return null;
     }
 
+    @Override
+    public User searchUser(User u) {
+        return null;
+    }
+
+    @Override
+    public ArrayList<User> sortUsers(model.entities.Customer[] u) {
+        return null;
+    }
+
+    @Override
+    public ArrayList<User> sortUsers(String id, User[] u) {
+        return null;
+    }
 }

@@ -1,1 +1,3 @@
-ADMIN;000;Admin;admin;123;1;8-5;30
+ADMIN;1;Admin;admin;123;1;08:00-17:00;30
+ADMIN;2;Pablo Solano;Pablo;MAX;2;8am-4pm;18
+CLERK;3;Max Vásquez;Max;123;3;10am-6pm;25

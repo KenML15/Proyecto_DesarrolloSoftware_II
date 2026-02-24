@@ -6,68 +6,74 @@ package controller;
 
 import java.util.ArrayList;
 import model.data.AdministratorData;
+import model.data.StaffDataFile;
 import model.entities.Administrator;
-import model.entities.Customer;
+import model.entities.Clerk;
 import model.entities.User;
 import model.entities.UserOperations;
 
-/**
- *
- * @author pablo
- */
 public class AdministratorController implements UserOperations {
 
     private static AdministratorData adminData = new AdministratorData();
 
-    public void insertAdministrator(Administrator admin) {
-        if (admin != null) {
-            adminData.insertAdministrator(admin);
-            System.out.println("LOG: Administrador insertado correctamente en AdministratorData.");
+    public void loadFromDisk() {
+        StaffDataFile file = new StaffDataFile();
+        ArrayList<Clerk> fromFile = file.getAllStaff();
+        adminData.getAllAdministrators().clear();
+        for (Clerk c : fromFile) {
+            if (c instanceof Administrator) {
+                adminData.insertAdministrator((Administrator) c);
+            }
         }
     }
 
-    public User searchUser(String username, String password) {
-        ArrayList<Administrator> admins = adminData.getAllAdministrators();
-
-        for (Administrator admin : admins) {
-            if (admin.getUsername().equalsIgnoreCase(username) && admin.getPassword().equals(password)) {
-                return admin;
-            }
+    public boolean insertAdministrator(Administrator admin) {
+        if (admin == null) {
+            return false;
         }
-        return null;
+        adminData.insertAdministrator(admin);
+        return syncDisk();
+    }
+
+    public boolean deleteAdministrator(String identification) {
+        adminData.deleteAdministrator(identification);
+        return syncDisk();
+    }
+
+    private boolean syncDisk() {
+        StaffDataFile file = new StaffDataFile();
+        ArrayList<Clerk> all = new ArrayList<>();
+        all.addAll(adminData.getAllAdministrators());
+        all.addAll(ClerkController.clerkData.getAllClerks());
+        return file.saveAll(all);
     }
 
     public ArrayList<Administrator> getAllAdministrators() {
         return adminData.getAllAdministrators();
     }
 
-    public void deleteAdministrator(String identification) {
-        adminData.deleteAdministrator(identification);
-    }
-
     @Override
-    public User searchUser(String identification) {
-        for (Administrator admin : adminData.getAllAdministrators()) {
-            if (admin.getIdentification().equals(identification)) {
-                return admin;
+    public User searchUser(String id) {
+        for (Administrator a : adminData.getAllAdministrators()) {
+            if (a.getIdentification().equals(id)) {
+                return a;
             }
         }
         return null;
     }
 
     @Override
-    public User searchUser(User user) {
-        return searchUser(user.getUsername(), user.getPassword());
+    public User searchUser(User u) {
+        return null;
     }
 
     @Override
-    public ArrayList<User> sortUsers(Customer[] allUsers) {
-        throw new UnsupportedOperationException("Operación no requerida para Admin en este momento.");
+    public ArrayList<User> sortUsers(model.entities.Customer[] u) {
+        return null;
     }
 
     @Override
-    public ArrayList<User> sortUsers(String identification, User[] allUsers) {
-        throw new UnsupportedOperationException("Operación no requerida para Admin en este momento.");
-
+    public ArrayList<User> sortUsers(String id, User[] u) {
+        return null;
     }
 }

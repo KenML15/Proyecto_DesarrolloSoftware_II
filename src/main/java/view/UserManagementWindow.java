@@ -7,7 +7,6 @@ package view;
 import controller.AdministratorController;
 import controller.ClerkController;
 import java.awt.*;
-import java.io.IOException;
 import javax.swing.*;
 import model.entities.Administrator;
 import model.entities.Clerk;
@@ -106,40 +105,28 @@ public class UserManagementWindow extends BaseInternalFrame {
     }
 
     private void saveUser() {
-        try {
-            if (txtId.getText().isEmpty() || txtName.getText().isEmpty() || txtUser.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Por favor complete todos los campos", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+        String id = txtId.getText();
+        String name = txtName.getText();
+        int age = (int) spinAge.getValue();
+        String user = txtUser.getText();
+        String pass = new String(txtPass.getPassword());
+        int code = Integer.parseInt(txtCode.getText()); 
+        String schedule = txtSchedule.getText();
 
-            String id = txtId.getText();
-            String name = txtName.getText();
-            int age = (int) spinAge.getValue();
-            String user = txtUser.getText();
-            String pass = new String(txtPass.getPassword());
-            int code = Integer.parseInt(txtCode.getText());
-            String schedule = txtSchedule.getText();
+        boolean exito;
+        if (comboRole.getSelectedItem().equals("Administrador")) {
+            Administrator newAdmin = new Administrator(code, schedule, age, null, id, name, user, pass);
+            exito = adminCtrl.insertAdministrator(newAdmin);
+        } else {
+            Clerk newClerk = new Clerk(code, schedule, age, null, id, name, user, pass);
+            exito = clerkCtrl.insertClerk(newClerk);
+        }
 
-            model.data.StaffDataFile dataFile = new model.data.StaffDataFile();
-
-            if (comboRole.getSelectedItem().equals("Administrador")) {
-                Administrator newAdmin = new Administrator(code, schedule, age, null, id, name, user, pass);
-                dataFile.insertStaff(newAdmin);
-                adminCtrl.insertAdministrator(newAdmin);
-                JOptionPane.showMessageDialog(this, "Administrador registrado exitosamente.");
-            } else {
-                Clerk newClerk = new Clerk(code, schedule, age, null, id, name, user, pass);
-                dataFile.insertStaff(newClerk);
-                clerkCtrl.insertClerk(newClerk);
-                JOptionPane.showMessageDialog(this, "Empleado registrado exitosamente.");
-            }
-
+        if (exito) {
+            JOptionPane.showMessageDialog(this, "Registro exitoso.");
             this.dispose();
-
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "El código de empleado debe ser un número numérico.", "Error de formato", JOptionPane.ERROR_MESSAGE);
-        } catch (HeadlessException | IOException e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de Sistema", JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al guardar en el archivo.");
         }
     }
 }

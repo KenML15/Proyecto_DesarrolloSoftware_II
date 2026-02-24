@@ -44,8 +44,6 @@ public class Menu_Admin extends JFrame {
     private User currentUser;
     private JPanel sidePanel;
     private HomeDesktop desktop;
-    private AdministratorController adminController = new AdministratorController();
-    private ClerkController clerkController = new ClerkController();
 
     public Menu_Admin(User user) {
         super("SISTEMA DE GESTIÓN DE PARQUEOS");

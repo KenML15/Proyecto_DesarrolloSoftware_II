@@ -7,13 +7,11 @@ package view;
 import controller.AdministratorController;
 import controller.ClerkController;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
-import model.data.StaffDataFile;
 import model.entities.Administrator;
 import model.entities.Clerk;
 
@@ -89,44 +87,40 @@ public class UserManagement extends BaseInternalFrame {
 
     private void loadAllUsers() {
         tableModel.setRowCount(0);
-        try {
-            StaffDataFile dataFile = new StaffDataFile();
-            ArrayList<Clerk> staff = dataFile.getAllStaff();
+        ArrayList<Clerk> allStaff = new ArrayList<>();
+        allStaff.addAll(adminCtrl.getAllAdministrators());
+        allStaff.addAll(clerkCtrl.getAllClerks());
 
-            for (Clerk e : staff) {
-                String role = (e instanceof Administrator) ? "Administrador" : "Dependiente";
-                tableModel.addRow(new Object[]{
-                    e.getIdentification(), e.getName(), e.getUsername(),
-                    role, e.getEmployeeCode(), e.getSchedule()
-                });
-            }
-        } catch (IOException ex) {
-            showError("Error al cargar la tabla de usuarios: " + ex.getMessage());
+        for (Clerk e : allStaff) {
+            String role = (e instanceof Administrator) ? "Administrador" : "Dependiente";
+            tableModel.addRow(new Object[]{
+                e.getIdentification(), e.getName(), e.getUsername(),
+                role, e.getEmployeeCode(), e.getSchedule()
+            });
         }
     }
 
     private void deleteSelectedUser() {
         int row = userTable.getSelectedRow();
         if (row == -1) {
-            showWarning("Seleccione un usuario de la tabla para eliminar.");
+            showWarning("Seleccione un usuario.");
             return;
         }
 
         String id = (String) tableModel.getValueAt(row, 0);
-        String name = (String) tableModel.getValueAt(row, 1);
         String rol = (String) tableModel.getValueAt(row, 3);
 
-        int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea eliminar a: " + name + " (" + rol + ")?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (JOptionPane.showConfirmDialog(this, "¿Eliminar?") == JOptionPane.YES_OPTION) {
+            boolean exito = (rol.equals("Administrador"))
+                    ? adminCtrl.deleteAdministrator(id)
+                    : clerkCtrl.deleteClerk(id);
 
-        if (confirm == JOptionPane.YES_OPTION) {
-            if (rol.equals("Administrador")) {
-                adminCtrl.deleteAdministrator(id);
+            if (exito) {
+                loadAllUsers();
+                showSuccess("Usuario eliminado.");
             } else {
-                clerkCtrl.deleteClerk(id);
+                showError("No se pudo actualizar el archivo.");
             }
-
-            loadAllUsers();
-            showSuccess("Usuario eliminado correctamente.");
         }
     }
 

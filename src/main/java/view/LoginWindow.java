@@ -33,7 +33,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import model.data.StaffDataFile;
 import model.entities.Administrator;
 
-
 /**
  *
  * @author pablo
@@ -62,6 +61,12 @@ public class LoginWindow extends JFrame implements ActionListener {
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+
+        AdministratorController adminCtrl = new AdministratorController();
+        ClerkController clerkCtrl = new ClerkController();
+        adminCtrl.loadFromDisk();
+        clerkCtrl.loadFromDisk();
+
         new LoginWindow().setVisible(true);
     }
 
@@ -70,9 +75,6 @@ public class LoginWindow extends JFrame implements ActionListener {
         setSize(380, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
-        insertUsersTest();
-
         initComponents();
     }
 
@@ -183,35 +185,29 @@ public class LoginWindow extends JFrame implements ActionListener {
             String pass = new String(txtPassword.getPassword());
             String role = comboRol.getSelectedItem().toString();
 
-            try {
-                StaffDataFile staffFile = new StaffDataFile();
-                ArrayList<model.entities.Clerk> allStaff = staffFile.getAllStaff();
-                model.entities.User userAuth = null;
-
-                //Buscamos en el archivo Staff.txt
-                for (model.entities.Clerk emp : allStaff) {
-                    if (emp.getUsername().equals(user) && emp.getPassword().equals(pass)) {
-                        userAuth = emp;
-                        break;
-                    }
+            StaffDataFile staffFile = new StaffDataFile();
+            ArrayList<model.entities.Clerk> allStaff = staffFile.getAllStaff();
+            model.entities.User userAuth = null;
+            //Buscamos en el archivo Staff.txt
+            for (model.entities.Clerk emp : allStaff) {
+                if (emp.getUsername().equals(user) && emp.getPassword().equals(pass)) {
+                    userAuth = emp;
+                    break;
                 }
-
-                if (userAuth != null) {
-                    boolean isAdmin = (userAuth instanceof model.entities.Administrator);
-                    if (role.equals("Administrador") && isAdmin) {
-                        this.dispose();
-                        new Menu_Admin(userAuth).setVisible(true);
-                    } else if (role.equals("Empleado") && !isAdmin) {
-                        this.dispose();
-                        new Menu_Clerk(userAuth).setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "El rol no coincide.");
-                    }
+            }
+            if (userAuth != null) {
+                boolean isAdmin = (userAuth instanceof model.entities.Administrator);
+                if (role.equals("Administrador") && isAdmin) {
+                    this.dispose();
+                    new Menu_Admin(userAuth).setVisible(true);
+                } else if (role.equals("Empleado") && !isAdmin) {
+                    this.dispose();
+                    new Menu_Clerk(userAuth).setVisible(true);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Credenciales incorrectas.");
+                    JOptionPane.showMessageDialog(this, "El rol no coincide.");
                 }
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error: No se pudo leer el archivo de personal.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Credenciales incorrectas.");
             }
         }
     }
@@ -225,29 +221,5 @@ public class LoginWindow extends JFrame implements ActionListener {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         button.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
-    }
-
-//    public void insertUsersTest() {
-//        // Los administradores van al AdministratorController
-//        adminController.insertAdministrator(new Administrator(
-//                99,
-//                "Full Time",
-//                30,
-//                null,
-//                "0-000",
-//                "Admin Supremo",
-//                "admin",
-//                "admin123"
-//        ));
-//    }
-    public void insertUsersTest() {
-        try {
-            StaffDataFile sf = new StaffDataFile();
-            if (sf.getAllStaff().isEmpty()) {
-                // Crea el admin solo si el archivo está vacío
-                sf.insertStaff(new Administrator(1, "8-5", 30, null, "000", "Admin", "admin", "123"));
-            }
-        } catch (IOException e) {
-        }
     }
 }
