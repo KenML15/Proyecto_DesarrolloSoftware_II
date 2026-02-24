@@ -13,7 +13,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.beans.PropertyVetoException;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
@@ -25,8 +26,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 import model.entities.Administrator;
-import model.entities.ParkingLot;
 import model.entities.User;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -51,13 +52,13 @@ public class Menu_Clerk extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // --- SIDEBAR ---
+        //sidebar
         sidePanel = new JPanel();
-        sidePanel.setBackground(new Color(44, 62, 80)); // Azul oscuro
+        sidePanel.setBackground(new Color(44, 62, 80)); //color azul oscuro
         sidePanel.setPreferredSize(new Dimension(250, 800));
-        sidePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0)); // 0 spacing para control total
+        sidePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
-        // Encabezado del SideBar
+        //Encabezado del sidebar
         JLabel lblBrand = new JLabel("PARK-SYSTEM", SwingConstants.CENTER);
         lblBrand.setForeground(Color.WHITE);
         lblBrand.setFont(new Font("Segoe UI", Font.BOLD, 22));
@@ -65,23 +66,21 @@ public class Menu_Clerk extends JFrame {
         lblBrand.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(52, 73, 94)));
         sidePanel.add(lblBrand);
 
-        // --- ÁREA CENTRAL ---
         desktop = new HomeDesktop();
-        desktop.setBackground(new Color(236, 240, 241)); // Gris claro moderno
+        desktop.setBackground(new Color(236, 240, 241));
 
-        // --- BOTONES DE NAVEGACIÓN (Sin el gris de Swing) ---
+        //botones de navegación
         addSidebarButton("CLIENTES", e -> openCustomerManagement(desktop));
         addSidebarButton("VEHÍCULOS", e -> openVehicleManagement(desktop));
         addSidebarButton("PARQUEOS", e -> openParkingLotManagement(desktop));
         addSidebarButton("VER PARQUEO", e -> openParkingVisualView(desktop));
-        // addSidebarButton("CONFIGURAR ESPACIOS", e -> openSpaceConfiguration(desktop));
 
-        // Espacio flexible y botón de salida
+        //botón de salida
         JButton btnExit = addSidebarButton("CERRAR SESIÓN", e -> {
             this.dispose();
             new LoginWindow().setVisible(true);
         });
-        btnExit.setBackground(new Color(192, 57, 43)); // Rojo técnico
+        btnExit.setBackground(new Color(192, 57, 43)); //color rojo
 
         add(sidePanel, BorderLayout.WEST);
         add(desktop, BorderLayout.CENTER);
@@ -96,7 +95,6 @@ public class Menu_Clerk extends JFrame {
         btn.setForeground(new Color(236, 240, 241));
         btn.setBackground(new Color(44, 62, 80));
 
-        // --- AQUÍ SE QUITA EL GRIS ---
         btn.setContentAreaFilled(false); // Quita el fondo gris por defecto
         btn.setOpaque(true);             // Permite que se vea nuestro color
         btn.setFocusPainted(false);      // Quita el borde de enfoque
@@ -106,14 +104,16 @@ public class Menu_Clerk extends JFrame {
 
         btn.addActionListener(action);
 
-        // Efecto Hover
+        //efecto Hover
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (btn.getBackground().equals(new Color(44, 62, 80))) {
                     btn.setBackground(new Color(52, 73, 94));
                 }
             }
 
+            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (btn.getBackground().equals(new Color(52, 73, 94))) {
                     btn.setBackground(new Color(44, 62, 80));
@@ -131,7 +131,7 @@ public class Menu_Clerk extends JFrame {
                 if (c instanceof JButton) {
                     JButton btn = (JButton) c;
                     String txt = btn.getText().toUpperCase();
-                    // Ocultamos las opciones sensibles para usuarios normales
+                    //Ocultamos las opciones sensibles para usuarios normales
                     if (txt.equals("PARQUEOS") || txt.equals("TARIFAS") || txt.equals("CONFIGURAR ESPACIOS")) {
                         btn.setVisible(false);
                     }
@@ -140,10 +140,10 @@ public class Menu_Clerk extends JFrame {
         }
     }
 
-    // --- MÉTODOS DE SOPORTE (LIMPIOS) ---
+    //métodos de soporte
     private void addWindowToDesktop(HomeDesktop desktop, JInternalFrame window) {
     try {
-        // 1. Evitar duplicados
+        //Evitar duplicados
         for (Component c : desktop.getComponents()) {
             if (c.getClass() == window.getClass()) {
                 JInternalFrame win = (JInternalFrame) c;
@@ -153,21 +153,18 @@ public class Menu_Clerk extends JFrame {
             }
         }
 
-        // 2. FORZAR CAPA MÁXIMA (DRAG_LAYER está por encima de PALETTE y MODAL)
         desktop.add(window, JDesktopPane.DRAG_LAYER);
         
-        // 3. FORZAR POSICIÓN 0 (Frente absoluto)
         desktop.setComponentZOrder(window, 0);
 
         window.setVisible(true);
         window.toFront();
         window.setSelected(true);
         
-        // 4. REFRESCAR EL ESCRITORIO
         desktop.revalidate();
         desktop.repaint();
         
-    } catch (Exception e) {
+    } catch (PropertyVetoException e) {
         showError("Error: " + e.getMessage());
     }
 }
@@ -180,10 +177,10 @@ public class Menu_Clerk extends JFrame {
     private void openParkingVisualView(HomeDesktop desktop) {
     try {
         ParkingLotFileController controller = new ParkingLotFileController();
-        // Abrimos la ventana de selección de parqueo o la vista directa
+        //Abrimos la ventana de selección de parqueo o la vista directa
         ParkingVisualWindow window = new ParkingVisualWindow(controller);
         addWindowToDesktop(desktop, window);
-    } catch (Exception e) {
+    } catch (IOException | JDOMException e) {
         showError("Error al abrir vista visual: " + e.getMessage());
     }
 }
@@ -196,39 +193,20 @@ public class Menu_Clerk extends JFrame {
         addWindowToDesktop(desktop, new ParkingLotManagement());
     }
 
-    private void openFeeManagement(HomeDesktop desktop) {
-        addWindowToDesktop(desktop, new FeeManagement());
-    }
-
-    private void openSpaceConfiguration(HomeDesktop desktop) {
-        try {
-            ParkingLotFileController controller = new ParkingLotFileController();
-            ArrayList<ParkingLot> parkingLots = controller.getAllParkingLots();
-            if (parkingLots.isEmpty()) {
-                showMessage("Cree un parqueo primero", "Información");
-                return;
-            }
-            // (Aquí puedes llamar a tu lógica de JOptionDialog para elegir parqueo)
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
-        }
-    }
-
     private void openParkingLotWindow(HomeDesktop desktop) {
         try {
             ParkingLotFileController controller = new ParkingLotFileController();
             ParkingLotWindow window = new ParkingLotWindow(controller);
 
-            // 1. Agregar especificando la capa superior
+            //Agregar especificando la capa superior
             desktop.add(window, JDesktopPane.PALETTE_LAYER);
 
-            // 2. Forzar Z-Order al frente (posición 0)
             desktop.setComponentZOrder(window, 0);
 
             window.setVisible(true);
             window.toFront();
             window.setSelected(true);
-        } catch (Exception e) {
+        } catch (PropertyVetoException | IOException | JDOMException e) {
             showError("Error: " + e.getMessage());
         }
     }

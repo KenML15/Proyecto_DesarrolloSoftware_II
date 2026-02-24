@@ -10,11 +10,12 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import model.data.StaffDataFile;
 import model.entities.Administrator;
 import model.entities.Clerk;
-import model.entities.User;
 
 public class UserManagement extends BaseInternalFrame {
 
@@ -26,7 +27,6 @@ public class UserManagement extends BaseInternalFrame {
 
     public UserManagement() {
         super("GESTIÓN DE PERSONAL");
-        // Usamos los controladores (preferiblemente los que tienen el 'static' que pusimos antes)
         this.adminCtrl = new AdministratorController();
         this.clerkCtrl = new ClerkController();
 
@@ -38,7 +38,7 @@ public class UserManagement extends BaseInternalFrame {
         setSize(900, 550);
         setLayout(new BorderLayout(10, 10));
 
-        // --- TABLA ---
+        //Tabla
         tableModel = new DefaultTableModel(COLUMNS, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -52,7 +52,7 @@ public class UserManagement extends BaseInternalFrame {
         JScrollPane scrollPane = new JScrollPane(userTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- BOTONES ---
+        //Botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
 
         JButton btnAdd = createStyledButton("Nuevo Usuario", new Color(46, 204, 113));
@@ -97,14 +97,12 @@ private void loadAllUsers() {
             return;
         }
 
-        // Obtenemos los datos de la fila seleccionada
-        String id = (String) tableModel.getValueAt(row, 0); // Columna Cédula
-        String name = (String) tableModel.getValueAt(row, 1); // Columna Nombre
-        String rol = (String) tableModel.getValueAt(row, 3); // Columna Rol
+        //Obtenemos los datos de la fila seleccionada
+        String id = (String) tableModel.getValueAt(row, 0); //Columna Cédula
+        String name = (String) tableModel.getValueAt(row, 1); //Columna Nombre
+        String rol = (String) tableModel.getValueAt(row, 3); //Columna Rol
 
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "¿Está seguro de que desea eliminar a: " + name + " (" + rol + ")?",
-                "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea eliminar a: " + name + " (" + rol + ")?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             if (rol.equals("Administrador")) {
@@ -113,7 +111,7 @@ private void loadAllUsers() {
                 clerkCtrl.deleteClerk(id);
             }
 
-            loadAllUsers(); // Refresca la tabla automáticamente
+            loadAllUsers(); //Refresca la tabla automáticamente
             JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente.");
         }
     }
@@ -124,10 +122,10 @@ private void loadAllUsers() {
         win.setVisible(true);
         win.toFront();
 
-        // Refrescar al cerrar la ventana de registro
-        win.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+        //Refrescar al cerrar la ventana de registro
+        win.addInternalFrameListener(new InternalFrameAdapter() {
             @Override
-            public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
+            public void internalFrameClosed(InternalFrameEvent e) {
                 loadAllUsers();
             }
         });
@@ -140,11 +138,10 @@ private void loadAllUsers() {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setPreferredSize(new Dimension(150, 40));
 
-        // --- ESTO ES LO QUE HACE QUE EL COLOR SE VEA ---
         btn.setOpaque(true);
-        btn.setBorderPainted(false); // Quita el borde gris de Windows
-        btn.setContentAreaFilled(true); // Fuerza el color de fondo
-        btn.setFocusPainted(false); // Quita el cuadro de puntos al hacer clic
+        btn.setBorderPainted(false); //Quita el borde gris de Windows
+        btn.setContentAreaFilled(true); //Fuerza el color de fondo
+        btn.setFocusPainted(false); //Quita el cuadro de puntos al hacer clic
 
         return btn;
     }

@@ -12,6 +12,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -52,12 +53,11 @@ public class VehicleManagement extends BaseInternalFrame {
     private final String[] COLUMNS = {"Placa", "Color", "Marca", "Modelo", "Tipo", "Clientes", "Espacio", "Estado", "Entrada"};
 
     public VehicleManagement() {
-        super("GESTIÓN DE VEHÍCULOS"); // Usamos el constructor de BaseInternalFrame
+        super("GESTIÓN DE VEHÍCULOS");
         initControllers();
         createInterface();
         loadAllVehicles();
 
-        // Estilo extra para la tabla (resuelve la línea invisible)
         styleTable(vehicleTable);
     }
 
@@ -92,14 +92,14 @@ public class VehicleManagement extends BaseInternalFrame {
     //Panel de búsqueda
     private JPanel createSearchPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
-        panel.setBackground(backgroundColor); // Gris muy claro
+        panel.setBackground(backgroundColor); //Gris muy claro
 
         JLabel lblSearch = new JLabel("Buscar vehículo:");
         lblSearch.setFont(labelFont);
         panel.add(lblSearch);
 
         searchField = new JTextField(20);
-        styleTextField(searchField); // Borde azul y padding
+        styleTextField(searchField); //Borde azul y padding
         panel.add(searchField);
 
         JButton searchButton = new JButton("BUSCAR");
@@ -109,7 +109,7 @@ public class VehicleManagement extends BaseInternalFrame {
 
         JButton clearButton = new JButton("MOSTRAR TODOS");
         styleButton(clearButton);
-        clearButton.setBackground(new Color(127, 140, 141)); // Gris para diferenciar
+        clearButton.setBackground(new Color(127, 140, 141)); //Gris para diferenciar
         clearButton.addActionListener(e -> loadAllVehicles());
         panel.add(clearButton);
 
@@ -132,8 +132,8 @@ public class VehicleManagement extends BaseInternalFrame {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                label.setBackground(primaryColor); // El azul oscuro
-                label.setForeground(Color.WHITE);   // Texto blanco
+                label.setBackground(primaryColor); //Azul oscuro
+                label.setForeground(Color.WHITE);   //Texto blanco
                 label.setFont(new Font("Segoe UI", Font.BOLD, 12));
                 label.setHorizontalAlignment(JLabel.CENTER);
                 label.setOpaque(true);
@@ -154,9 +154,9 @@ public class VehicleManagement extends BaseInternalFrame {
         panel.setBackground(backgroundColor);
 
         JButton btnNew = createActionButton("NUEVO VEHÍCULO", primaryColor, e -> openNewVehicle());
-        JButton btnEdit = createActionButton("EDITAR", new Color(39, 174, 96), e -> editSelectedVehicle()); // Verde
-        JButton btnDelete = createActionButton("ELIMINAR", new Color(192, 57, 43), e -> deleteSelectedVehicle()); // Rojo
-        JButton btnRefresh = createActionButton("ACTUALIZAR", new Color(52, 152, 219), e -> loadAllVehicles()); // Azul claro
+        JButton btnEdit = createActionButton("EDITAR", new Color(39, 174, 96), e -> editSelectedVehicle()); //Verde
+        JButton btnDelete = createActionButton("ELIMINAR", new Color(192, 57, 43), e -> deleteSelectedVehicle()); //Rojo
+        JButton btnRefresh = createActionButton("ACTUALIZAR", new Color(52, 152, 219), e -> loadAllVehicles()); //Azul claro
 
         panel.add(btnNew);
         panel.add(btnEdit);
@@ -326,7 +326,6 @@ public class VehicleManagement extends BaseInternalFrame {
         }
 
         String plate = (String) tableModel.getValueAt(row, 0);
-//        String brand = (String) tableModel.getValueAt(row, 2);
 
         int confirm = JOptionPane.showConfirmDialog(this,
                 "¿Eliminar vehículo " + plate + "?",
@@ -368,9 +367,9 @@ public class VehicleManagement extends BaseInternalFrame {
                 // Si el desktop es null, algo va mal con la jerarquía
                 System.err.println("Error: No se encontró el DesktopPane");
             }
-        } catch (Exception e) {
+        } catch (PropertyVetoException e) {
             showError("No se pudo abrir la pantalla de registro: " + e.getMessage());
-            e.printStackTrace(); // Esto forzará que salga algo en consola si falla
+            e.printStackTrace();
         }
     }
 

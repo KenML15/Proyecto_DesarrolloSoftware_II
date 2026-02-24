@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
- package view;
+package view;
 
 import controller.AdministratorController;
 import controller.ClerkController;
@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import model.data.StaffDataFile;
 import model.entities.Administrator;
 import model.entities.Clerk;
@@ -38,15 +39,14 @@ import model.entities.User;
  *
  * @author pablo
  */
-
 public class LoginWindow extends JFrame implements ActionListener {
 
     JTextField txtUsername;
     JPasswordField txtPassword;
     JComboBox<String> comboRol;
-    JButton btnSignIn; 
+    JButton btnSignIn;
 
-    // Controladores específicos
+    //Controladores específicos
     ClerkController clerkController = new ClerkController();
     AdministratorController adminController = new AdministratorController();
 
@@ -54,14 +54,13 @@ public class LoginWindow extends JFrame implements ActionListener {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-            // Personalización técnica de componentes
             UIManager.put("Button.font", new Font("Segoe UI", Font.PLAIN, 13));
             UIManager.put("Label.font", new Font("Segoe UI", Font.PLAIN, 13));
             UIManager.put("Panel.background", new Color(245, 246, 250));
             UIManager.put("OptionPane.background", Color.WHITE);
             UIManager.put("OptionPane.messageForeground", new Color(44, 62, 80));
 
-        } catch (Exception e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
         new LoginWindow().setVisible(true);
@@ -84,12 +83,12 @@ public class LoginWindow extends JFrame implements ActionListener {
         container.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         container.setBackground(new Color(245, 246, 250));
 
-        // 1. Título: 
+        //Título 
         JLabel lblTitle = new JLabel("Bienvenido al Parking System");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // 2. Logo 
+        //Logo 
         JLabel lblLogo = new JLabel();
         try {
             ImageIcon iconOriginal = new ImageIcon("imagenes/Logo.png");
@@ -100,7 +99,7 @@ public class LoginWindow extends JFrame implements ActionListener {
         }
         lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // 3. Casilla de Rol 
+        //Casilla de Rol 
         JLabel lblRol = new JLabel("Seleccione su Rol:");
         lblRol.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -108,25 +107,24 @@ public class LoginWindow extends JFrame implements ActionListener {
         comboRol = new JComboBox<>(roles);
         styleComboBox(comboRol);
 
-        // 4. Nombre de Usuario
+        //Nombre de Usuario
         JLabel lblUser = new JLabel("Nombre de usuario:");
         lblUser.setAlignmentX(Component.CENTER_ALIGNMENT);
         txtUsername = new JTextField();
         styleTextField(txtUsername);
 
-        // 5. Contraseña
+        //Contraseña
         JLabel lblPass = new JLabel("Contraseña:");
         lblPass.setAlignmentX(Component.CENTER_ALIGNMENT);
         txtPassword = new JPasswordField();
         styleTextField(txtPassword);
 
-        // 7. Botón de Ingreso (Al final como en tu dibujo)
+        //Botón de Ingreso
         btnSignIn = new JButton("INGRESAR");
         styleButton(btnSignIn);
         btnSignIn.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnSignIn.addActionListener(this);
 
-        // --- AGREGAR EN EL ORDEN DEL BOCETO ---
         container.add(lblTitle);
         container.add(Box.createVerticalStrut(15));
         container.add(lblLogo);
@@ -144,7 +142,7 @@ public class LoginWindow extends JFrame implements ActionListener {
         container.add(txtPassword);
         container.add(Box.createVerticalStrut(10));
 
-        container.add(Box.createVerticalGlue()); // Empuja el botón hacia abajo si sobra espacio
+        container.add(Box.createVerticalGlue());
         container.add(btnSignIn);
         container.add(Box.createVerticalStrut(10));
 
@@ -155,11 +153,11 @@ public class LoginWindow extends JFrame implements ActionListener {
         combo.setMaximumSize(new Dimension(180, 35));
         combo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // 3. ESTILO DE TEXTO
+        //Estilo del texto
         combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         combo.setForeground(new Color(44, 62, 80));
 
-        // Nota: Si usas FlatLaf, esto ayuda a que el botón de la flecha no rompa la estética
+        //Ayuda a que el botón de la flecha no rompa la estética
         combo.putClientProperty("JComponent.roundRect", true);
     }
 
@@ -168,11 +166,11 @@ public class LoginWindow extends JFrame implements ActionListener {
         field.setPreferredSize(new Dimension(300, 35));
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Transparencia total
+        //Transparencia total
         field.setOpaque(false);
         field.setBackground(new Color(0, 0, 0, 0));
 
-        // Solo línea inferior azul
+        //Solo línea inferior azul
         field.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(52, 152, 219)));
 
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -180,44 +178,45 @@ public class LoginWindow extends JFrame implements ActionListener {
     }
 
     @Override
-public void actionPerformed(ActionEvent e) {
-    if (e.getSource() == btnSignIn) {
-        String user = txtUsername.getText();
-        String pass = new String(txtPassword.getPassword());
-        String role = comboRol.getSelectedItem().toString();
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnSignIn) {
+            String user = txtUsername.getText();
+            String pass = new String(txtPassword.getPassword());
+            String role = comboRol.getSelectedItem().toString();
 
-        try {
-            StaffDataFile staffFile = new StaffDataFile();
-            ArrayList<model.entities.Clerk> allStaff = staffFile.getAllStaff();
-            model.entities.User userAuth = null;
+            try {
+                StaffDataFile staffFile = new StaffDataFile();
+                ArrayList<model.entities.Clerk> allStaff = staffFile.getAllStaff();
+                model.entities.User userAuth = null;
 
-            // Buscamos en el archivo Staff.txt
-            for (model.entities.Clerk emp : allStaff) {
-                if (emp.getUsername().equals(user) && emp.getPassword().equals(pass)) {
-                    userAuth = emp;
-                    break;
+                //Buscamos en el archivo Staff.txt
+                for (model.entities.Clerk emp : allStaff) {
+                    if (emp.getUsername().equals(user) && emp.getPassword().equals(pass)) {
+                        userAuth = emp;
+                        break;
+                    }
                 }
-            }
 
-            if (userAuth != null) {
-                boolean isAdmin = (userAuth instanceof model.entities.Administrator);
-                if (role.equals("Administrador") && isAdmin) {
-                    this.dispose();
-                    new Menu_Admin(userAuth).setVisible(true);
-                } else if (role.equals("Empleado") && !isAdmin) {
-                    this.dispose();
-                    new Menu_Clerk(userAuth).setVisible(true);
+                if (userAuth != null) {
+                    boolean isAdmin = (userAuth instanceof model.entities.Administrator);
+                    if (role.equals("Administrador") && isAdmin) {
+                        this.dispose();
+                        new Menu_Admin(userAuth).setVisible(true);
+                    } else if (role.equals("Empleado") && !isAdmin) {
+                        this.dispose();
+                        new Menu_Clerk(userAuth).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "El rol no coincide.");
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(this, "El rol no coincide.");
+                    JOptionPane.showMessageDialog(this, "Credenciales incorrectas.");
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "Credenciales incorrectas.");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error: No se pudo leer el archivo de personal.");
             }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Error: No se pudo leer el archivo de personal.");
         }
     }
-}
+
     private void styleButton(JButton button) {
         button.setBackground(new Color(52, 152, 219));
         button.setForeground(Color.WHITE);
@@ -243,12 +242,13 @@ public void actionPerformed(ActionEvent e) {
 //        ));
 //    }
     public void insertUsersTest() {
-    try {
-        StaffDataFile sf = new StaffDataFile();
-        if (sf.getAllStaff().isEmpty()) {
-            // Crea el admin solo si el archivo está vacío
-            sf.insertStaff(new Administrator(1, "8-5", 30, null, "000", "Admin", "admin", "123"));
+        try {
+            StaffDataFile sf = new StaffDataFile();
+            if (sf.getAllStaff().isEmpty()) {
+                // Crea el admin solo si el archivo está vacío
+                sf.insertStaff(new Administrator(1, "8-5", 30, null, "000", "Admin", "admin", "123"));
+            }
+        } catch (IOException e) {
         }
-    } catch (IOException e) { }
-}
+    }
 }

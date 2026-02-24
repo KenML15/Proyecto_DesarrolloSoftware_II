@@ -13,25 +13,19 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 import model.entities.Administrator;
-import model.entities.Customer;
 import model.entities.ParkingLot;
 import model.entities.User;
 import org.jdom2.JDOMException;
@@ -59,13 +53,13 @@ public class Menu extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // --- SIDEBAR ---
+        //Sidebar
         sidePanel = new JPanel();
-        sidePanel.setBackground(new Color(44, 62, 80)); // Azul oscuro
+        sidePanel.setBackground(new Color(44, 62, 80)); //Azul oscuro
         sidePanel.setPreferredSize(new Dimension(250, 800));
-        sidePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0)); // 0 spacing para control total
+        sidePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
-        // Encabezado del SideBar
+        //Encabezado del SideBar
         JLabel lblBrand = new JLabel("SISTEMA DE PARQUEOS", SwingConstants.CENTER);
         lblBrand.setForeground(Color.WHITE);
         lblBrand.setFont(new Font("Segoe UI", Font.BOLD, 22));
@@ -75,9 +69,9 @@ public class Menu extends JFrame {
 
         // --- ÁREA CENTRAL ---
         desktop = new HomeDesktop();
-        desktop.setBackground(new Color(236, 240, 241)); // Gris claro moderno
+        desktop.setBackground(new Color(236, 240, 241)); //Este es un color gris claro
 
-        // --- BOTONES DE NAVEGACIÓN (Sin el gris de Swing) ---
+        //Botones de navegacón
         addSidebarButton("CLIENTES", e -> openCustomerManagement(desktop));
         addSidebarButton("VEHÍCULOS", e -> openVehicleManagement(desktop));
         addSidebarButton("PARQUEOS", e -> openParkingLotManagement(desktop));
@@ -91,7 +85,7 @@ public class Menu extends JFrame {
             this.dispose();
             new LoginWindow().setVisible(true);
         });
-        btnExit.setBackground(new Color(192, 57, 43)); // Rojo técnico
+        btnExit.setBackground(new Color(192, 57, 43)); //Este es un color rojo
 
         add(sidePanel, BorderLayout.WEST);
         add(desktop, BorderLayout.CENTER);
@@ -106,7 +100,6 @@ public class Menu extends JFrame {
         btn.setForeground(new Color(236, 240, 241));
         btn.setBackground(new Color(44, 62, 80));
 
-        // --- AQUÍ SE QUITA EL GRIS ---
         btn.setContentAreaFilled(false); // Quita el fondo gris por defecto
         btn.setOpaque(true);             // Permite que se vea nuestro color
         btn.setFocusPainted(false);      // Quita el borde de enfoque
@@ -116,14 +109,16 @@ public class Menu extends JFrame {
 
         btn.addActionListener(action);
 
-        // Efecto Hover
+        //Efecto Hover
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (btn.getBackground().equals(new Color(44, 62, 80))) {
                     btn.setBackground(new Color(52, 73, 94));
                 }
             }
 
+            @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (btn.getBackground().equals(new Color(52, 73, 94))) {
                     btn.setBackground(new Color(44, 62, 80));
@@ -141,7 +136,7 @@ public class Menu extends JFrame {
                 if (c instanceof JButton) {
                     JButton btn = (JButton) c;
                     String txt = btn.getText().toUpperCase();
-                    // Ocultamos las opciones sensibles para usuarios normales
+                    //Ocultamos las opciones sensibles para usuarios dependientes
                     if (txt.equals("PARQUEOS") || txt.equals("TARIFAS") || txt.equals("CONFIGURAR ESPACIOS") || txt.equals("REPORTES")) {
                         btn.setVisible(false);
                     }
@@ -150,10 +145,10 @@ public class Menu extends JFrame {
         }
     }
 
-    // --- MÉTODOS DE SOPORTE ---
+    //Métodos de soporte
     private void addWindowToDesktop(HomeDesktop desktop, JInternalFrame window) {
         try {
-            // Verificar si ya está agregada para no duplicar
+            //Verificar si ya está agregada para no duplicar
             Component[] components = desktop.getComponents();
             for (Component c : components) {
                 if (c.getClass() == window.getClass()) {
@@ -167,7 +162,7 @@ public class Menu extends JFrame {
             window.setVisible(true);
             window.toFront();
             window.setSelected(true);
-        } catch (Exception e) {
+        } catch (PropertyVetoException e) {
             showError("No se pudo abrir la ventana: " + e.getMessage());
         }
     }
@@ -191,10 +186,9 @@ public class Menu extends JFrame {
     
     private void openReportsWindow(HomeDesktop desktop) {
         try {
-            // Obtener el nombre del usuario actual para mostrarlo en los reportes
+            //Obtenemos el nombre del usuario actual para mostrarlo en los reportes
             String userName = currentUser.getName();
             
-            // Crear y mostrar la ventana de reportes
             ReportsWindow reportsWindow = new ReportsWindow(userName);
             addWindowToDesktop(desktop, reportsWindow);
             
@@ -212,7 +206,7 @@ public class Menu extends JFrame {
                 return;
             }
             // (Aquí puedes llamar a tu lógica de JOptionDialog para elegir parqueo)
-        } catch (Exception e) {
+        } catch (IOException | JDOMException e) {
             showError("Error: " + e.getMessage());
         }
     }
@@ -223,7 +217,7 @@ public class Menu extends JFrame {
 
             ParkingLotWindow window = new ParkingLotWindow(controller);
             addWindowToDesktop(desktop, window);
-        } catch (Exception e) {
+        } catch (IOException | JDOMException e) {
             showError("Error: " + e.getMessage());
         }
     }

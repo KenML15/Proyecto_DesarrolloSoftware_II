@@ -61,7 +61,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
         setLocation(150, 50);
         setLayout(new BorderLayout(0, 0));
 
-        // Panel Central para la Tabla
+        //Panel Central para la Tabla
         JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
         centerPanel.setBackground(backgroundColor);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -73,7 +73,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
         scrollPane.setBorder(BorderFactory.createLineBorder(fieldBorderColor));
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Panel de Botones Inferior
+        //Panel de Botones Inferior
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setBackground(backgroundColor);
 
@@ -112,22 +112,22 @@ public class ParkingLotManagement extends BaseInternalFrame {
         }
 
         try {
-            // Obtener el ID del parqueo seleccionado
+            //Obtener el ID del parqueo seleccionado
             int parkingLotId = Integer.parseInt(modelDataTable.getValueAt(selectedRow, 0).toString());
             ParkingLot selectedLot = parkingLotController.getParkingLotById(parkingLotId);
 
-            // Crear la ventana de salida (puedes modificarla para recibir el parqueo)
+            //Crear la ventana de salida (puedes modificarla para recibir el parqueo)
             VehicleExitWindow exitWindow = new VehicleExitWindow(selectedLot);
 
             getDesktopPane().add(exitWindow);
             exitWindow.setVisible(true);
             exitWindow.toFront();
 
-            // Actualizar la tabla cuando se cierre la ventana
+            //Actualizar la tabla cuando se cierre la ventana
             exitWindow.addInternalFrameListener(new InternalFrameAdapter() {
                 @Override
                 public void internalFrameClosed(InternalFrameEvent e) {
-                    loadParkingLots(); // Refrescar la tabla
+                    loadParkingLots(); //Refrescar la tabla
                 }
             });
 

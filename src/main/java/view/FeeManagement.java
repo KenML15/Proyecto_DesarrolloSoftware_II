@@ -14,13 +14,11 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import model.entities.Fee;
 import org.jdom2.JDOMException;
@@ -40,7 +38,7 @@ public class FeeManagement extends BaseInternalFrame {
     private final String[] COLUMNS = {"Tipo de Vehículo", "Media Hora", "Hora", "Día", "Semana", "Mes", "Año"};
 
     public FeeManagement() {
-        super("GESTIÓN DE TARIFAS"); // Título para la barra superior azul
+        super("GESTIÓN DE TARIFAS"); //Título para la barra superior azul
         init();
         createUI();
         loadFees();
@@ -58,10 +56,10 @@ public class FeeManagement extends BaseInternalFrame {
     }
 
     private void createUI() {
-        setSize(1000, 600); // Un poco más de ancho para que las columnas de dinero no se amontonen
+        setSize(1000, 600);
         setLayout(new BorderLayout(0, 0));
 
-        // Panel Central que contiene Filtros y Tabla
+        //Panel Central que contiene el filtro y la tabla
         JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
         centerPanel.setBackground(backgroundColor);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -81,8 +79,7 @@ public class FeeManagement extends BaseInternalFrame {
         lblFilter.setFont(labelFont);
         panel.add(lblFilter);
 
-        vehicleTypeCombo = new JComboBox<>(new String[]{"Todos", "Motocicleta", "Liviano", "Pesado", "Bicicleta", "Otro"});
-        // Estilo manual para el combo ya que no suele estar en BaseInternalFrame
+        vehicleTypeCombo = new JComboBox<>(new String[]{"Todos", "Moto", "Liviano", "Pesado", "Bicicleta", "Otro"});
         vehicleTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         vehicleTypeCombo.setBackground(Color.WHITE);
         vehicleTypeCombo.addActionListener(e -> filterFees());
@@ -100,9 +97,8 @@ public class FeeManagement extends BaseInternalFrame {
         };
 
         feeTable = new JTable(tableModel);
-        styleTable(feeTable); // Método de BaseInternalFrame
+        styleTable(feeTable);
 
-        // Ajuste de ancho de columnas (El tipo de vehículo necesita menos espacio que los precios)
         feeTable.getColumnModel().getColumn(0).setPreferredWidth(150);
 
         JScrollPane scroll = new JScrollPane(feeTable);
@@ -129,7 +125,7 @@ public class FeeManagement extends BaseInternalFrame {
 
     private JButton createStyledButton(String text, Color bg, JPanel panel) {
         JButton btn = new JButton(text);
-        styleButton(btn); // Método de BaseInternalFrame
+        styleButton(btn);
         btn.setBackground(bg);
         panel.add(btn);
         return btn;
@@ -239,15 +235,15 @@ public class FeeManagement extends BaseInternalFrame {
         }
     }
 
-    private void showError(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 
-    private void showWarning(String seleccione_una_tarifa_de_la_tabla_para_el) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    private void showSuccess(String la_tarifa_se_ha_eliminado_correctamente) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void showSuccess(String string) {
+        JOptionPane.showMessageDialog(this, string);
     }
 }

@@ -14,7 +14,6 @@ import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -45,7 +44,7 @@ public class FeeWindow extends BaseInternalFrame {
         setSize(500, 550);
         setLayout(new BorderLayout());
 
-        // Panel de Formulario
+        //Panel del formulario
         JPanel formPanel = new JPanel(new GridLayout(7, 2, 15, 15));
         formPanel.setBackground(Color.WHITE);
         formPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -53,7 +52,7 @@ public class FeeWindow extends BaseInternalFrame {
                 BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
 
-        // Tipo de vehículo
+        //Tarifa para cada tipo de vehículo
         formPanel.add(createLabel("Tipo de Vehículo*:"));
         vehicleTypeCombo = new JComboBox<>(new String[]{
             "-- Seleccione --", "Motocicleta", "Liviano", "Pesado", "Bicicleta", "Otro"
@@ -61,7 +60,6 @@ public class FeeWindow extends BaseInternalFrame {
         vehicleTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         formPanel.add(vehicleTypeCombo);
 
-        // Creación y estilización de campos
         txtHalfHour = createStyledField(formPanel, "Media Hora (₡)*:");
         txtHour = createStyledField(formPanel, "Hora (₡)*:");
         txtDay = createStyledField(formPanel, "Día (₡)*:");
@@ -71,7 +69,7 @@ public class FeeWindow extends BaseInternalFrame {
 
         add(formPanel, BorderLayout.CENTER);
 
-        // Panel de botones
+        //Panel de los botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
         buttonPanel.setBackground(backgroundColor);
 
@@ -90,20 +88,18 @@ public class FeeWindow extends BaseInternalFrame {
     }
 
  private JTextField createStyledField(JPanel panel, String labelText) {
-    // Aquí usamos createLabel para que procese el HTML del asterisco
     panel.add(createLabel(labelText)); 
     
     JTextField field = new JTextField();
-    styleTextField(field); // El método de estilo que ya tenías
+    styleTextField(field);
     panel.add(field);
     return field;
 }
 
 private JLabel createLabel(String text) {
-    // Buscamos el * y le ponemos una etiqueta de color mediante HTML
     String htmlText = "<html>" + text.replace("*", "<font color='red'>*</font>") + "</html>";
     JLabel label = new JLabel(htmlText);
-    label.setFont(labelFont); // Usamos la fuente moderna de la aplicación
+    label.setFont(labelFont);
     return label;
 }
 
@@ -156,7 +152,7 @@ private JLabel createLabel(String text) {
         }
 
         try {
-            // Validar que no estén vacíos y sean números
+            //Validar que no estén vacíos y sean números
             double fHalf = parse(txtHalfHour);
             double fHour = parse(txtHour);
             double fDay = parse(txtDay);
@@ -206,7 +202,7 @@ private JLabel createLabel(String text) {
         JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 
-    private void showSuccess(String tarifa_creada_exitosamente) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 }

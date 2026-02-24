@@ -15,8 +15,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -31,7 +29,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -77,17 +74,15 @@ public class VehicleWindow extends BaseInternalFrame {
         // Pasamos el título directamente al constructor de BaseInternalFrame
         super("REGISTRO DE VEHÍCULO");
         this.vehicleToEdit = null;
-        this.selectedCustomers = new ArrayList<>(); // Inicializar lista vacía
+        this.selectedCustomers = new ArrayList<>(); //Inicializar lista vacía
         initWindow();
         setVisible(true);
     }
 
-    // Constructor para editar vehículo
+    //Constructor para editar vehículo
     public VehicleWindow(Vehicle vehicle) {
-        // Título dinámico para edición
         super("EDITAR VEHÍCULO");
         this.vehicleToEdit = vehicle;
-        // Obtenemos los clientes ya asociados al vehículo
         this.selectedCustomers = vehicle.getCustomer();
         initWindow();
         setVisible(true);
@@ -120,10 +115,10 @@ public class VehicleWindow extends BaseInternalFrame {
 
     //Crear interfaz
     private void createUI() {
-        setSize(600, 700); // Un poco más grande para que no se vea apretado
+        setSize(600, 700);
         setLayout(new BorderLayout());
 
-        // --- PANEL DE TÍTULO ---
+        //título
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(primaryColor);
         headerPanel.setPreferredSize(new Dimension(600, 50));
@@ -132,7 +127,6 @@ public class VehicleWindow extends BaseInternalFrame {
         lblTitle.setFont(titleFont);
         headerPanel.add(lblTitle);
 
-        // --- CONTENEDOR PRINCIPAL CON SCROLL ---
         JPanel container = new JPanel();
         container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
         container.setBackground(backgroundColor);
@@ -163,13 +157,13 @@ public class VehicleWindow extends BaseInternalFrame {
     }
     
     private void loadData() {
-        //Llenar el combo de Clientes disponibles
+        //Llenar el combo de clientes disponibles
         loadCustomers();
         
-        //Llenar el combo de Tipos de Vehículo (Automóvil, Moto, etc.)
+        //Llenar el combo de tipos de vehículo
         loadVehicleTypes();
         
-        //Llenar el combo de Parqueos (Norte, Sur, etc.)
+        //Llenar el combo de parqueos
         loadParkingLots();
         
         //Refrescar la JList visual de clientes que ya están "a bordo"
@@ -188,7 +182,7 @@ public class VehicleWindow extends BaseInternalFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Inicializar y Estilizar campos
+        //Inicializar y Estilizar campos
         plateField = new JTextField();
         styleTextField(plateField);
         colorField = new JTextField();
@@ -198,7 +192,7 @@ public class VehicleWindow extends BaseInternalFrame {
         modelField = new JTextField();
         styleTextField(modelField);
 
-        // Añadir al GridBag
+        //Añadir al GridBag
         addFormRow(panel, "Placa*:", plateField, gbc, 0);
         addFormRow(panel, "Color:", colorField, gbc, 1);
         addFormRow(panel, "Marca:", brandField, gbc, 2);
@@ -220,7 +214,7 @@ public class VehicleWindow extends BaseInternalFrame {
                 BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
 
-        // Selector superior
+        //Selector superior
         JPanel top = new JPanel(new BorderLayout(10, 0));
         top.setOpaque(false);
         customerCombo = new JComboBox<>();
@@ -232,14 +226,14 @@ public class VehicleWindow extends BaseInternalFrame {
         top.add(customerCombo, BorderLayout.CENTER);
         top.add(addButton, BorderLayout.EAST);
 
-        // Lista central
+        //Lista central
         customerListModel = new DefaultListModel<>();
         customerList = new JList<>(customerListModel);
         customerList.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         JScrollPane listScroll = new JScrollPane(customerList);
         listScroll.setPreferredSize(new Dimension(0, 120));
 
-        // Botón remover
+        //Botón remover
         JButton removeButton = new JButton("REMOVER SELECCIONADO");
         styleButton(removeButton);
         removeButton.setBackground(new Color(192, 57, 43)); // Rojo
@@ -272,7 +266,7 @@ public class VehicleWindow extends BaseInternalFrame {
         return panel;
     }
 
-    // Método auxiliar para el GridBagLayout
+    //Método auxiliar para el GridBagLayout
     private void addFormRow(JPanel p, String text, JComponent comp, GridBagConstraints gbc, int row) {
         gbc.gridy = row;
         gbc.gridx = 0;

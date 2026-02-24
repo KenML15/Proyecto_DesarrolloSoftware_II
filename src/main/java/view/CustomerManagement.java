@@ -8,20 +8,17 @@ import controller.CustomerFileController;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
@@ -40,7 +37,7 @@ public class CustomerManagement extends BaseInternalFrame {
     private final String[] COLUMNS = {"ID", "Nombre", "Discapacidad", "Email", "Dirección", "Teléfono"};
 
     public CustomerManagement() {
-        super("GESTIÓN DE CLIENTES"); // Título para la barra superior
+        super("GESTIÓN DE CLIENTES"); //Título para la barra superior
         setupController();
         createInterface();
         loadAllCustomers();
@@ -56,19 +53,19 @@ public class CustomerManagement extends BaseInternalFrame {
     }
 
     private void createInterface() {
-        this.setSize(1000, 600); // Un poco más ancha para la tabla
+        this.setSize(1000, 600); //Un poco más ancha para la tabla
         
         JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
         mainPanel.setBackground(backgroundColor);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // --- PARTE SUPERIOR: BUSQUEDA ---
+        //Barra de busqueda
         mainPanel.add(createTopPanel(), BorderLayout.NORTH);
 
-        // --- PARTE CENTRAL: TABLA ---
+        //Tabla con los datos del cliente
         mainPanel.add(createTablePanel(), BorderLayout.CENTER);
 
-        // --- PARTE INFERIOR: ACCIONES ---
+        //Acciones
         mainPanel.add(createActionsPanel(), BorderLayout.SOUTH);
 
         this.setContentPane(mainPanel);
@@ -78,7 +75,7 @@ public class CustomerManagement extends BaseInternalFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
 
-        // Panel izquierdo: Buscador
+        //Buscador
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         searchPanel.setOpaque(false);
         
@@ -86,7 +83,7 @@ public class CustomerManagement extends BaseInternalFrame {
         lblSearch.setFont(labelFont);
         
         searchField = new JTextField(25);
-        styleTextField(searchField); // Método de BaseInternalFrame
+        styleTextField(searchField); //Método de BaseInternalFrame
         
         JButton btnSearch = new JButton("BUSCAR");
         styleButton(btnSearch);
@@ -96,10 +93,10 @@ public class CustomerManagement extends BaseInternalFrame {
         searchPanel.add(searchField);
         searchPanel.add(btnSearch);
 
-        // Panel derecho: Refrescar
+        //Esto es para refrescar y mostrar todos los clientes
         JButton btnReload = new JButton("MOSTRAR TODOS");
         styleButton(btnReload);
-        btnReload.setBackground(accentColor); // Diferente color para distinguir
+        btnReload.setBackground(accentColor);//Le puse un color diferente para que sea más distintivo
         btnReload.addActionListener(e -> loadAllCustomers());
 
         panel.add(searchPanel, BorderLayout.WEST);
@@ -115,7 +112,7 @@ public class CustomerManagement extends BaseInternalFrame {
         };
         
         customerTable = new JTable(tableModel);
-        styleTable(customerTable); // Método de BaseInternalFrame
+        styleTable(customerTable); //Método de BaseInternalFrame
         
         JScrollPane scroll = new JScrollPane(customerTable);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
@@ -136,7 +133,7 @@ public class CustomerManagement extends BaseInternalFrame {
         styleButton(btnEdit);
         styleButton(btnDelete);
         
-        // Color especial para eliminar
+        //Color diferente para eliminar
         btnDelete.setBackground(new Color(192, 57, 43)); 
 
         btnAdd.addActionListener(e -> openAddWindow());
@@ -150,7 +147,6 @@ public class CustomerManagement extends BaseInternalFrame {
         return panel;
     }
 
-    // --- MANTENEMOS TU LÓGICA DE NEGOCIO IGUAL ---
     private void loadAllCustomers() {
         try {
             ArrayList<Customer> customers = controller.getAllCustomers();
@@ -177,7 +173,7 @@ public class CustomerManagement extends BaseInternalFrame {
         if (text.isEmpty()) { loadAllCustomers(); return; }
         try {
             showCustomersInTable(controller.searchCustomers(text));
-        } catch (Exception e) {
+        } catch (IOException e) {
             showError("Error en búsqueda: " + e.getMessage());
         }
     }
@@ -186,7 +182,8 @@ public class CustomerManagement extends BaseInternalFrame {
 
     private void openEditWindow() {
         int row = customerTable.getSelectedRow();
-        if (row < 0) { showWarning("Seleccione un cliente"); return; }
+        if (row < 0) { 
+            showWarning("Seleccione un cliente"); return; }
         try {
             int id = (int) tableModel.getValueAt(row, 0);
             openCustomerWindow(controller.getCustomerById(id));
@@ -208,7 +205,7 @@ public class CustomerManagement extends BaseInternalFrame {
                 controller.deleteCustomer(id);
                 loadAllCustomers();
                 showInfo("Cliente eliminado");
-            } catch (Exception e) {
+            } catch (IOException | IllegalArgumentException e) {
                 showError("Error al eliminar");
             }
         }
@@ -239,9 +236,5 @@ public class CustomerManagement extends BaseInternalFrame {
 
     private void showInfo(String message) {
         JOptionPane.showMessageDialog(this, message, "Información", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void showMessage(String text, String title, int type) {
-        JOptionPane.showMessageDialog(this, text, title, type);
     }
 }

@@ -84,6 +84,7 @@ public class Menu_Admin extends JFrame {
         // --- AQUÍ AÑADIMOS EL NUEVO BOTÓN DE PERSONAL ---
         // Usamos addSidebarButton para que tenga el mismo diseño que los demás
         addSidebarButton("GESTIÓN DE PERSONAL", e -> openUserManagement());
+        addSidebarButton("REPORTES", e -> openReportsWindow(desktop));
 
         // Espacio flexible y botón de salida
         JButton btnExit = addSidebarButton("CERRAR SESIÓN", e -> {
@@ -251,6 +252,20 @@ public class Menu_Admin extends JFrame {
             window.setSelected(true);
         } catch (Exception e) {
             showError("Error: " + e.getMessage());
+        }
+    }
+    
+    private void openReportsWindow(HomeDesktop desktop) {
+        try {
+            // Obtener el nombre del usuario actual para mostrarlo en los reportes
+            String userName = currentUser.getName();
+            
+            // Crear y mostrar la ventana de reportes
+            ReportsWindow reportsWindow = new ReportsWindow(userName);
+            addWindowToDesktop(desktop, reportsWindow);
+            
+        } catch (Exception e) {
+            showError("Error al abrir ventana de reportes: " + e.getMessage());
         }
     }
 

@@ -7,11 +7,13 @@ package view;
 import controller.ReportsController;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,14 +23,13 @@ import java.time.format.DateTimeParseException;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
+import org.jdom2.JDOMException;
 
 /**
  *
@@ -36,27 +37,25 @@ import javax.swing.border.TitledBorder;
  */
 public class ReportsWindow extends BaseInternalFrame implements ActionListener{
    
-    // Componentes comunes
     private JTextField txtStartDate, txtStartTime, txtEndDate, txtEndTime;
     private JTextField txtAdminName;
     private JButton btnGenerateJSON, btnGeneratePDF, btnCancel;
     
-    // Reporte 1: Ingresos
+    //Reporte 1: Ingresos
     private JRadioButton rbIncome;
     
-    // Reporte 2: Cantidad de vehículos
+    //Reporte 2: Cantidad de vehículos según su tipo de vehículo
     private JRadioButton rbVehicleQuantity;
     
-    // Reporte 3: Tipo más común
+    //Reporte 3: Tipo de vehículo más común
     private JRadioButton rbCommonType;
     
     private ButtonGroup reportGroup;
-    
-    // Controlador
+
     private ReportsController reportsController;
     private String currentUser;
     
-    // Formato de fechas
+    //Formato de fechas
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     
@@ -66,8 +65,8 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         
         try {
             this.reportsController = new ReportsController();
-        } catch (Exception e) {
-            showError("Error al inicializar controlador: " + e.getMessage());
+        } catch (IOException | JDOMException e) {
+            showError("Error: " + e.getMessage());
         }
         
         initUI();
@@ -78,26 +77,24 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         setLocation(150, 50);
         setLayout(new BorderLayout(10, 10));
         
-        // Panel principal
+        //Panel principal
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        // Panel de selección de reporte
+        //Panel de selección de reporte
         mainPanel.add(createReportSelectionPanel(), BorderLayout.NORTH);
         
-        // Panel de fechas y administrador
+        //Panel de fechas y administrador
         mainPanel.add(createDateTimePanel(), BorderLayout.CENTER);
         
-        // Panel de botones
+        //Panel de botones
         mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
         
         add(mainPanel);
     }
-    
-    /**
-     * Panel para seleccionar el tipo de reporte
-     */
+
+    //Panel para seleccionar el tipo de reporte
     private JPanel createReportSelectionPanel() {
         JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
         panel.setBackground(Color.WHITE);
@@ -110,12 +107,12 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
             primaryColor
         ));
         
-        // Crear radio buttons
+        //Crear radio buttons para que solamente tenga que seleccionar
         rbIncome = new JRadioButton("Reporte de ingresos por parqueo");
         rbVehicleQuantity = new JRadioButton("Reporte de cantidad de vehículos por tipo");
         rbCommonType = new JRadioButton("Reporte de tipo de vehículo más común por parqueo");
         
-        // Estilo
+        //Estilo
         Font radioFont = new Font("Segoe UI", Font.PLAIN, 13);
         rbIncome.setFont(radioFont);
         rbVehicleQuantity.setFont(radioFont);
@@ -125,13 +122,13 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         rbVehicleQuantity.setBackground(Color.WHITE);
         rbCommonType.setBackground(Color.WHITE);
         
-        // Grupo de botones
+        //Grupo de botones
         reportGroup = new ButtonGroup();
         reportGroup.add(rbIncome);
         reportGroup.add(rbVehicleQuantity);
         reportGroup.add(rbCommonType);
         
-        // Seleccionar primero por defecto
+        //Seleccionar primero por defecto
         rbIncome.setSelected(true);
         
         panel.add(rbIncome);
@@ -141,9 +138,7 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         return panel;
     }
     
-    /**
-     * Panel para ingresar fechas y administrador
-     */
+    //Panel para ingresar fechas y administrador
     private JPanel createDateTimePanel() {
         JPanel panel = new JPanel(new GridLayout(6, 2, 15, 10));
         panel.setBackground(Color.WHITE);
@@ -156,31 +151,31 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
             primaryColor
         ));
         
-        // Fila 1: Fecha inicio
+        //Fecha inicio, osea, desde qué día se tiene que generar el reporte
         panel.add(createStyledLabel("Fecha inicio (dd/mm/aaaa):"));
         txtStartDate = new JTextField(LocalDate.now().minusMonths(1).format(dateFormatter));
         styleTextField(txtStartDate);
         panel.add(txtStartDate);
         
-        // Fila 2: Hora inicio
+        //Hora inicio, desde qué hora se va a genrar el reporte
         panel.add(createStyledLabel("Hora inicio (hh:mm):"));
         txtStartTime = new JTextField("00:00");
         styleTextField(txtStartTime);
         panel.add(txtStartTime);
         
-        // Fila 3: Fecha fin
+        //Fecha fin, osea, el fin del periodo de tiempo
         panel.add(createStyledLabel("Fecha fin (dd/mm/aaaa):"));
         txtEndDate = new JTextField(LocalDate.now().format(dateFormatter));
         styleTextField(txtEndDate);
         panel.add(txtEndDate);
         
-        // Fila 4: Hora fin
+        //Hora final
         panel.add(createStyledLabel("Hora fin (hh:mm):"));
         txtEndTime = new JTextField("23:59");
         styleTextField(txtEndTime);
         panel.add(txtEndTime);
         
-        // Fila 5: Administrador (automático)
+        //Asignamos el admin de forma automática
         panel.add(createStyledLabel("Generado por:"));
         txtAdminName = new JTextField(currentUser);
         txtAdminName.setEditable(false);
@@ -189,25 +184,19 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         styleTextField(txtAdminName);
         panel.add(txtAdminName);
         
-        // Fila 6: Espacio en blanco para alinear
         panel.add(new JLabel(""));
         panel.add(new JLabel(""));
         
         return panel;
     }
     
-    /**
-     * Crea un label con estilo
-     */
     private JLabel createStyledLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         return label;
     }
     
-    /**
-     * Panel de botones
-     */
+    //Panel de botones
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         panel.setBackground(Color.WHITE);
@@ -220,9 +209,9 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         styleButton(btnGeneratePDF);
         styleButton(btnCancel);
         
-        btnGenerateJSON.setBackground(new Color(39, 174, 96)); // Verde
-        btnGeneratePDF.setBackground(new Color(41, 128, 185)); // Azul
-        btnCancel.setBackground(new Color(192, 57, 43)); // Rojo
+        btnGenerateJSON.setBackground(new Color(39, 174, 96)); //Verde
+        btnGeneratePDF.setBackground(new Color(41, 128, 185)); //Azul
+        btnCancel.setBackground(new Color(192, 57, 43)); //Rojo
         
         btnGenerateJSON.addActionListener(this);
         btnGeneratePDF.addActionListener(this);
@@ -243,19 +232,17 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
             generateReport("pdf");
         }
     }
-    
-    /**
-     * Genera el reporte en el formato especificado
-     */
+
+    //Genera el reporte en el formato especificado
     private void generateReport(String format) {
         try {
-            // 1. Validar que haya seleccionado un reporte
+            //Validar que haya seleccionado un reporte
             if (!rbIncome.isSelected() && !rbVehicleQuantity.isSelected() && !rbCommonType.isSelected()) {
                 showError("Debe seleccionar un tipo de reporte");
                 return;
             }
             
-            // 2. Validar fechas
+            //Validar fechas
             LocalDateTime start = validateAndParseDateTime(
                 txtStartDate.getText().trim(),
                 txtStartTime.getText().trim(),
@@ -273,11 +260,11 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
                 return;
             }
             
-            // 3. Generar nombre de archivo
+            //Generar nombre de archivo
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String fileName;
             
-            // 4. Determinar tipo de reporte y generar
+            //Determinar tipo de reporte y generar
             if (rbIncome.isSelected()) {
                 fileName = "ingresos_" + timestamp + "." + format;
                 if (format.equals("json")) {
@@ -315,9 +302,7 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         }
     }
     
-    /**
-     * Valida y convierte fecha y hora a LocalDateTime
-     */
+    //Valida y convierte fecha y hora a LocalDateTime
     private LocalDateTime validateAndParseDateTime(String date, String time, String fieldName) 
             throws DateTimeParseException {
         
@@ -326,26 +311,18 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
         
         return LocalDateTime.of(parsedDate, parsedTime);
     }
-    
-    /**
-     * Muestra mensaje de éxito
-     */
+
+    //Muestra mensaje de éxito y pregunta si desea abrir la carpeta del directorio de reportes
     private void showSuccess(String reportType, String fileName, String format) {
         String message = reportType + " generado exitosamente.\n\n" +
                         "Archivo: reports/" + fileName + "\n\n" +
                         "¿Desea abrir la carpeta de reports?";
         
-        int option = JOptionPane.showConfirmDialog(
-            this,
-            message,
-            "Reporte Generado",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        int option = JOptionPane.showConfirmDialog(this, message, "Reporte Generado", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
         
         if (option == JOptionPane.YES_OPTION) {
             try {
-                java.awt.Desktop.getDesktop().open(new java.io.File("reports/"));
+                Desktop.getDesktop().open(new File("reports/"));
             } catch (IOException e) {
                 showError("No se pudo abrir la carpeta");
             }
@@ -353,11 +330,6 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
     }
     
     private void showError(String message) {
-        JOptionPane.showMessageDialog(
-            this,
-            message,
-            "Error",
-            JOptionPane.ERROR_MESSAGE
-        );
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 }

@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -59,7 +60,7 @@ public class ParkingVisualWindow extends BaseInternalFrame {
         try {
             ArrayList<ParkingLot> lots = controller.getAllParkingLots();
 
-            // Si no hay parqueos, informamos al usuario sin lanzar error
+            //Si no hay parqueos, informamos al usuario sin lanzar error
             if (lots == null || lots.isEmpty()) {
                 northPanel.add(new JLabel("No hay parqueos registrados."));
             } else {
@@ -86,16 +87,16 @@ public class ParkingVisualWindow extends BaseInternalFrame {
                 northPanel.add(new JLabel("Seleccione Parqueo: "));
                 northPanel.add(comboLots);
 
-                // Cargar el primero por defecto
+                //Cargar el primero por defecto
                 renderMap(lots.get(0));
             }
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             // Solo mostramos el error si el fallo es crítico (ej. archivo no existe)
             JLabel lblError = new JLabel("Error de lectura: Datos inconsistentes en archivos");
             lblError.setForeground(Color.RED);
             northPanel.add(lblError);
-            e.printStackTrace(); // Esto te dirá en consola exactamente qué placa falta
+            e.printStackTrace();
         }
 
         add(northPanel, BorderLayout.NORTH);
@@ -103,7 +104,7 @@ public class ParkingVisualWindow extends BaseInternalFrame {
 
     private void renderMap(ParkingLot lot) {
         gridPanel.removeAll();
-        // Usamos un GridLayout dinámico (columnas fijas, filas según espacios)
+        //Usamos un GridLayout dinámico (columnas fijas, filas según espacios)
         gridPanel.setLayout(new GridLayout(0, 5, 10, 10));
         gridPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         gridPanel.setBackground(new Color(240, 240, 240));
@@ -112,11 +113,11 @@ public class ParkingVisualWindow extends BaseInternalFrame {
             JPanel spaceCard = new JPanel(new BorderLayout());
             spaceCard.setPreferredSize(new Dimension(100, 80));
 
-            // Lógica de colores según Spaces.txt (tercer campo)
+            //Lógica de colores según Spaces.txt
             if (s.isSpaceTaken()) {
-                spaceCard.setBackground(new Color(231, 76, 60)); // Rojo: Ocupado
+                spaceCard.setBackground(new Color(231, 76, 60)); //Rojo: Ocupado
             } else {
-                spaceCard.setBackground(new Color(46, 204, 113)); // Verde: Libre
+                spaceCard.setBackground(new Color(46, 204, 113)); //Verde: Libre
             }
 
             JLabel lblId = new JLabel("#" + s.getId(), SwingConstants.CENTER);

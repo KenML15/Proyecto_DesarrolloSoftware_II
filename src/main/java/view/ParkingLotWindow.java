@@ -24,18 +24,18 @@ import org.jdom2.JDOMException;
  *
  * @author 50687
  */
-public class ParkingLotWindow extends BaseInternalFrame implements ActionListener{
-    
+public class ParkingLotWindow extends BaseInternalFrame implements ActionListener {
+
     private JPanel panel;
     private JLabel labelName, labelAddress, labelSpaces;
     private JTextField textFieldName, textFieldSpaces;
     private JComboBox comboBoxAddress;
     private JButton buttonCreate, buttonCancel;
-    
+
     private ParkingLotFileController parkingLotController;
     private SpaceFileController spaceController;
 
-   public ParkingLotWindow(ParkingLotFileController controller) throws IOException, JDOMException {
+    public ParkingLotWindow(ParkingLotFileController controller) throws IOException, JDOMException {
         super("CREAR NUEVO PARQUEO"); // Título para el encabezado azul
         this.parkingLotController = controller;
         this.spaceController = new SpaceFileController();
@@ -49,24 +49,24 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
     }
 
     private void setWindowProperties() {
-    setSize(450, 380);
-    setLocation(250, 150);
-    setResizable(false);
-    setVisible(true);
+        setSize(450, 380);
+        setLocation(250, 150);
+        setResizable(false);
+        setVisible(true);
 
-    // Forzar el frente y el foco después de la renderización inicial
-    SwingUtilities.invokeLater(() -> {
-        try {
-            this.toFront();
-            this.setSelected(true);
-            this.requestFocus();
-        } catch (java.beans.PropertyVetoException e) {
-            e.printStackTrace();
-        }
-    });
-}
+        // Forzar el frente y el foco después de la renderización inicial
+        SwingUtilities.invokeLater(() -> {
+            try {
+                this.toFront();
+                this.setSelected(true);
+                this.requestFocus();
+            } catch (java.beans.PropertyVetoException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-   private void createPanel() {
+    private void createPanel() {
         panel = new JPanel();
         panel.setLayout(null);
         panel.setBackground(Color.WHITE); //Fondo limpio
@@ -79,17 +79,17 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
         labelName.setBounds(50, 40, 150, 25);
         labelName.setFont(labelFont);
         panel.add(labelName);
-        
+
         textFieldName = new JTextField();
         textFieldName.setBounds(200, 40, 180, 30);
         styleTextField(textFieldName);
         panel.add(textFieldName);
-        
+
         //Dirección del parqueo
         labelAddress = new JLabel("Dirección:");
         labelAddress.setBounds(50, 140, 150, 25);
         panel.add(labelAddress);
-        
+
         comboBoxAddress = new JComboBox<>(addresses);
         comboBoxAddress.setBounds(200, 140, 180, 30);
         comboBoxAddress.setBackground(Color.WHITE);
@@ -97,7 +97,7 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
         panel.add(comboBoxAddress);
 
         //Espacios del parqueo
-        labelSpaces = new JLabel("Espacios totales (1-100):");
+        labelSpaces = new JLabel("Espacios totales:");
         labelSpaces.setBounds(50, 90, 180, 25);
         labelSpaces.setFont(labelFont);
         panel.add(labelSpaces);
@@ -125,7 +125,6 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
         panel.add(buttonCancel);
     }
 
-
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
@@ -138,12 +137,12 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
             showError("Ocurrió un error al procesar la acción del botón" + ex.getMessage());
         }
     }
-    
+
     private void handleCreate() {
         String name = textFieldName.getText().trim();
         String address = (String) comboBoxAddress.getSelectedItem();
         String spacesText = textFieldSpaces.getText().trim();
-        
+
         validateInput(name, address, spacesText);
         createParkingLot(name, address, spacesText);
     }
@@ -153,13 +152,13 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
             showWarning("Ingrese el nombre del parqueo");
             return;
         }
-        
-        if (address.equals("-- Seleccione --")){
+
+        if (address.equals("-- Seleccione --")) {
             showWarning("Seleccione una dirección válida");
             return;
         }
-        
-        if (spacesText.isEmpty()){
+
+        if (spacesText.isEmpty()) {
             showWarning("Ingrese la cantidad de espacios");
             return;
         }
@@ -168,7 +167,7 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
     private void createParkingLot(String name, String address, String spacesText) {
         try {
             int numberOfSpaces = Integer.parseInt(spacesText);
-            // Enviamos null o un arreglo vacío, el Controller debe generar los objetos finales
+            //Enviamos null o un arreglo vacío, el Controller debe generar los objetos finales
             parkingLotController.createParkingLot(name, address, numberOfSpaces);
 
             JOptionPane.showMessageDialog(null, "El parqueo se ha creado con éxito");
@@ -178,7 +177,7 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
             showError("Error: " + e.getMessage());
         }
     }
-    
+
     // Opciones predefinidas para las direcciones
     private final String[] addresses = {
         "-- Seleccione --",
@@ -201,10 +200,10 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
     }
 
     private void showError(String message) {
-        JOptionPane.showMessageDialog(this, message, "Error", 
-            JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, "Error",
+                JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private void showWarning(String message) {
         JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }

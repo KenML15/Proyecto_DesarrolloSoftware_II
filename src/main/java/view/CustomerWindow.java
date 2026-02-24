@@ -12,6 +12,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,17 +32,17 @@ import model.entities.Customer;
  */
 public class CustomerWindow extends BaseInternalFrame implements ActionListener {
 
-    // Componentes de la interfaz
+    //Componentes para la interfaz
     public JTextField textFieldNumber, textFieldName, textFieldEmail, textFieldAddress, textFieldPhone;
     public JCheckBox chkDisability;
     private JButton buttonInsert, buttonModify, buttonCancel;
 
-    // Controlador y datos
+    //Controller
     private CustomerFileController customerController;
     private Customer customerToEdit;
     public static final String FILECUSTOMER = "Customers.txt";
 
-    // Constructor para insertar
+    //Constructor para insertar clientes
     public CustomerWindow() {
         super("INSERTAR CLIENTE");
         initController();
@@ -51,7 +51,7 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         setNextId();
     }
 
-    // Constructor para modificar
+    //Constructor para modificar los clientes
     public CustomerWindow(Customer customer) {
         super("MODIFICAR CLIENTE");
         this.customerToEdit = customer;
@@ -64,16 +64,13 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
 
     private void initController() {
         try {
-            // Asegúrate de que la ruta sea igual en Management y Window
             customerController = new CustomerFileController("Customers.txt");
         } catch (IOException e) {
-            // Si entra aquí, la ventana no se termina de crear y por eso no abre
             JOptionPane.showMessageDialog(this, "ERROR DE ARCHIVO: " + e.getMessage());
         }
     }
 
     private void initUI() {
-        // 1. PRIMERÍSIMO: Crear las instancias (El "new")
         textFieldNumber = new JTextField();
         textFieldName = new JTextField();
         textFieldEmail = new JTextField();
@@ -85,7 +82,7 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         buttonModify = new JButton("ACTUALIZAR");
         buttonCancel = new JButton("CANCELAR");
 
-        // 2. SEGUNDO: Aplicar estilos (Maquillar lo que ya existe)
+        //Aplicar estilos a los JTextField
         styleTextField(textFieldNumber);
         styleTextField(textFieldName);
         styleTextField(textFieldEmail);
@@ -95,13 +92,13 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         styleButton(buttonInsert);
         styleButton(buttonModify);
         styleButton(buttonCancel);
-        buttonCancel.setBackground(new Color(231, 76, 60)); // Rojo vibrante
+        buttonCancel.setBackground(new Color(231, 76, 60)); //Este es un color rojo
 
-        // 3. TERCERO: Configurar el Layout y Paneles
+        //A quí configuramos el layout y paneles
         setSize(550, 650);
         setLayout(new BorderLayout());
 
-        // --- PANEL DE TÍTULO ---
+        //Este es el panel para el título
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(primaryColor);
         headerPanel.setPreferredSize(new Dimension(550, 60));
@@ -110,7 +107,7 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
         headerPanel.add(lblTitle);
 
-        // --- PANEL CENTRAL (Blanco y elegante) ---
+        //Este es el panel central
         JPanel containerPanel = new JPanel(new BorderLayout());
         containerPanel.setBackground(backgroundColor);
         containerPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
@@ -126,30 +123,30 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(8, 5, 8, 5);
 
-        // Añadir componentes al panel de formulario
+        //Componentes del formulario de clientes
         addFormField(formPanel, "ID CLIENTE", textFieldNumber, gbc, 0);
         addFormField(formPanel, "NOMBRE COMPLETO", textFieldName, gbc, 1);
         addFormField(formPanel, "CORREO ELECTRÓNICO", textFieldEmail, gbc, 2);
-        addFormField(formPanel, "DIRECCIÓN FÍSICA", textFieldAddress, gbc, 3);
+        addFormField(formPanel, "DIRECCIÓN", textFieldAddress, gbc, 3);
         addFormField(formPanel, "TELÉFONO", textFieldPhone, gbc, 4);
 
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(15, 5, 5, 5);
-        chkDisability.setBackground(Color.WHITE); // Para que combine con el fondo
+        chkDisability.setBackground(Color.WHITE); //Para que combine con el fondo
         formPanel.add(chkDisability, gbc);
 
         containerPanel.add(formPanel, BorderLayout.CENTER);
 
-        // --- PANEL DE BOTONES ---
+        //Panel de los botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 20));
         buttonPanel.setBackground(backgroundColor);
         buttonPanel.add(buttonCancel);
         buttonPanel.add(buttonInsert);
         buttonPanel.add(buttonModify);
 
-        // --- AGREGAR TODO AL FRAME ---
+        //Agregamos todo al frame
         add(headerPanel, BorderLayout.NORTH);
         add(containerPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
@@ -176,7 +173,6 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         panel.add(textField, gbc);
     }
 
-    // --- LÓGICA DE NEGOCIO ---
     private void loadCustomerData() {
         if (customerToEdit != null) {
             textFieldNumber.setText(String.valueOf(customerToEdit.getId()));
@@ -225,8 +221,8 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
             customerController.createCustomer(createCustomerFromFields());
             JOptionPane.showMessageDialog(this, "Cliente guardado exitosamente");
             this.dispose();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        } catch (HeadlessException | IOException | IllegalArgumentException e) {
+            showError("Error al insertar al cliente" + e.getMessage());
         }
     }
 
@@ -238,28 +234,28 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
             customerController.updateCustomer(createCustomerFromFields());
             JOptionPane.showMessageDialog(this, "Cliente actualizado exitosamente");
             this.dispose();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        } catch (HeadlessException | IOException | IllegalArgumentException e) {
+            showError("Error al modificar el clientes" + e.getMessage());
         }
     }
 
     private boolean validateFields() {
         if (textFieldName.getText().trim().isEmpty() || textFieldEmail.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nombre y Email son obligatorios", "Validación", JOptionPane.WARNING_MESSAGE);
+            showWarning("El nombre y el email son obligatorios");
             return false;
         }
         return true;
     }
 
     private Customer createCustomerFromFields() {
-        Customer c = new Customer();
-        c.setId(Integer.parseInt(textFieldNumber.getText()));
-        c.setName(textFieldName.getText().trim());
-        c.setEmail(textFieldEmail.getText().trim());
-        c.setAddress(textFieldAddress.getText().trim());
-        c.setPhoneNumber(textFieldPhone.getText().trim());
-        c.setDisabilityPresented(chkDisability.isSelected());
-        return c;
+        Customer customer = new Customer();
+        customer.setId(Integer.parseInt(textFieldNumber.getText()));
+        customer.setName(textFieldName.getText().trim());
+        customer.setEmail(textFieldEmail.getText().trim());
+        customer.setAddress(textFieldAddress.getText().trim());
+        customer.setPhoneNumber(textFieldPhone.getText().trim());
+        customer.setDisabilityPresented(chkDisability.isSelected());
+        return customer;
     }
 
     private void handleCancel() {
@@ -269,25 +265,33 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         }
     }
 
-    protected void addHoverEffect(JButton btn) {
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+    protected void addHoverEffect(JButton button) {
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
 
-                if (btn.isEnabled()) {
-                    btn.setBackground(accentColor);
+                if (button.isEnabled()) {
+                    button.setBackground(accentColor);
                 }
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
 
-                if (btn.getText().equals("CANCELAR")) {
-                    btn.setBackground(new Color(192, 57, 43));
+                if (button.getText().equals("CANCELAR")) {
+                    button.setBackground(new Color(192, 57, 43));
                 } else {
-                    btn.setBackground(primaryColor);
+                    button.setBackground(primaryColor);
                 }
             }
         });
+    }
+    
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 }

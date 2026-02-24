@@ -4,6 +4,8 @@
  */
 package model.entities;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author 50687
@@ -69,6 +71,8 @@ public class Clerk extends User implements Employee{
         return "Clerk{" + "employeeCode=" + employeeCode + ", schedule=" + schedule + ", age=" + age + ", parkingLot=" + parkingLot + '}';
     }
 
+    
+
     @Override
     public boolean verifyUserLogin(String loginDetails) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -81,7 +85,7 @@ public class Clerk extends User implements Employee{
 
     @Override
     public ParkingLot assignWorkplace(int parkingLotId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.parkingLot;
     }
     
     

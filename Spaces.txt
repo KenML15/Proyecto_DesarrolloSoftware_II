@@ -123,3 +123,10 @@
 321;false;false;0
 322;false;false;0
 323;false;false;0
+501;true;false;2
+502;true;false;2
+503;false;false;1
+504;false;false;2
+505;false;false;1
+506;false;false;3
+507;false;false;4

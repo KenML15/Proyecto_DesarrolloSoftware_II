@@ -12,6 +12,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -54,9 +55,9 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     public SpaceConfigurationWindow(ParkingLot parkingLot, ParkingLotFileController controller) throws IOException, JDOMException {
     super("CONFIGURAR ESPACIOS: " + parkingLot.getName());
     
-    // Propiedades críticas de superposición
+    //Propiedades de superposición
     this.setClosable(true);
-    this.setLayer(JDesktopPane.DRAG_LAYER); // Se define a sí misma en capa alta
+    this.setLayer(JDesktopPane.DRAG_LAYER); //Se define a sí misma en capa alta
     
     this.parkingLot = parkingLot;
     this.parkingLotController = controller;
@@ -88,10 +89,10 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     setResizable(true);
     setVisible(true);
 
-    // Pequeño retraso para asegurar que el escritorio ya la registró
+    //Pequeño retraso para asegurar que el escritorio ya la registró
     SwingUtilities.invokeLater(() -> {
         try {
-            this.moveToFront(); // Método específico de JInternalFrame para ir al frente
+            this.moveToFront(); //Método específico de JInternalFrame para ir al frente
             this.setSelected(true);
             this.requestFocusInWindow();
         } catch (java.beans.PropertyVetoException e) {
@@ -133,16 +134,16 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
         disabledCheckBoxes = new JCheckBox[numSpaces];
 
         for (int i = 0; i < numSpaces; i++) {
-            // Número de espacio
+            //Número de espacio
             JLabel lblNum = new JLabel("Espacio #" + (i + 1));
             lblNum.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             mainPanel.add(lblNum);
 
-            // Combo de Tipo
+            //Combo de Tipo
             typeComboBoxes[i] = createTypeComboBox();
             mainPanel.add(typeComboBoxes[i]);
 
-            // Checkbox
+            //Checkbox
             disabledCheckBoxes[i] = new JCheckBox();
             disabledCheckBoxes[i].setBackground(Color.WHITE);
             disabledCheckBoxes[i].setHorizontalAlignment(SwingConstants.CENTER);
@@ -238,10 +239,7 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
             Space[] newSpaces = createSpacesFromForm();
 
             if (countDisabledSpaces(newSpaces) == 0) {
-                int result = JOptionPane.showConfirmDialog(this,
-                        "ADVERTENCIA: No ha asignado espacios para personas con discapacidad.\n"
-                        + "¿Desea guardar la configuración de todos modos?",
-                        "Validación de Espacios", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                int result = JOptionPane.showConfirmDialog(this, "ADVERTENCIA: No ha asignado espacios para personas con discapacidad.\n" + "¿Desea guardar la configuración de todos modos?", "Validación de Espacios", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
                 if (result != JOptionPane.YES_OPTION) {
                     return;
@@ -255,7 +253,7 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
         } catch (IOException ex) {
 
             showError("Error al guardar en el archivo: " + ex.getMessage());
-        } catch (Exception ex) {
+        } catch (HeadlessException ex) {
             showError("Ocurrió un error inesperado: " + ex.getMessage());
         }
     }
@@ -297,9 +295,7 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     }
 
     private void askForConfirmation() {
-        int result = JOptionPane.showConfirmDialog(this,
-                "No hay espacios para discapacidad. ¿Continuar?",
-                "Confirmar", JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showConfirmDialog(this, "No hay espacios para discapacidad. ¿Continuar?", "Confirmar", JOptionPane.YES_NO_OPTION);
 
         if (result != JOptionPane.YES_OPTION) {
             JOptionPane.showMessageDialog(this, "Operación cancelada", "Información", JOptionPane.INFORMATION_MESSAGE);
@@ -307,9 +303,7 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     }
 
     private void cancelConfiguration() {
-        int result = JOptionPane.showConfirmDialog(this,
-                "¿Cancelar configuración?",
-                "Confirmar", JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showConfirmDialog(this, "¿Cancelar configuración?", "Confirmar", JOptionPane.YES_NO_OPTION);
 
         if (result == JOptionPane.YES_OPTION) {
             dispose();

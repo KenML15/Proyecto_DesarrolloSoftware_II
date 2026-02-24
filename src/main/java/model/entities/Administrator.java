@@ -8,7 +8,7 @@ package model.entities;
  *
  * @author pablo
  */
-public class Administrator extends Clerk {
+public class Administrator extends Clerk{
 
     // Constructor completo
     public Administrator(int employeeCode, String schedule, int age, ParkingLot parkingLot, String identification, String name, String username, String password) {
