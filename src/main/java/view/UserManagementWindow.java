@@ -29,6 +29,7 @@ public class UserManagementWindow extends BaseInternalFrame {
         setClosable(true);
         setIconifiable(true);
         setResizable(false);
+        SwingUtilities.invokeLater(() -> centerInDesktop());
 
         setupWindow();
     }

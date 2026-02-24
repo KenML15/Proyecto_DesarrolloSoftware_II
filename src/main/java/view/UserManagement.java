@@ -17,7 +17,6 @@ import model.data.StaffDataFile;
 import model.entities.Administrator;
 import model.entities.Clerk;
 
-
 public class UserManagement extends BaseInternalFrame {
 
     private AdministratorController adminCtrl;
@@ -33,6 +32,7 @@ public class UserManagement extends BaseInternalFrame {
 
         initComponents();
         loadAllUsers();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
     }
 
     private void initComponents() {
@@ -56,7 +56,7 @@ public class UserManagement extends BaseInternalFrame {
 
         JScrollPane scrollPane = new JScrollPane(userTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(fieldBorderColor));
-        
+
         centerPanel.add(new JLabel("Listado de Administradores y Empleados registrados"), BorderLayout.NORTH);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -96,7 +96,7 @@ public class UserManagement extends BaseInternalFrame {
             for (Clerk e : staff) {
                 String role = (e instanceof Administrator) ? "Administrador" : "Dependiente";
                 tableModel.addRow(new Object[]{
-                    e.getIdentification(), e.getName(), e.getUsername(), 
+                    e.getIdentification(), e.getName(), e.getUsername(),
                     role, e.getEmployeeCode(), e.getSchedule()
                 });
             }
@@ -132,18 +132,38 @@ public class UserManagement extends BaseInternalFrame {
 
     private void openRegistrationWindow() {
         UserManagementWindow win = new UserManagementWindow(adminCtrl, clerkCtrl);
-        getDesktopPane().add(win);
-        
-        getDesktopPane().setLayer(win, JLayeredPane.PALETTE_LAYER);
-        win.setVisible(true);
-        win.toFront();
+        JDesktopPane desktop = getDesktopPane();
 
-        win.addInternalFrameListener(new InternalFrameAdapter() {
-            @Override
-            public void internalFrameClosed(InternalFrameEvent e) {
-                loadAllUsers();
-            }
-        });
+        if (desktop != null) {
+            // 1. Añadir a la capa superior (MODAL_LAYER) para que no se esconda
+            desktop.add(win, JLayeredPane.MODAL_LAYER);
+
+            // 2. Centrar la ventana respecto al escritorio actual
+            Dimension desktopSize = desktop.getSize();
+            Dimension frameSize = win.getSize();
+            win.setLocation((desktopSize.width - frameSize.width) / 2,
+                    (desktopSize.height - frameSize.height) / 2);
+
+            win.setVisible(true);
+
+            // 3. Forzar el frente y el foco después de procesar el evento del clic
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    win.setSelected(true);
+                    win.toFront();
+                    win.requestFocus();
+                } catch (java.beans.PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            win.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    loadAllUsers();
+                }
+            });
+        }
     }
 
     private void showError(String message) {

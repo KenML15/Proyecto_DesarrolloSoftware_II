@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import model.entities.Customer;
 import model.entities.ParkingLot;
 import model.entities.Space;
@@ -145,16 +146,27 @@ public class VehicleWindow extends BaseInternalFrame {
         add(createButtonPanel(), BorderLayout.SOUTH);
     }
 
-    private void initWindow() {
-        initControllers();
-        initData();
-        createUI();
-        loadData();
+   private void initWindow() {
+    initControllers();
+    initData();
+    createUI();
+    loadData();
 
-        if (isEditMode()) {
-            loadVehicleData();
-        }
+    if (isEditMode()) {
+        loadVehicleData();
     }
+
+    // ESTO TRAE LA VENTANA AL FRENTE
+    SwingUtilities.invokeLater(() -> {
+        try {
+            this.toFront();          // La mueve arriba en la lista de capas
+            this.setSelected(true);   // La marca como activa para el DesktopPane
+            this.requestFocus();      // Pide el foco del teclado
+        } catch (java.beans.PropertyVetoException e) {
+            e.printStackTrace();
+        }
+    });
+}
     
     private void loadData() {
         //Llenar el combo de clientes disponibles

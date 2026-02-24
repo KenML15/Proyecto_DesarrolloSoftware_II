@@ -24,9 +24,11 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 import model.entities.Administrator;
 import model.entities.ParkingLot;
@@ -71,6 +73,9 @@ public class Menu_Admin extends JFrame {
         lblBrand.setPreferredSize(new Dimension(250, 80));
         lblBrand.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(52, 73, 94)));
         sidePanel.add(lblBrand);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Esto maximiza la ventana al abrirse
+        setSize(1200, 800); // Tamaño mínimo si el usuario decide restaurarla
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         desktop = new HomeDesktop();
         desktop.setBackground(new Color(236, 240, 241));
@@ -86,8 +91,8 @@ public class Menu_Admin extends JFrame {
         addSidebarButton("REPORTES", e -> openReportsWindow(desktop));
 
         JButton btnExit = addSidebarButton("CERRAR SESIÓN", e -> {
-            this.dispose(); 
-            new LoginWindow().setVisible(true); 
+            this.dispose();
+            new LoginWindow().setVisible(true);
         });
         btnExit.setBackground(new Color(192, 57, 43));
 
@@ -99,13 +104,7 @@ public class Menu_Admin extends JFrame {
 
     private void openUserManagement() {
         UserManagement window = new UserManagement();
-        desktop.add(window);
-        window.setVisible(true);
-        try {
-            window.setSelected(true);
-        } catch (java.beans.PropertyVetoException e) {
-            e.printStackTrace();
-        }
+        addWindowToDesktop(desktop, window);
     }
 
     private JButton addSidebarButton(String text, ActionListener action) {
@@ -162,7 +161,7 @@ public class Menu_Admin extends JFrame {
 
     private void addWindowToDesktop(HomeDesktop desktop, JInternalFrame window) {
         try {
-            //Evitar duplicados
+            // 1. Evitar duplicados (Tu lógica actual está perfecta)
             for (Component c : desktop.getComponents()) {
                 if (c.getClass() == window.getClass()) {
                     JInternalFrame win = (JInternalFrame) c;
@@ -172,13 +171,21 @@ public class Menu_Admin extends JFrame {
                 }
             }
 
-            desktop.add(window, JDesktopPane.DRAG_LAYER);
-
-            desktop.setComponentZOrder(window, 0);
+            // 2. Añadir en una capa superior (MODAL o POPUP)
+            desktop.add(window, JLayeredPane.MODAL_LAYER);
 
             window.setVisible(true);
-            window.toFront();
-            window.setSelected(true);
+
+            // 3. El truco del invokeLater: asegura que el foco ocurra DESPUÉS de mostrarse
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    window.setSelected(true);
+                    window.toFront();
+                    window.requestFocus();
+                } catch (PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+            });
 
             desktop.revalidate();
             desktop.repaint();
@@ -244,16 +251,16 @@ public class Menu_Admin extends JFrame {
             showError("Error: " + e.getMessage());
         }
     }
-    
+
     private void openReportsWindow(HomeDesktop desktop) {
         try {
             //Obtener el nombre del usuario actual para mostrarlo en los reportes
             String userName = currentUser.getName();
-            
+
             //Crear y mostrar la ventana de reportes
             ReportsWindow reportsWindow = new ReportsWindow(userName);
             addWindowToDesktop(desktop, reportsWindow);
-            
+
         } catch (Exception e) {
             showError("Error al abrir ventana de reportes: " + e.getMessage());
         }

@@ -7,6 +7,7 @@ package view;
 import controller.CustomerFileController;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,11 +15,13 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
@@ -41,6 +44,7 @@ public class CustomerManagement extends BaseInternalFrame {
         setupController();
         createInterface();
         loadAllCustomers();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
     }
 
     private void setupController() {
@@ -211,19 +215,41 @@ public class CustomerManagement extends BaseInternalFrame {
         }
     }
 
-    private void openCustomerWindow(Customer customer) {
-        CustomerWindow window = (customer == null) ? new CustomerWindow() : new CustomerWindow(customer);
-        JDesktopPane desktop = getDesktopPane();
-        if (desktop != null) {
-            desktop.add(window);
-            window.setVisible(true);
-            window.toFront();
-            window.addInternalFrameListener(new InternalFrameAdapter() {
-                @Override
-                public void internalFrameClosed(InternalFrameEvent e) { loadAllCustomers(); }
-            });
-        }
+private void openCustomerWindow(Customer customer) {
+    CustomerWindow window = (customer == null) ? new CustomerWindow() : new CustomerWindow(customer);
+    JDesktopPane desktop = getDesktopPane();
+    
+    if (desktop != null) {
+        // 1. Añadir a una capa superior (MODAL_LAYER)
+        desktop.add(window, JLayeredPane.MODAL_LAYER);
+        
+        // 2. Centrar la ventana en el escritorio
+        Dimension desktopSize = desktop.getSize();
+        Dimension frameSize = window.getSize();
+        window.setLocation((desktopSize.width - frameSize.width) / 2, 
+                           (desktopSize.height - frameSize.height) / 2);
+
+        window.setVisible(true);
+
+        // 3. Forzar el foco y el frente de forma asíncrona
+        SwingUtilities.invokeLater(() -> {
+            try {
+                window.setSelected(true);
+                window.toFront();
+                window.requestFocus();
+            } catch (java.beans.PropertyVetoException e) {
+                e.printStackTrace();
+            }
+        });
+
+        window.addInternalFrameListener(new InternalFrameAdapter() {
+            @Override
+            public void internalFrameClosed(InternalFrameEvent e) {
+                loadAllCustomers();
+            }
+        });
     }
+}
 
 
     private void showError(String message) {

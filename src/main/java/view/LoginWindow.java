@@ -32,8 +32,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import model.data.StaffDataFile;
 import model.entities.Administrator;
-import model.entities.Clerk;
-import model.entities.User;
+
 
 /**
  *

@@ -40,12 +40,14 @@ public class ParkingLotWindow extends BaseInternalFrame implements ActionListene
         this.parkingLotController = controller;
         this.spaceController = new SpaceFileController();
         setupWindow();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
     }
 
     private void setupWindow() {
         setWindowProperties();
         createPanel();
         createComponents();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
     }
 
     private void setWindowProperties() {

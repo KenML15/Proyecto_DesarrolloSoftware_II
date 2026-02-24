@@ -53,19 +53,19 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     private ArrayList<VehicleType> vehicleTypes;
 
     public SpaceConfigurationWindow(ParkingLot parkingLot, ParkingLotFileController controller) throws IOException, JDOMException {
-    super("CONFIGURAR ESPACIOS: " + parkingLot.getName());
-    
-    //Propiedades de superposición
-    this.setClosable(true);
-    this.setLayer(JDesktopPane.DRAG_LAYER); //Se define a sí misma en capa alta
-    
-    this.parkingLot = parkingLot;
-    this.parkingLotController = controller;
-    this.vehicleTypeController = new VehicleTypeController();
+        super("CONFIGURAR ESPACIOS: " + parkingLot.getName());
 
-    loadVehicleTypes();
-    setupWindow();
-}
+        //Propiedades de superposición
+        this.setClosable(true);
+        this.setLayer(JDesktopPane.DRAG_LAYER); //Se define a sí misma en capa alta
+
+        this.parkingLot = parkingLot;
+        this.parkingLotController = controller;
+        this.vehicleTypeController = new VehicleTypeController();
+
+        loadVehicleTypes();
+        setupWindow();
+    }
 
     private void loadVehicleTypes() {
         try {
@@ -84,22 +84,22 @@ public class SpaceConfigurationWindow extends BaseInternalFrame implements Actio
     }
 
     private void setWindowProperties() {
-    setSize(600, 500);
-    setLocation(200, 100);
-    setResizable(true);
-    setVisible(true);
+        setSize(600, 500);
+        setLocation(200, 100);
+        setResizable(true);
 
-    //Pequeño retraso para asegurar que el escritorio ya la registró
-    SwingUtilities.invokeLater(() -> {
-        try {
-            this.moveToFront(); //Método específico de JInternalFrame para ir al frente
-            this.setSelected(true);
-            this.requestFocusInWindow();
-        } catch (java.beans.PropertyVetoException e) {
-            e.printStackTrace();
-        }
-    });
-}
+        // Esto obliga a Java a procesar la ventana y traerla al frente
+        SwingUtilities.invokeLater(() -> {
+            try {
+                this.toFront();
+                this.setSelected(true);
+                this.requestFocus();
+                this.grabFocus();
+            } catch (java.beans.PropertyVetoException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
     private void createMainPanel() {
         mainPanel = new JPanel();

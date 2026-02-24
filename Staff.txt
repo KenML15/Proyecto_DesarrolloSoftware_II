@@ -1,5 +1,1 @@
 ADMIN;000;Admin;admin;123;1;8-5;30
-CLERK;3;juan;juan;1234;12;x;18
-ADMIN;8;jefferson gamboa;jeff;9090;22;vive en el parking;41
-CLERK;101110111;Dependiente;dependiente;123;708;7-4;18
-ADMIN;305530086;Eilyn;eilyn;123;1804;8am - 5pm;21

@@ -65,6 +65,9 @@ public class Menu_Clerk extends JFrame {
         lblBrand.setPreferredSize(new Dimension(250, 80));
         lblBrand.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(52, 73, 94)));
         sidePanel.add(lblBrand);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Esto maximiza la ventana al abrirse
+        setSize(1200, 800); // Tamaño mínimo si el usuario decide restaurarla
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         desktop = new HomeDesktop();
         desktop.setBackground(new Color(236, 240, 241));
@@ -142,48 +145,48 @@ public class Menu_Clerk extends JFrame {
 
     //métodos de soporte
     private void addWindowToDesktop(HomeDesktop desktop, JInternalFrame window) {
-    try {
-        //Evitar duplicados
-        for (Component c : desktop.getComponents()) {
-            if (c.getClass() == window.getClass()) {
-                JInternalFrame win = (JInternalFrame) c;
-                win.setSelected(true);
-                win.toFront();
-                return;
+        try {
+            //Evitar duplicados
+            for (Component c : desktop.getComponents()) {
+                if (c.getClass() == window.getClass()) {
+                    JInternalFrame win = (JInternalFrame) c;
+                    win.setSelected(true);
+                    win.toFront();
+                    return;
+                }
             }
+
+            desktop.add(window, JDesktopPane.DRAG_LAYER);
+
+            desktop.setComponentZOrder(window, 0);
+
+            window.setVisible(true);
+            window.toFront();
+            window.setSelected(true);
+
+            desktop.revalidate();
+            desktop.repaint();
+
+        } catch (PropertyVetoException e) {
+            showError("Error: " + e.getMessage());
         }
-
-        desktop.add(window, JDesktopPane.DRAG_LAYER);
-        
-        desktop.setComponentZOrder(window, 0);
-
-        window.setVisible(true);
-        window.toFront();
-        window.setSelected(true);
-        
-        desktop.revalidate();
-        desktop.repaint();
-        
-    } catch (PropertyVetoException e) {
-        showError("Error: " + e.getMessage());
     }
-}
 
     private void openCustomerManagement(HomeDesktop desktop) {
         CustomerManagement window = new CustomerManagement();
         addWindowToDesktop(desktop, window);
     }
-    
+
     private void openParkingVisualView(HomeDesktop desktop) {
-    try {
-        ParkingLotFileController controller = new ParkingLotFileController();
-        //Abrimos la ventana de selección de parqueo o la vista directa
-        ParkingVisualWindow window = new ParkingVisualWindow(controller);
-        addWindowToDesktop(desktop, window);
-    } catch (IOException | JDOMException e) {
-        showError("Error al abrir vista visual: " + e.getMessage());
+        try {
+            ParkingLotFileController controller = new ParkingLotFileController();
+            //Abrimos la ventana de selección de parqueo o la vista directa
+            ParkingVisualWindow window = new ParkingVisualWindow(controller);
+            addWindowToDesktop(desktop, window);
+        } catch (IOException | JDOMException e) {
+            showError("Error al abrir vista visual: " + e.getMessage());
+        }
     }
-}
 
     private void openVehicleManagement(HomeDesktop desktop) {
         addWindowToDesktop(desktop, new VehicleManagement());

@@ -9,4 +9,13 @@
     <monthly>112000.0</monthly>
     <annual>1344000.0</annual>
   </fee>
+  <fee>
+    <vehicleType>Motocicleta</vehicleType>
+    <halfHour>450.0</halfHour>
+    <hourly>1000.0</hourly>
+    <daily>9000.0</daily>
+    <weekly>46000.0</weekly>
+    <monthly>110000.0</monthly>
+    <annual>200000.0</annual>
+  </fee>
 </fees>

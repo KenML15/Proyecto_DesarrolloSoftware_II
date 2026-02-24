@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import model.entities.Fee;
 
 /**
@@ -38,6 +39,7 @@ public class FeeWindow extends BaseInternalFrame {
         this.feeController = controller;
         initUI();
         loadFeeData();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
     }
 
     private void initUI() {

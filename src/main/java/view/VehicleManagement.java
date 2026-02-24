@@ -9,6 +9,7 @@ import controller.VehicleFileController;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionListener;
@@ -23,12 +24,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -57,6 +60,7 @@ public class VehicleManagement extends BaseInternalFrame {
         initControllers();
         createInterface();
         loadAllVehicles();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
 
         styleTable(vehicleTable);
     }
@@ -344,34 +348,45 @@ public class VehicleManagement extends BaseInternalFrame {
     }
 
     //Abrir ventana de vehículo
-    private void openVehicleWindow(Vehicle vehicle) {
-        try {
-            VehicleWindow window = (vehicle == null) ? new VehicleWindow() : new VehicleWindow(vehicle);
+   private void openVehicleWindow(Vehicle vehicle) {
+    try {
+        VehicleWindow window = (vehicle == null) ? new VehicleWindow() : new VehicleWindow(vehicle);
+        JDesktopPane desktop = getDesktopPane();
 
-            // Obtenemos el desktop de forma segura
-            JDesktopPane desktop = getDesktopPane();
+        if (desktop != null) {
+            // 1. Añadir la ventana en una capa superior para que nada la tape
+            desktop.add(window, JLayeredPane.MODAL_LAYER);
+            
+            // 2. Centrar la ventana respecto al escritorio (Opcional pero recomendado)
+            Dimension desktopSize = desktop.getSize();
+            Dimension frameSize = window.getSize();
+            window.setLocation((desktopSize.width - frameSize.width) / 2, 
+                               (desktopSize.height - frameSize.height) / 2);
 
-            if (desktop != null) {
-                desktop.add(window);
-                window.setVisible(true); // ¡IMPORTANTE!
-                window.toFront();
-                window.setSelected(true);
+            window.setVisible(true);
 
-                window.addInternalFrameListener(new InternalFrameAdapter() {
-                    @Override
-                    public void internalFrameClosed(InternalFrameEvent e) {
-                        loadAllVehicles();
-                    }
-                });
-            } else {
-                // Si el desktop es null, algo va mal con la jerarquía
-                System.err.println("Error: No se encontró el DesktopPane");
-            }
-        } catch (PropertyVetoException e) {
-            showError("No se pudo abrir la pantalla de registro: " + e.getMessage());
-            e.printStackTrace();
+            // 3. Forzar el frente y el foco DESPUÉS de que Swing termine de procesar el clic
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    window.toFront();
+                    window.setSelected(true);
+                    window.requestFocus();
+                } catch (PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            window.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    loadAllVehicles();
+                }
+            });
         }
+    } catch (Exception e) {
+        showError("No se pudo abrir la pantalla de registro: " + e.getMessage());
     }
+}
 
     //Mostrar error
     private void showError(String message) {

@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import model.entities.Invoice;
 import model.entities.ParkingLot;
 import model.entities.Vehicle;
@@ -47,6 +48,7 @@ public class VehicleExitWindow extends BaseInternalFrame {
         this.selectedParkingLot = parkingLot;
         initControllers();
         initUI();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
         parkingLotLabel.setText(parkingLot.getName());
         parkingLotLabel.setForeground(primaryColor); //Resaltar el nombre del parqueo
     }

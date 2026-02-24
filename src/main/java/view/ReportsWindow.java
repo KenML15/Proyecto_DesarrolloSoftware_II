@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import org.jdom2.JDOMException;
 
@@ -62,6 +63,7 @@ public class ReportsWindow extends BaseInternalFrame implements ActionListener{
     public ReportsWindow(String userName) {
         super("GENERAR REPORTES");
         this.currentUser = userName;
+        SwingUtilities.invokeLater(() -> centerInDesktop());
         
         try {
             this.reportsController = new ReportsController();

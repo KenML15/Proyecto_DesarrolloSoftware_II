@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import model.entities.Customer;
 
 /**
@@ -47,6 +48,7 @@ public class CustomerWindow extends BaseInternalFrame implements ActionListener 
         super("INSERTAR CLIENTE");
         initController();
         initUI();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
         buttonModify.setVisible(false);
         setNextId();
     }

@@ -22,6 +22,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import model.entities.ParkingLot;
 import model.entities.Space;
 
@@ -41,6 +42,7 @@ public class ParkingVisualWindow extends BaseInternalFrame {
         this.setClosable(true);
         this.setResizable(true);
         this.setMaximizable(true);
+        SwingUtilities.invokeLater(() -> centerInDesktop());
 
         setLayout(new BorderLayout());
 

@@ -7,6 +7,7 @@ package view;
 import controller.FeeController;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.IOException;
@@ -14,11 +15,14 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDesktopPane;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import model.entities.Fee;
 import org.jdom2.JDOMException;
@@ -42,6 +46,7 @@ public class FeeManagement extends BaseInternalFrame {
         init();
         createUI();
         loadFees();
+        SwingUtilities.invokeLater(() -> centerInDesktop());
     }
 
     private void init() {
@@ -182,16 +187,38 @@ public class FeeManagement extends BaseInternalFrame {
 
     private void openFeeWindow(Fee fee) {
         FeeWindow window = new FeeWindow(fee, feeController);
-        window.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
-            @Override
-            public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
-                loadFees();
-            }
-        });
+        JDesktopPane desktop = getDesktopPane();
 
-        getDesktopPane().add(window);
-        window.setVisible(true);
-        window.toFront();
+        if (desktop != null) {
+            // 1. Añadir a la capa superior para evitar que quede oculta
+            desktop.add(window, JLayeredPane.MODAL_LAYER);
+
+            // 2. Centrado automático en el escritorio
+            Dimension desktopSize = desktop.getSize();
+            Dimension frameSize = window.getSize();
+            window.setLocation((desktopSize.width - frameSize.width) / 2,
+                    (desktopSize.height - frameSize.height) / 2);
+
+            window.setVisible(true);
+
+            // 3. Forzar el frente y el foco de forma segura
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    window.setSelected(true);
+                    window.toFront();
+                    window.requestFocus();
+                } catch (java.beans.PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            window.addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosed(javax.swing.event.InternalFrameEvent e) {
+                    loadFees();
+                }
+            });
+        }
     }
 
     private void editSelectedFee() {
@@ -238,7 +265,7 @@ public class FeeManagement extends BaseInternalFrame {
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private void showWarning(String message) {
         JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
