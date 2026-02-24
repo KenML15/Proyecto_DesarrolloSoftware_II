@@ -27,9 +27,7 @@ public class PDFGenerator {
     
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // ===============================
-    // MÉTODO BASE PARA CREAR PDF
-    // ===============================
+    //Este es el método base para crear el pdf
     private PDPageContentStream createDocument(PDDocument document, String title) throws IOException {
         PDPage page = new PDPage();
         document.addPage(page);
@@ -47,9 +45,7 @@ public class PDFGenerator {
         return content;
     }
 
-    /**
-     * Agrega el encabezado común a todos los reportes
-     */
+    //Aquí se agrega un encabezado común a todos los parqaos
     private void addHeader(PDPageContentStream content, String admin, 
                            String startDate, String endDate) throws IOException {
         content.showText("Administrador: " + admin);
@@ -63,22 +59,20 @@ public class PDFGenerator {
         content.newLineAtOffset(0, -LINE_SPACING * 2);
     }
 
-    // ===============================
-    // INCOME REPORT
-    // ===============================
+    //Reporte de los ingresos por parqueo, más el total
     public void generateIncomePDF(IncomeReport report, String fileName) throws IOException {
         try (PDDocument document = new PDDocument()) {
 
             PDPageContentStream content = createDocument(document, "REPORTE DE INGRESOS POR PARQUEO");
 
-            // Encabezado
+            //Encabezado
             addHeader(content, 
                 report.getAdministratorName(),
                 report.getEntryTime().format(dateFormatter),
                 report.getExitTime().format(dateFormatter)
             );
 
-            // Detalle de ingresos
+            //Detalle de ingresos
             content.setFont(PDType1Font.HELVETICA_BOLD, 11);
             content.showText("PARQUEO                     INGRESOS");
             content.newLineAtOffset(0, -LINE_SPACING);
@@ -103,22 +97,20 @@ public class PDFGenerator {
         }
     }
 
-    // ===============================
-    // VEHICLE QUANTITY REPORT
-    // ===============================
+    //Reporte para la cantidad de vehículos según su tipo
     public void generateVehicleQuantityPDF(VehicleQuantityReport report, String fileName) throws IOException {
         try (PDDocument document = new PDDocument()) {
 
             PDPageContentStream content = createDocument(document, "REPORTE DE CANTIDAD DE VEHÍCULOS POR TIPO");
 
-            // Encabezado
+            //Encabezado
             addHeader(content,
                 report.getAdministratorName(),
                 report.getEntryTime().format(dateFormatter),
                 report.getExitTime().format(dateFormatter)
             );
 
-            // Detalle
+            //Detalle
             content.setFont(PDType1Font.HELVETICA_BOLD, 11);
             content.showText("TIPO DE VEHÍCULO           CANTIDAD");
             content.newLineAtOffset(0, -LINE_SPACING);
@@ -138,23 +130,21 @@ public class PDFGenerator {
         }
     }
 
-    // ===============================
-    // COMMON TYPE REPORT
-    // ===============================
+    //Reporte para el tipo de vehículo más frecuente
     public void generateCommonTypePDF(CommonTypeReport report, String fileName) throws IOException {
         try (PDDocument document = new PDDocument()) {
 
             PDPageContentStream content = createDocument(document,
                     "REPORTE DE TIPO DE VEHÍCULO MÁS COMÚN POR PARQUEO");
 
-            // Encabezado
+            //Encabezado
             addHeader(content,
                 report.getAdministratorName(),
                 report.getEntryTime().format(dateFormatter),
                 report.getExitTime().format(dateFormatter)
             );
 
-            // Detalle
+            //Detalle
             content.setFont(PDType1Font.HELVETICA_BOLD, 11);
             content.showText("PARQUEO                    TIPO MÁS COMÚN");
             content.newLineAtOffset(0, -LINE_SPACING);

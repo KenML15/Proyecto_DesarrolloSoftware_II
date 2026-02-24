@@ -86,7 +86,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
     private void createButtons(JPanel panel) {
         buttonDelete = createStyledButton("ELIMINAR", new Color(192, 57, 43), panel);
         buttonConfigure = createStyledButton("CONFIGURAR", new Color(39, 174, 96), panel);
-        buttonStatus = createStyledButton("ESTADO", primaryColor, panel);
+        buttonStatus = createStyledButton("VER ESTADO", primaryColor, panel);
         buttonExit = createStyledButton("REGISTRAR SALIDA", new Color(230, 126, 34), panel);
 
         buttonDelete.addActionListener(e -> deleteParkingLot());
@@ -253,16 +253,19 @@ public class ParkingLotManagement extends BaseInternalFrame {
             }
             
             String status = String.format("""
-            ┌────────────────────────────────────┐
-            │        ESTADO DEL PARQUEO      │
-            ├────────────────────────────────────┤
-            │  Nombre: %-25s                 │
-            │  Espacios totales: %-16d       │
-            │  Ocupados: %-22d               │
-            │  Libres: %-24d                 │
-            │  Espacios discapacidad: %-11d  │
-            └────────────────────────────────────┘
-            """,
+    ╔══════════════════════════════════════════╗
+    ║           REPORTE DE ESTADO              ║
+    ╠══════════════════════════════════════════╣
+    ║                                          ║
+    ║  Parqueo:    %-24s║
+    ║                                          ║
+    ║   Espacios Totales:      %-12d ║
+    ║   Espacios Ocupados:     %-12d ║
+    ║   Espacios Libres:       %-12d ║
+    ║   Zona Discapacidad:     %-12d ║
+    ║                                          ║
+    ╚══════════════════════════════════════════╝
+    """,
                     parkingLot.getName(),
                     spaces.length,
                     occupied,

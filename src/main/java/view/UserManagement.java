@@ -17,6 +17,7 @@ import model.data.StaffDataFile;
 import model.entities.Administrator;
 import model.entities.Clerk;
 
+
 public class UserManagement extends BaseInternalFrame {
 
     private AdministratorController adminCtrl;
@@ -36,9 +37,14 @@ public class UserManagement extends BaseInternalFrame {
 
     private void initComponents() {
         setSize(900, 550);
-        setLayout(new BorderLayout(10, 10));
+        setLocation(100, 50);
+        setLayout(new BorderLayout(0, 0));
 
-        //Tabla
+        JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
+        centerPanel.setBackground(backgroundColor);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        //Configuración de la Tabla
         tableModel = new DefaultTableModel(COLUMNS, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -46,61 +52,69 @@ public class UserManagement extends BaseInternalFrame {
             }
         };
         userTable = new JTable(tableModel);
-        userTable.setRowHeight(30);
-        userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        styleTable(userTable); //Método heredado para diseño profesional
 
         JScrollPane scrollPane = new JScrollPane(userTable);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        scrollPane.setBorder(BorderFactory.createLineBorder(fieldBorderColor));
+        
+        centerPanel.add(new JLabel("Listado de Administradores y Empleados registrados"), BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
 
-        //Botones
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        buttonPanel.setBackground(backgroundColor);
 
-        JButton btnAdd = createStyledButton("Nuevo Usuario", new Color(46, 204, 113));
-        JButton btnDelete = createStyledButton("Eliminar", new Color(231, 76, 60));
-        JButton btnRefresh = createStyledButton("Refrescar", new Color(149, 165, 166));
+        createButtons(buttonPanel);
 
-        btnAdd.addActionListener(e -> openRegistrationWindow());
-        btnDelete.addActionListener(e -> deleteSelectedUser());
-        btnRefresh.addActionListener(e -> loadAllUsers());
-
-        buttonPanel.add(btnRefresh);
-        buttonPanel.add(btnAdd);
-        buttonPanel.add(btnDelete);
-
-        add(new JLabel("  Listado de Administradores y Empleados", SwingConstants.LEFT), BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-private void loadAllUsers() {
-    tableModel.setRowCount(0);
-    try {
-        StaffDataFile dataFile = new StaffDataFile();
-        ArrayList<Clerk> staff = dataFile.getAllStaff();
+    private void createButtons(JPanel panel) {
+        JButton btnRefresh = createStyledButton("REFRESCAR", primaryColor, panel);
+        JButton btnAdd = createStyledButton("NUEVO USUARIO", new Color(39, 174, 96), panel); //Verde
+        JButton btnDelete = createStyledButton("ELIMINAR", new Color(192, 57, 43), panel); //Rojo
 
-        for (Clerk e : staff) {
-            String role = (e instanceof Administrator) ? "Administrador" : "Dependiente";
-            tableModel.addRow(new Object[]{
-                e.getIdentification(), e.getName(), e.getUsername(), 
-                role, e.getEmployeeCode(), e.getSchedule()
-            });
-        }
-    } catch (IOException ex) {
-        System.err.println("Error al cargar tabla: " + ex.getMessage());
+        btnRefresh.addActionListener(e -> loadAllUsers());
+        btnAdd.addActionListener(e -> openRegistrationWindow());
+        btnDelete.addActionListener(e -> deleteSelectedUser());
     }
-}
+
+    private JButton createStyledButton(String text, Color bg, JPanel panel) {
+        JButton btn = new JButton(text);
+        styleButton(btn);
+        btn.setBackground(bg);
+        panel.add(btn);
+        return btn;
+    }
+
+    private void loadAllUsers() {
+        tableModel.setRowCount(0);
+        try {
+            StaffDataFile dataFile = new StaffDataFile();
+            ArrayList<Clerk> staff = dataFile.getAllStaff();
+
+            for (Clerk e : staff) {
+                String role = (e instanceof Administrator) ? "Administrador" : "Dependiente";
+                tableModel.addRow(new Object[]{
+                    e.getIdentification(), e.getName(), e.getUsername(), 
+                    role, e.getEmployeeCode(), e.getSchedule()
+                });
+            }
+        } catch (IOException ex) {
+            showError("Error al cargar la tabla de usuarios: " + ex.getMessage());
+        }
+    }
 
     private void deleteSelectedUser() {
         int row = userTable.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, seleccione un usuario de la tabla para eliminar.");
+            showWarning("Seleccione un usuario de la tabla para eliminar.");
             return;
         }
 
-        //Obtenemos los datos de la fila seleccionada
-        String id = (String) tableModel.getValueAt(row, 0); //Columna Cédula
-        String name = (String) tableModel.getValueAt(row, 1); //Columna Nombre
-        String rol = (String) tableModel.getValueAt(row, 3); //Columna Rol
+        String id = (String) tableModel.getValueAt(row, 0);
+        String name = (String) tableModel.getValueAt(row, 1);
+        String rol = (String) tableModel.getValueAt(row, 3);
 
         int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro de que desea eliminar a: " + name + " (" + rol + ")?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
@@ -111,18 +125,19 @@ private void loadAllUsers() {
                 clerkCtrl.deleteClerk(id);
             }
 
-            loadAllUsers(); //Refresca la tabla automáticamente
-            JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente.");
+            loadAllUsers();
+            showSuccess("Usuario eliminado correctamente.");
         }
     }
 
     private void openRegistrationWindow() {
         UserManagementWindow win = new UserManagementWindow(adminCtrl, clerkCtrl);
         getDesktopPane().add(win);
+        
+        getDesktopPane().setLayer(win, JLayeredPane.PALETTE_LAYER);
         win.setVisible(true);
         win.toFront();
 
-        //Refrescar al cerrar la ventana de registro
         win.addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
@@ -131,18 +146,15 @@ private void loadAllUsers() {
         });
     }
 
-    private JButton createStyledButton(String text, Color bg) {
-        JButton btn = new JButton(text);
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setPreferredSize(new Dimension(150, 40));
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
-        btn.setOpaque(true);
-        btn.setBorderPainted(false); //Quita el borde gris de Windows
-        btn.setContentAreaFilled(true); //Fuerza el color de fondo
-        btn.setFocusPainted(false); //Quita el cuadro de puntos al hacer clic
+    private void showWarning(String message) {
+        JOptionPane.showMessageDialog(this, message, "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
 
-        return btn;
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message, "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
 }
