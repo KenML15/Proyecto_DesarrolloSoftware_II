@@ -38,7 +38,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
     private JPanel panelParkingLots;
     private JTable tableParkingLots;
     private DefaultTableModel modelDataTable;
-    private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Espacios preferenciales", "Espacios ocupados"};
+    private final String[] headings = {"ID", "Nombre", "Espacios Totales", "Preferenciales", "Ocupados", "Encargado"};
     private ParkingLotFileController parkingLotController;
 
     public ParkingLotManagement() {
@@ -107,46 +107,46 @@ public class ParkingLotManagement extends BaseInternalFrame {
     }
 
     private void openVehicleExitWindow() {
-    int selectedRow = tableParkingLots.getSelectedRow();
-    if (selectedRow < 0) {
-        showWarning("Seleccione un parqueo primero");
-        return;
+        int selectedRow = tableParkingLots.getSelectedRow();
+        if (selectedRow < 0) {
+            showWarning("Seleccione un parqueo primero");
+            return;
+        }
+
+        try {
+            int parkingLotId = Integer.parseInt(modelDataTable.getValueAt(selectedRow, 0).toString());
+            ParkingLot selectedLot = parkingLotController.getParkingLotById(parkingLotId);
+
+            VehicleExitWindow exitWindow = new VehicleExitWindow(selectedLot);
+
+            // 1. Agregar y subir de capa
+            getDesktopPane().add(exitWindow);
+            getDesktopPane().setLayer(exitWindow, JLayeredPane.MODAL_LAYER);
+
+            exitWindow.setVisible(true);
+
+            // 2. Forzar frente y foco
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    exitWindow.setSelected(true);
+                    exitWindow.toFront();
+                    exitWindow.requestFocus();
+                } catch (java.beans.PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            exitWindow.addInternalFrameListener(new InternalFrameAdapter() {
+                @Override
+                public void internalFrameClosed(InternalFrameEvent e) {
+                    loadParkingLots();
+                }
+            });
+
+        } catch (IOException | NumberFormatException e) {
+            showError("Error al abrir ventana de salida: " + e.getMessage());
+        }
     }
-
-    try {
-        int parkingLotId = Integer.parseInt(modelDataTable.getValueAt(selectedRow, 0).toString());
-        ParkingLot selectedLot = parkingLotController.getParkingLotById(parkingLotId);
-
-        VehicleExitWindow exitWindow = new VehicleExitWindow(selectedLot);
-
-        // 1. Agregar y subir de capa
-        getDesktopPane().add(exitWindow);
-        getDesktopPane().setLayer(exitWindow, JLayeredPane.MODAL_LAYER); 
-
-        exitWindow.setVisible(true);
-
-        // 2. Forzar frente y foco
-        SwingUtilities.invokeLater(() -> {
-            try {
-                exitWindow.setSelected(true);
-                exitWindow.toFront();
-                exitWindow.requestFocus();
-            } catch (java.beans.PropertyVetoException e) {
-                e.printStackTrace();
-            }
-        });
-
-        exitWindow.addInternalFrameListener(new InternalFrameAdapter() {
-            @Override
-            public void internalFrameClosed(InternalFrameEvent e) {
-                loadParkingLots(); 
-            }
-        });
-
-    } catch (IOException | NumberFormatException e) {
-        showError("Error al abrir ventana de salida: " + e.getMessage());
-    }
-}
 
     private void loadParkingLots() {
         try {
@@ -173,7 +173,7 @@ public class ParkingLotManagement extends BaseInternalFrame {
     }
 
     private String[][] createDataMatrix(ArrayList<ParkingLot> parkingLots) {
-        String[][] data = new String[parkingLots.size()][5];
+        String[][] data = new String[parkingLots.size()][6];
 
         for (int i = 0; i < parkingLots.size(); i++) {
             ParkingLot parkingLot = parkingLots.get(i);
@@ -190,6 +190,9 @@ public class ParkingLotManagement extends BaseInternalFrame {
             data[i][2] = String.valueOf(parkingLot.getNumberOfSpaces());
             data[i][3] = String.valueOf(disability);
             data[i][4] = String.valueOf(countOccupiedSpaces(parkingLot));
+            data[i][5] = (parkingLot.getAssignedClerk() != null)
+                    ? parkingLot.getAssignedClerk().getName()
+                    : "Sin asignar";
         }
 
         return data;
@@ -225,31 +228,31 @@ public class ParkingLotManagement extends BaseInternalFrame {
         }
     }
 
-private void configureSpaces() {
-    try {
-        int id = getSelectedParkingLotId();
-        ParkingLot parkingLot = parkingLotController.getParkingLotById(id);
-        SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, parkingLotController);
+    private void configureSpaces() {
+        try {
+            int id = getSelectedParkingLotId();
+            ParkingLot parkingLot = parkingLotController.getParkingLotById(id);
+            SpaceConfigurationWindow window = new SpaceConfigurationWindow(parkingLot, parkingLotController);
 
-        getDesktopPane().add(window);
-        getDesktopPane().setLayer(window, JLayeredPane.DRAG_LAYER); // Capa muy alta
+            getDesktopPane().add(window);
+            getDesktopPane().setLayer(window, JLayeredPane.DRAG_LAYER); // Capa muy alta
 
-        window.setVisible(true);
+            window.setVisible(true);
 
-        // Aseguramos que salte al frente inmediatamente
-        SwingUtilities.invokeLater(() -> {
-            try {
-                window.setSelected(true);
-                window.toFront();
-            } catch (java.beans.PropertyVetoException e) {
-                e.printStackTrace();
-            }
-        });
+            // Aseguramos que salte al frente inmediatamente
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    window.setSelected(true);
+                    window.toFront();
+                } catch (java.beans.PropertyVetoException e) {
+                    e.printStackTrace();
+                }
+            });
 
-    } catch (Exception e) {
-        showError("Error al abrir ventana: " + e.getMessage());
+        } catch (Exception e) {
+            showError("Error al abrir ventana: " + e.getMessage());
+        }
     }
-}
 
     private void showParkingLotStatus() {
         try {
@@ -272,23 +275,21 @@ private void configureSpaces() {
 
             String status = String.format("""
     ╔══════════════════════════════════════════╗
-    ║           REPORTE DE ESTADO              ║
+    ║           ESTADO DEL PARQUEO             ║
     ╠══════════════════════════════════════════╣
-    ║                                          ║
-    ║  Parqueo:    %-24s║
-    ║                                          ║
-    ║   Espacios Totales:      %-12d ║
-    ║   Espacios Ocupados:     %-12d ║
-    ║   Espacios Libres:       %-12d ║
-    ║   Zona Discapacidad:     %-12d ║
-    ║                                          ║
+    ║  Parqueo:   %-25s║
+    ║  Encargado: %-25s║
+    ║  ──────────────────────────────────────  ║
+    ║  [Σ] Espacios Totales:      %-12d ║
+    ║  [X] Espacios Ocupados:     %-12d ║
+    ║  [O] Espacios Libres:       %-12d ║
     ╚══════════════════════════════════════════╝
     """,
                     parkingLot.getName(),
+                    (parkingLot.getAssignedClerk() != null ? parkingLot.getAssignedClerk().getName() : "NO ASIGNADO"),
                     spaces.length,
                     occupied,
-                    spaces.length - occupied,
-                    disability
+                    spaces.length - occupied
             );
 
             JOptionPane.showMessageDialog(this, status, "Estado del Parqueo",

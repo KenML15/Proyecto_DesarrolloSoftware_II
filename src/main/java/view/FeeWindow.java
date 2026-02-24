@@ -57,7 +57,7 @@ public class FeeWindow extends BaseInternalFrame {
         //Tarifa para cada tipo de vehículo
         formPanel.add(createLabel("Tipo de Vehículo*:"));
         vehicleTypeCombo = new JComboBox<>(new String[]{
-            "-- Seleccione --", "Motocicleta", "Liviano", "Pesado", "Bicicleta", "Otro"
+            "-- Seleccione --", "Moto", "Liviano", "Pesado", "Bicicleta", "Otro"
         });
         vehicleTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         formPanel.add(vehicleTypeCombo);

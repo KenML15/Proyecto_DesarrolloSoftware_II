@@ -44,6 +44,8 @@ public class Menu_Admin extends JFrame {
     private User currentUser;
     private JPanel sidePanel;
     private HomeDesktop desktop;
+    private AdministratorController adminController = new AdministratorController();
+    private ClerkController clerkController = new ClerkController();
 
     public Menu_Admin(User user) {
         super("SISTEMA DE GESTIÓN DE PARQUEOS");
@@ -87,6 +89,7 @@ public class Menu_Admin extends JFrame {
         addSidebarButton("VER PARQUEO", e -> openParkingVisualView(desktop));
         addSidebarButton("GESTIÓN DE PERSONAL", e -> openUserManagement());
         addSidebarButton("REPORTES", e -> openReportsWindow(desktop));
+        addSidebarButton("ASIGNAR PERSONAL", e -> openAssignClerk(desktop));
 
         JButton btnExit = addSidebarButton("CERRAR SESIÓN", e -> {
             this.dispose();
@@ -103,6 +106,11 @@ public class Menu_Admin extends JFrame {
     private void openUserManagement() {
         UserManagement window = new UserManagement();
         addWindowToDesktop(desktop, window);
+    }
+
+    private void openAssignClerk(HomeDesktop desktop) {
+        AssignClerkWindow win = new AssignClerkWindow();
+        addWindowToDesktop(desktop, win);
     }
 
     private JButton addSidebarButton(String text, ActionListener action) {

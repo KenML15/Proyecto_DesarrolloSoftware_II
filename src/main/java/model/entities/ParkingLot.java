@@ -18,6 +18,7 @@ public class ParkingLot {
     private int numberOfSpaces;
     private ArrayList<Vehicle> vehicles;
     private Space[] spaces;
+    private Clerk assignedClerk;
 
     public ParkingLot(int id, String name, String address, int numberOfSpaces, ArrayList<Vehicle> vehicles, Space[] spaces) {
         this.id = id;
@@ -78,6 +79,16 @@ public class ParkingLot {
     public void setSpaces(Space[] spaces) {
         this.spaces = spaces;
     }
+
+    public Clerk getAssignedClerk() {
+        return assignedClerk;
+    }
+
+    public void setAssignedClerk(Clerk assignedClerk) {
+        this.assignedClerk = assignedClerk;
+    }
+    
+    
 
     @Override
     public String toString() {

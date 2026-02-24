@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import model.entities.Clerk;
 import model.entities.ParkingLot;
 import model.entities.Space;
 import model.entities.Vehicle;
@@ -28,10 +29,12 @@ public class ParkingLotDataFile {
 
     private final SpaceDataFile spaceData;
     private final VehicleDataFile vehicleData;
+    private final StaffDataFile staffData;
 
     public ParkingLotDataFile() throws IOException, JDOMException {
         this.spaceData = new SpaceDataFile();
         this.vehicleData = new VehicleDataFile();
+        this.staffData = new StaffDataFile();
         ensureFileExists();
     }
 
@@ -69,14 +72,18 @@ public class ParkingLotDataFile {
     
     public ArrayList<ParkingLot> getAllParkingLots() throws IOException{
         ArrayList<ParkingLot> parkingLots = new ArrayList<>();
+        ArrayList<Clerk> allStaff = staffData.getAllStaff();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(PARKINGLOT_FILE))) {
             String line;
+            int lineNumber = 0;
 
             while ((line = bufferedReader.readLine()) != null) {
+                lineNumber++;
                 String[] parts = line.split(FIELD_DELIMITER);
 
-                if (parts.length < 5) {
+                if (parts.length < 6) { // Mínimo 6 campos (formato viejo)
+                    System.out.println("Línea " + lineNumber + " ignorada: formato incorrecto");
                     continue;
                 }
 
@@ -87,14 +94,29 @@ public class ParkingLotDataFile {
 
                 ArrayList<Vehicle> vehicles = parseVehicles(parts[4]);
                 Space[] spaces = parseSpaces(parts[5], numberOfSpaces);
-
+                
                 ParkingLot parkingLot = new ParkingLot(id, name, address, numberOfSpaces, vehicles, spaces);
+                
+                if (parts.length >= 7) {
+                String clerkId = parts[6];
+                if (!clerkId.equals(null) && !clerkId.isEmpty()) {
+                    for (Clerk clerk : allStaff) {
+                        if (clerk.getIdentification().equals(clerkId)) {
+                            parkingLot.setAssignedClerk(clerk);
+                            System.out.println("  → Clerk asignado: " + clerk.getName());
+                            break;
+                        }
+                    }
+                }
+            }
 
                 parkingLots.add(parkingLot);
+                System.out.println("Parqueo cargado: " + parkingLot.getName());
             }
 
         } catch (IOException e) {
             System.out.println("Error al leer el archivo del parqueo");
+            throw e;
         }
 
         return parkingLots;
@@ -147,17 +169,23 @@ public class ParkingLotDataFile {
         return maxId + 1;
     }
     
-    private String formatParkingLot(ParkingLot parkingLot) throws IOException, NullPointerException{
+    private String formatParkingLot(ParkingLot parkingLot) throws IOException, NullPointerException {
 
         String vehicles = formatVehicles(parkingLot.getVehicles());
         String spaces = formatSpaces(parkingLot.getSpaces());
+
+        // Si no hay clerk, guardar cadena vacía en lugar de "null"
+        String clerkId = (parkingLot.getAssignedClerk() != null)
+                ? parkingLot.getAssignedClerk().getIdentification()
+                : ""; // ← Cambiar NULL_VALUE por "" para simplificar
 
         return parkingLot.getId() + FIELD_DELIMITER
                 + parkingLot.getName() + FIELD_DELIMITER
                 + parkingLot.getAddress() + FIELD_DELIMITER
                 + parkingLot.getNumberOfSpaces() + FIELD_DELIMITER
                 + vehicles + FIELD_DELIMITER
-                + spaces;
+                + spaces + FIELD_DELIMITER
+                + clerkId;
     }
     
     private String formatVehicles(ArrayList<Vehicle> vehicles) throws IOException{
